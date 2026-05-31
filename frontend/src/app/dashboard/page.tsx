@@ -55,6 +55,8 @@ export default function DashboardPage() {
           data = await api.getDemoRisk()
         }
         setResult(data)
+        // Persist full result so checklist/report pages can read without re-fetching
+        sessionStorage.setItem('cl-risk-result', JSON.stringify(data))
       } catch {
         setError('Could not load risk analysis. Try the demo scenario or go back to retry.')
       } finally {

@@ -46,13 +46,20 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
             </Link>
           </>
         )}
-        {isApp && onCompare && (
-          <button
-            onClick={onCompare}
-            className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline"
-          >
-            Compare ⊞
-          </button>
+        {isApp && (
+          <>
+            {onCompare && (
+              <button onClick={onCompare} className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+                Compare ⊞
+              </button>
+            )}
+            <Link href="/checklist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Checklist
+            </Link>
+            <Link href="/report" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Report
+            </Link>
+          </>
         )}
         <Link
           href="/intake"
