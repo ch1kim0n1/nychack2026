@@ -20,8 +20,8 @@
 
 ## Current Build Status
 
-> **MVP + PHASE 1 COMPLETE** — all core features shipped across 14 commits to main.
-> **NEXT UP:** 2.3 Live ingestion run (requires Docker + OpenAI key) → 5.2 Demo dry-runs → 6.1–6.2 Vercel + Railway deploy → 2.8 Lock real human story
+> **ENHANCED BACKLOG — LARGE BATCH SHIPPED.** ~30 backlog items implemented across 13 commits this session (checklist, report, scenario builder, stakeholder map, heatmap, timeline, dependency graph, hidden-requirement detector, follow-ups, trust badges, fee/date extractors, Pulse 2.0, lease checklist, RAG audit log, citation metrics, enriched demo seed).
+> **REMAINING (need infra, not code):** Sections 10/13 live monitoring & scraping (10.1, 10.6–10.10, 13.4–13.6), Section 9.1 watchlist (needs auth), Section 12.8 admin mode (needs auth), Section 15 monetization (needs billing). All require services beyond the current stack.
 
 ---
 
@@ -38,7 +38,7 @@
 | Human story / market validation | ⬜ Not started |
 | Demo prep, QA & deployment | ⬜ Not started |
 | **Phase 1 Actionability layer** (info tool → execution tool) | ⬜ Planned — the priority upgrade after MVP, see the Phase 1 section |
-| Enhanced feature backlog (beyond PDD) | ⬜ Planned — ~120 features, see Sections 8–20 |
+| Enhanced feature backlog (beyond PDD) | 🟡 ~30 of ~120 shipped (Sections 8–14); remainder needs infra (monitoring, auth, billing) |
 
 ---
 
@@ -235,36 +235,36 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 8.3 | ⬜ | ⭐ | Draft Assistant | Generate agency emails, call scripts, and landlord/permit-office inquiry messages. |
 | 8.4 | ⬜ | ⭐ | Regulatory Threat Radar | Monitor proposed bills, ordinances, rule/fee changes relevant to a saved profile. |
 | 8.5 | ⬜ | ⭐ | Compliance Pulse 2.0 | Upgrade the email mock into a personalized digest of new risks, deadlines, and actions. |
-| 8.6 | ⬜ | | Stakeholder Map | Show which city/county/state/agency department owns each compliance issue. |
-| 8.7 | ⬜ | | Old Rule vs New Rule Diff | Extend the diff engine into time-based change detection (current vs. proposed/changed). |
-| 8.8 | ⬜ | | Before-You-Sign-Lease Checklist | Flag zoning, alcohol, occupancy, signage, parking, and health risks before a lease is signed. |
-| 8.9 | ⬜ | | Expansion Readiness Report | Printable artifact showing whether a business is ready to expand to a new city/service line. |
-| 8.10 | ⬜ | | Permit Path Timeline | Convert compliance steps into an estimated idea-to-opening timeline. |
+| 8.6 | ✅ | | Stakeholder Map | StakeholderMap component groups findings by agency w/ dept, phone, URL, fee, date. |
+| 8.7 | ⬜ | | Old Rule vs New Rule Diff | Time-based change detection — needs versioned source snapshots (infra). |
+| 8.8 | ✅ | | Before-You-Sign-Lease Checklist | /lease page filters lease-critical findings (zoning/occupancy/signage/...) w/ checkboxes. |
+| 8.9 | ✅ | | Expansion Readiness Report | /report page: printable assessment w/ summary, findings, consultant handoff. |
+| 8.10 | ✅ | | Permit Path Timeline | PermitTimeline groups findings by urgency (Now / 30–90d / ongoing) w/ steps. |
 
 ## 9. Product Intelligence
 
 | # | Status | Pri | Item | One-liner |
 |---|--------|-----|------|-----------|
-| 9.1 | ⬜ | | Business Profile Watchlist | Save profiles and auto-watch for rule changes matching city, industry, and activities. |
-| 9.2 | 🟡 | | Activity-Based Matching | Match rules to specific activities (alcohol, seating, food prep, hiring, delivery) — classifier already extracts activities. |
-| 9.3 | ⬜ | | Expansion Scenario Builder | Let users model "what if" plans: add alcohol, move city, second location, new services. |
-| 9.4 | ⬜ | | Compliance Risk Heatmap | Visualize risks by jurisdiction, activity, severity, and urgency. |
-| 9.5 | ⬜ | | Regulatory Dependency Graph | Show which permits depend on other permits, approvals, inspections, or documents. |
-| 9.6 | ⬜ | | Hidden Requirement Detector | Flag easy-to-miss requirements from a different agency or jurisdiction. |
-| 9.7 | ⬜ | | Business Change Detector | Ask follow-ups when a plan change (alcohol, seating, employees) could trigger new rules. |
-| 9.8 | ⬜ | | Regulation-to-Action Translator | Convert dense legal/government language into specific business tasks. |
-| 9.9 | ⬜ | | Compliance Gap Analyzer | Compare what the user has already done against what is still missing. |
-| 9.10 | ⬜ | | Confidence-Aware Findings | Label findings high/medium/low confidence by source quality and citation strength. |
+| 9.1 | ⬜ | | Business Profile Watchlist | Save profiles + auto-watch — needs persistence/auth + scheduled monitoring (infra). |
+| 9.2 | ✅ | | Activity-Based Matching | Classifier extracts activities; follow-ups + RAG query both use activity tags. |
+| 9.3 | ✅ | | Expansion Scenario Builder | /scenarios page: pick industry/cities/activities → routes to matched diff or intake. |
+| 9.4 | ✅ | | Compliance Risk Heatmap | RiskHeatmap: jurisdiction × requirement grid, color-coded by risk level. |
+| 9.5 | ✅ | | Regulatory Dependency Graph | prerequisites[] field; "Complete these first" block in expanded findings. |
+| 9.6 | ✅ | | Hidden Requirement Detector | is_hidden_requirement flag → "Easy to miss" badge on findings. |
+| 9.7 | ✅ | | Business Change Detector | Intake follow-up questions triggered by detected activities mutate the profile. |
+| 9.8 | ✅ | | Regulation-to-Action Translator | next_steps[] ordered actions + recommended_action per finding. |
+| 9.9 | 🟡 | | Compliance Gap Analyzer | Checklist progress bar (N/total approved, %) covers done-vs-missing; no separate view. |
+| 9.10 | ✅ | | Confidence-Aware Findings | confidence_level field → ConfidenceBadge (Verified/Likely/Uncertain) + low-confidence warning. |
 
 ## 10. Monitoring & Threat Radar (Fed10-inspired, compliance-focused)
 
 | # | Status | Pri | Item | One-liner |
 |---|--------|-----|------|-----------|
 | 10.1 | ⬜ | | Business-Specific Threat Detection | Detect whether a proposed rule or update actually matters to a specific profile. |
-| 10.2 | ⬜ | | Affected Business Explanation | Explain *why* a business is affected by a rule, not just what the rule says. |
-| 10.3 | ⬜ | | Recommended Response Path | Suggest monitor / contact agency / update docs / change plan / seek clarification. |
-| 10.4 | ⬜ | | Who-To-Contact Cards | For each risk, show the responsible department, agency, or support organization. |
-| 10.5 | ⬜ | | What-To-Say Generator | Generate short scripts for permit offices, city departments, landlords, or licensors. |
+| 10.2 | 🟡 | | Affected Business Explanation | `explanation` is profile-specific; not a separate "why you" field. |
+| 10.3 | ✅ | | Recommended Response Path | response_path field: monitor/contact_agency/update_docs/change_plan/seek_clarification. |
+| 10.4 | ✅ | | Who-To-Contact Cards | StakeholderMap agency cards w/ department, phone, site link. |
+| 10.5 | ✅ | | What-To-Say Generator | Draft Assistant (POST /api/draft): email, call script, landlord question channels. |
 | 10.6 | ⬜ | | Rule Change Impact Summary | Summarize what changed, who's affected, when it matters, and what action is needed. |
 | 10.7 | ⬜ | | Policy Watch Mode | Follow a topic (alcohol, seating, food trucks, sales tax, zoning, childcare). |
 | 10.8 | ⬜ | | Proposed Ordinance Monitor | Track city council agendas and proposed ordinances for business-impacting changes. |
@@ -275,16 +275,16 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 
 | # | Status | Pri | Item | One-liner |
 |---|--------|-----|------|-----------|
-| 11.1 | ⬜ | | Step-by-Step Compliance Checklist | Turn each finding into an ordered checklist with status tracking. |
-| 11.2 | ⬜ | | Task Status Tracking | Mark tasks not started / in progress / submitted / approved / rejected / blocked. |
-| 11.3 | ⬜ | | Document Requirement List | Show all documents needed for each permit, license, or inspection step. |
-| 11.4 | ⬜ | ⭐ | Deadline Tracker | Track filing deadlines, renewal dates, inspection windows, and response deadlines. |
-| 11.5 | ⬜ | ⭐ | Renewal Reminder System | Alert before licenses, permits, insurance, tax, or inspections need renewal. |
-| 11.6 | ⬜ | | Opening-Day Readiness Checklist | Final pre-launch checklist before a restaurant/salon/store/daycare opens. |
-| 11.7 | ⬜ | | Blocked Step Explainer | Explain why a task can't proceed until a prerequisite step is complete. |
-| 11.8 | ⬜ | | Permit Submission Packet Builder | Assemble forms, source links, document lists, and agency instructions into one packet. |
-| 11.9 | ⬜ | | Landlord Question Generator | Generate zoning/alcohol/occupancy/signage/parking/renovation questions for landlords. |
-| 11.10 | ⬜ | | Consultant Handoff Report | Structured summary an owner can send to a lawyer, accountant, or permit expediter. |
+| 11.1 | ✅ | | Step-by-Step Compliance Checklist | /checklist: each finding → task card w/ next_steps, documents, expand. |
+| 11.2 | ✅ | | Task Status Tracking | not_started/in_progress/submitted/approved/blocked, persisted to localStorage. |
+| 11.3 | ✅ | | Document Requirement List | documents_needed[] shown in checklist expand + drawer + report. |
+| 11.4 | ✅ | ⭐ | Deadline Tracker | Per-task deadline input; "Due soon" (≤7d) + "Overdue" badges. |
+| 11.5 | 🟡 | ⭐ | Renewal Reminder System | Deadline tracking in place; actual reminders need email/notification infra. |
+| 11.6 | 🟡 | | Opening-Day Readiness Checklist | /checklist + /lease cover pre-open verification; no dedicated opening-day view. |
+| 11.7 | ✅ | | Blocked Step Explainer | prerequisites[] → "Complete these first" block per finding. |
+| 11.8 | 🟡 | | Permit Submission Packet Builder | /report assembles findings + docs + citations + handoff; not a per-permit packet. |
+| 11.9 | ✅ | | Landlord Question Generator | Draft Assistant "landlord" channel generates lease questions. |
+| 11.10 | ✅ | | Consultant Handoff Report | /report Consultant Handoff section: high-risk items + sources for advisors. |
 
 ## 12. Trust, Safety & Citation
 
@@ -293,8 +293,8 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 12.1 | 🟡 | | Citation Verification Layer | Auto-check every finding for a valid source URL + matching quoted evidence — basic URL check already enforced (1.8). |
 | 12.2 | ⛔ | | Evidence Drawer | Expand a finding to see the exact source excerpt — design exists (§6.5), blocked on frontend. |
 | 12.3 | ✅ | | No-Citation Suppression Rule | Hide any finding not tied to a source — already enforced in the risk service. |
-| 12.4 | ⬜ | | Source Freshness Badge | Show when each source was last checked and whether it may be stale. |
-| 12.5 | ⬜ | | Jurisdiction Badge | Label each requirement as city / county / state / federal / agency-specific. |
+| 12.4 | ✅ | | Source Freshness Badge | SourceFreshnessBadge ("Checked Nd ago" + stale warning); ingestion sets last_checked_at. |
+| 12.5 | ✅ | | Jurisdiction Badge | jurisdiction_level field → JurisdictionBadge (City/County/State/Federal/Agency). |
 | 12.6 | 🟡 | | Informational Guidance Banner | "Not legal advice" notice — API returns the disclaimer; persistent UI banner pending frontend. |
 | 12.7 | ⬜ | | Contradiction Detector | Flag when sources conflict or one agency page disagrees with another. |
 | 12.8 | ⬜ | | Manual Validation Mode | Let admins manually approve demo-critical findings before release. |
@@ -311,25 +311,25 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 13.4 | ⬜ | | Regulatory Change Log | Store prior versions of ingested sources to detect change over time. |
 | 13.5 | ⬜ | ⭐ | Source Diff Pipeline | Compare newly scraped docs vs. prior versions and summarize meaningful changes. |
 | 13.6 | ⬜ | | City Council Agenda Parser | Ingest agendas; flag items on permits, zoning, fees, food service, alcohol, inspections. |
-| 13.7 | ⬜ | | Permit Fee Extractor | Extract fee amounts and display estimated cost ranges. |
-| 13.8 | ⬜ | | Effective Date Extractor | Extract dates when rules, fees, or ordinances become active. |
-| 13.9 | ⬜ | | RAG Query Audit Log | Store which docs were retrieved and how each answer was generated, for traceability. |
-| 13.10 | ⬜ | | Citation Coverage Metric | Track % of findings with valid, source-backed evidence as a quality target. |
+| 13.7 | ✅ | | Permit Fee Extractor | permit_fee field extracted by LLM; shown in StakeholderMap + Timeline. |
+| 13.8 | ✅ | | Effective Date Extractor | effective_date field extracted; shown in StakeholderMap + Timeline deadlines. |
+| 13.9 | ✅ | | RAG Query Audit Log | RagQueryLog table; RagService logs query + retrieved chunk IDs per call. |
+| 13.10 | ✅ | | Citation Coverage Metric | GET /api/metrics/citation-coverage; validator script also reports 100%. |
 
 ## 14. Frontend & UX (build on the Section 3–4 foundation)
 
 | # | Status | Pri | Item | One-liner |
 |---|--------|-----|------|-----------|
-| 14.1 | ⛔ | | Risk Dashboard Cards | Per-issue card with severity, impact, deadline, confidence, source, next step. |
-| 14.2 | ⛔ | | Action Button Per Finding | "Draft Email," "View Source," "Add Deadline," "Mark Done," "Compare City." |
-| 14.3 | ⛔ | ⭐ | Diff Viewer Upgrade | Expand Dallas↔Austin into a clean same / changed / new / removed / unknown table. |
-| 14.4 | ⛔ | | Impact Labels | Business-language labels: "Could delay opening," "Could trigger fine," "Verify before lease." |
-| 14.5 | ⛔ | | Guided Intake Follow-Ups | Targeted follow-up questions only when needed (alcohol, seating, employees, delivery). |
-| 14.6 | ⛔ | | Plain-English Mode | Simplified version of each rule for non-technical users. |
-| 14.7 | ⛔ | | Detailed Evidence Mode | Let advanced users expand the full legal/government source context. |
-| 14.8 | ⛔ | | Print/Export Report Button | Export findings, checklist, citations, and action plan as PDF or markdown. |
-| 14.9 | 🟡 | | Demo Mode Toggle | Locked prevalidated scenario for judges — backend `/api/risk/demo` exists; UI toggle pending. |
-| 14.10 | ⛔ | | Confidence Warning UI | Visually separate verified findings from uncertain/incomplete ones. |
+| 14.1 | ✅ | | Risk Dashboard Cards | Finding rows w/ risk badge, impact label, citation, expand; summary cards on top. |
+| 14.2 | ✅ | | Action Button Per Finding | Draft email + View source + Compare (nav) + checklist status + deadline. |
+| 14.3 | ✅ | ⭐ | Diff Viewer Upgrade | 3-scenario switcher + NEW/CHANGED/SAME Δ coding + per-cell citations. |
+| 14.4 | ✅ | | Impact Labels | ImpactLabel badges (Could delay opening / trigger fine / verify before lease / renewal). |
+| 14.5 | ✅ | | Guided Intake Follow-Ups | 4 conditional follow-up questions on intake, triggered by detected activities. |
+| 14.6 | 🟡 | | Plain-English Mode | Findings already plain-English by default; no separate toggle (low value given default). |
+| 14.7 | 🟡 | | Detailed Evidence Mode | Citation drawer + source links present; full chunk-excerpt view needs ingested text. |
+| 14.8 | ✅ | | Print/Export Report Button | /report + /checklist + /lease + /diff all have print/PDF support. |
+| 14.9 | ✅ | | Demo Mode Toggle | /demo route loads cached seeded scenario; "See a live example" CTA on landing. |
+| 14.10 | ✅ | | Confidence Warning UI | ConfidenceBadge + low-confidence warning box in drawer separate verified from uncertain. |
 
 ## 15. Monetization & Growth
 
