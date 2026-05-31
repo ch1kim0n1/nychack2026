@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────
+   DESIGN TOKENS — CivicLens §2
+   All components reference vars, never raw hex.
+───────────────────────────────────────── */
+
+:root {
+  /* Neutrals — light */
+  --cl-canvas:         #F6F8FA;
+  --cl-surface:        #FFFFFF;
+  --cl-sunken:         #F1F4F7;
+  --cl-border-subtle:  #E4E9EF;
+  --cl-border:         #D3DAE3;
+  --cl-border-strong:  #B6C0CC;
+  --cl-text:           #11202E;
+  --cl-text-secondary: #4A5B6B;
+  --cl-text-muted:     #76828F;
+
+  /* Navy ramp */
+  --cl-navy-50:  #EEF3F8;
+  --cl-navy-100: #D7E3F0;
+  --cl-navy-600: #1F4D7A;
+  --cl-navy-700: #163A5E;
+  --cl-navy-800: #102B45;
+  --cl-navy-900: #0B1F33;
+
+  /* Risk states — desaturated on purpose */
+  --cl-risk-high-fg:     #B23A3A;
+  --cl-risk-high-bg:     #FBEDED;
+  --cl-risk-high-border: #E8C5C5;
+  --cl-risk-med-fg:      #9A6B16;
+  --cl-risk-med-bg:      #FBF3E3;
+  --cl-risk-med-border:  #ECDBB4;
+  --cl-risk-low-fg:      #3F7A5A;
+  --cl-risk-low-bg:      #EAF3EE;
+  --cl-risk-low-border:  #C4DECE;
+
+  /* Radius */
+  --cl-radius-sm: 4px;
+  --cl-radius:    6px;
+  --cl-radius-lg: 8px;
+
+  /* Elevation */
+  --cl-elev-1: 0 1px 2px rgba(16,32,48,.06);
+  --cl-elev-2: 0 4px 12px rgba(16,32,48,.10);
+  --cl-elev-3: 0 12px 32px rgba(16,32,48,.16);
+
+  /* Motion */
+  --cl-dur-instant:  80ms;
+  --cl-dur-fast:     140ms;
+  --cl-dur-base:     200ms;
+  --cl-dur-slow:     320ms;
+  --cl-dur-entrance: 480ms;
+  --cl-dur-count:    700ms;
+  --cl-ease-standard: cubic-bezier(.4,0,.2,1);
+  --cl-ease-in:       cubic-bezier(.4,0,1,1);
+  --cl-ease-out:      cubic-bezier(0,0,.2,1);
+}
+
+/* ─────────────────────────────────────────
+   DARK THEME — opt-in via data-theme="dark"
+───────────────────────────────────────── */
+
+[data-theme="dark"] {
+  --cl-canvas:         #0B1320;
+  --cl-surface:        #111B2B;
+  --cl-sunken:         #0E1726;
+  --cl-border-subtle:  #1E2D42;
+  --cl-border:         #28384E;
+  --cl-border-strong:  #374E68;
+  --cl-text:           #E6ECF2;
+  --cl-text-secondary: #9DAEC0;
+  --cl-text-muted:     #637A91;
+
+  --cl-navy-600: #4E86C2;
+  --cl-navy-700: #3D6FA0;
+
+  --cl-risk-high-fg:     #E07A7A;
+  --cl-risk-high-bg:     #2A1718;
+  --cl-risk-high-border: #5C2828;
+  --cl-risk-med-fg:      #D9A84A;
+  --cl-risk-med-bg:      #2A2113;
+  --cl-risk-med-border:  #5C4518;
+  --cl-risk-low-fg:      #6FB58E;
+  --cl-risk-low-bg:      #122318;
+  --cl-risk-low-border:  #1E4A2E;
+}
+
+/* ─────────────────────────────────────────
+   BASE
+───────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--cl-canvas);
+  color: var(--cl-text);
+  font-size: 0.9375rem;
+  line-height: 1.4375rem;
+}
+
+/* Monospace data elements */
+.font-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+/* Focus ring — global, 2px navy-600 at 40% */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--cl-navy-600) 40%, transparent);
+  outline-offset: 2px;
+}
+
+/* Reduced motion — collapse everything to instant opacity */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print — for diff viewer */
+@media print {
+  .no-print { display: none !important; }
+  .print-expand { display: block !important; }
+  body { background: white; color: black; }
+}
