@@ -44,6 +44,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
             <Link href="#sources" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Sources
             </Link>
+            <Link href="/pricing" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Pricing
+            </Link>
           </>
         )}
         {isApp && (
