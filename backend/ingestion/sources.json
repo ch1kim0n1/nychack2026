@@ -1,39 +1,49 @@
 [
   {
-    "title": "Texas Licenses & Permits Guide",
-    "agency": "Texas.gov",
-    "jurisdiction": "Texas",
-    "url": "https://www.texas.gov/topics/business/business-licenses-and-permits/",
-    "type": "guide",
-    "jurisdiction_tags": ["Texas"],
-    "industry_tags": ["all"],
-    "activity_tags": ["licensing", "permits"]
-  },
-  {
-    "title": "TABC Licensing Requirements",
+    "title": "TABC Licenses & Permits",
     "agency": "Texas Alcoholic Beverage Commission",
     "jurisdiction": "Texas",
-    "url": "https://www.tabc.texas.gov/licenses-permits/",
+    "url": "https://www.tabc.texas.gov/services/tabc-licenses-permits/",
     "type": "licensing",
     "jurisdiction_tags": ["Texas"],
     "industry_tags": ["food_service", "retail"],
     "activity_tags": ["alcohol_planned", "alcohol_service"]
   },
   {
-    "title": "Austin Development Services – Permits",
+    "title": "Austin Environmental Health Services – Food Permits",
     "agency": "City of Austin",
     "jurisdiction": "Austin, TX",
-    "url": "https://www.austintexas.gov/department/permits",
+    "url": "https://www.austintexas.gov/health/divisions/environmental-health-services",
     "type": "permits",
     "jurisdiction_tags": ["Austin, TX"],
-    "industry_tags": ["all"],
-    "activity_tags": ["permits", "construction", "zoning"]
+    "industry_tags": ["food_service"],
+    "activity_tags": ["food_preparation", "permits"]
   },
   {
-    "title": "Dallas Permits & Licenses",
+    "title": "Austin Public Health",
+    "agency": "City of Austin",
+    "jurisdiction": "Austin, TX",
+    "url": "https://www.austintexas.gov/health",
+    "type": "health",
+    "jurisdiction_tags": ["Austin, TX"],
+    "industry_tags": ["food_service", "childcare", "cosmetology"],
+    "activity_tags": ["permits", "inspections", "licensing"]
+  },
+  {
+    "title": "Dallas Code Compliance – Food Establishments",
     "agency": "City of Dallas",
     "jurisdiction": "Dallas, TX",
-    "url": "https://dallascityhall.com/departments/sustainabledevelopment/permit/Pages/default.aspx",
+    "url": "https://dallascityhall.com/departments/codecompliance/Pages/default.aspx",
+    "type": "permits",
+    "jurisdiction_tags": ["Dallas, TX"],
+    "industry_tags": ["food_service", "retail"],
+    "activity_tags": ["food_preparation", "permits", "inspections"]
+  },
+  {
+    "title": "Dallas Sustainable Development & Construction",
+    "agency": "City of Dallas",
+    "jurisdiction": "Dallas, TX",
+    "url": "https://dallascityhall.com/departments/sustainabledevelopment/Pages/default.aspx",
     "type": "permits",
     "jurisdiction_tags": ["Dallas, TX"],
     "industry_tags": ["all"],
@@ -48,15 +58,5 @@
     "jurisdiction_tags": ["Texas"],
     "industry_tags": ["all"],
     "activity_tags": ["tax", "sales_tax"]
-  },
-  {
-    "title": "Texas Legislature Online – Bill Search",
-    "agency": "Texas Legislature",
-    "jurisdiction": "Texas",
-    "url": "https://legis.state.tx.us/BillSearch/Search.aspx",
-    "type": "legislation",
-    "jurisdiction_tags": ["Texas"],
-    "industry_tags": ["all"],
-    "activity_tags": ["legislation", "compliance"]
   }
 ]
