@@ -7,11 +7,23 @@ import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { RiskBadge } from '@/components/ui/risk-badge'
 import { CitationChip } from '@/components/ui/citation-chip'
 import { SummaryCard } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
-import { api, type BusinessProfile, type RiskFinding, type RiskAnalysisResult } from '@/lib/api'
+import { api, type BusinessProfile, type RiskFinding, type RiskAnalysisResult, type DraftResult } from '@/lib/api'
 import { staggerRows } from '@/lib/gsap'
-import { ChevronDown, ChevronRight, ExternalLink, X, CheckCircle, AlertTriangle } from 'lucide-react'
+import {
+  ChevronDown, ChevronRight, ExternalLink, X, CheckCircle, AlertTriangle,
+  Mail, Phone, Home, Copy, Check,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const IMPACT_LABEL_COLORS: Record<string, string> = {
+  'Could delay opening': 'text-risk-high-fg bg-risk-high-bg border-risk-high-border',
+  'Could trigger fine':  'text-risk-high-fg bg-risk-high-bg border-risk-high-border',
+  'Must verify before lease': 'text-risk-med-fg bg-risk-med-bg border-risk-med-border',
+  'Renewal risk': 'text-risk-med-fg bg-risk-med-bg border-risk-med-border',
+  'Informational': 'text-risk-low-fg bg-risk-low-bg border-risk-low-border',
+}
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -36,7 +48,6 @@ export default function DashboardPage() {
           try {
             data = await api.analyzeRisk(profile)
           } catch {
-            // Live analysis failed — fall back to demo data and flag degraded
             data = await api.getDemoRisk()
             setDegraded(true)
           }
@@ -53,7 +64,6 @@ export default function DashboardPage() {
     load()
   }, [])
 
-  // Risk-score count-up (700ms, power1.out) — runs once after data lands
   useEffect(() => {
     if (!result || hasAnimated.current || !scoreRef.current) return
     hasAnimated.current = true
@@ -69,7 +79,6 @@ export default function DashboardPage() {
     requestAnimationFrame(tick)
   }, [result])
 
-  // GSAP stagger on findings rows after they render
   useEffect(() => {
     if (!result || !findingsRef.current) return
     const rows = findingsRef.current.querySelectorAll('[data-finding-row]')
@@ -93,11 +102,10 @@ export default function DashboardPage() {
       />
       <DisclaimerBanner />
 
-      {/* Degraded / partial banner */}
       {degraded && (
         <div className="bg-risk-med-bg border-b border-risk-med-border px-6 py-2 flex items-center gap-2 text-caption text-risk-med-fg">
           <AlertTriangle size={13} strokeWidth={1.5} className="shrink-0" />
-          Live analysis unavailable — showing cached demo results. Some sources may be incomplete.
+          Live analysis unavailable — showing cached demo results.
           <button className="ml-auto underline" onClick={() => router.push('/intake')}>Re-analyze</button>
         </div>
       )}
@@ -109,22 +117,14 @@ export default function DashboardPage() {
           <div className="bg-risk-high-bg border border-risk-high-border rounded p-4 text-body text-risk-high-fg">
             {error}
             <div className="mt-3 flex gap-3">
-              <button
-                className="text-caption underline"
-                onClick={() => { sessionStorage.removeItem('cl-profile'); window.location.reload() }}
-              >
-                Try demo data
-              </button>
-              <button className="text-caption underline" onClick={() => router.push('/intake')}>
-                Go back
-              </button>
+              <button className="text-caption underline" onClick={() => { sessionStorage.removeItem('cl-profile'); window.location.reload() }}>Try demo data</button>
+              <button className="text-caption underline" onClick={() => router.push('/intake')}>Go back</button>
             </div>
           </div>
         )}
 
         {result && !loading && (
           <>
-            {/* ── Summary row ── */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <SummaryCard
                 label="Risk Score"
@@ -145,13 +145,12 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* ── Empty state ── */}
             {result.findings.length === 0 && (
               <div className="flex flex-col items-center gap-3 py-16 text-center">
                 <CheckCircle size={32} strokeWidth={1.5} className="text-risk-low-fg" />
                 <h2 className="text-h2 text-[var(--cl-text)]">No high-risk findings for this profile.</h2>
                 <p className="text-body text-[var(--cl-text-secondary)] max-w-sm">
-                  We checked all available sources for your business type and location and found nothing requiring immediate action.
+                  We checked all available sources and found nothing requiring immediate action.
                 </p>
                 <p className="text-caption text-[var(--cl-text-muted)] font-mono">
                   Sources checked: TABC · Austin APH · Dallas Code Compliance · TX Comptroller
@@ -159,7 +158,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* ── Findings list ── */}
             {result.findings.length > 0 && (
               <div ref={findingsRef} className="flex flex-col gap-2">
                 {result.findings.map((finding, i) => (
@@ -182,9 +180,22 @@ export default function DashboardPage() {
       </main>
 
       {drawerFinding && (
-        <CitationDrawer finding={drawerFinding} onClose={() => setDrawerFinding(null)} />
+        <CitationDrawer
+          finding={drawerFinding}
+          businessDescription={profileInput ?? 'Texas small business'}
+          onClose={() => setDrawerFinding(null)}
+        />
       )}
     </div>
+  )
+}
+
+function ImpactLabel({ label }: { label: string }) {
+  const classes = IMPACT_LABEL_COLORS[label] ?? 'text-[var(--cl-text-muted)] bg-sunken border-[var(--cl-border)]'
+  return (
+    <span className={cn('inline-block font-mono text-citation px-2 py-0.5 rounded-sm border whitespace-nowrap', classes)}>
+      {label}
+    </span>
   )
 }
 
@@ -207,6 +218,11 @@ function FindingRow({
           <div className="min-w-0">
             <h3 className="text-h3 text-[var(--cl-text)] leading-snug">{finding.affected_area}</h3>
             <p className="text-body text-[var(--cl-text-secondary)] mt-1 line-clamp-2">{finding.explanation}</p>
+            {finding.impact_label && (
+              <div className="mt-2">
+                <ImpactLabel label={finding.impact_label} />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -218,100 +234,250 @@ function FindingRow({
             : <ChevronRight size={16} className="text-[var(--cl-text-muted)]" />}
         </div>
       </div>
+
       {expanded && (
-        <div className="px-4 pb-4 border-t border-[var(--cl-border-subtle)] pt-3 space-y-2">
+        <div className="px-4 pb-4 border-t border-[var(--cl-border-subtle)] pt-3 space-y-3">
           <p className="text-body text-[var(--cl-text)]">{finding.explanation}</p>
           <p className="text-caption text-[var(--cl-text-secondary)]">
             <strong>Next step:</strong> {finding.recommended_action}
           </p>
-          <CitationChip url={finding.source_url} onClick={onCitationClick} />
+          {finding.next_steps && finding.next_steps.length > 0 && (
+            <ol className="list-decimal list-inside space-y-1">
+              {finding.next_steps.map((s, i) => (
+                <li key={i} className="text-caption text-[var(--cl-text-secondary)]">{s}</li>
+              ))}
+            </ol>
+          )}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <CitationChip url={finding.source_url} onClick={onCitationClick} />
+            <button
+              onClick={onCitationClick}
+              className="inline-flex items-center gap-1.5 text-caption text-navy-600 border border-[var(--cl-border)] bg-navy-50 hover:bg-navy-100 rounded-sm px-2 py-0.5 transition-colors"
+            >
+              <Mail size={12} strokeWidth={1.5} />
+              Draft email
+            </button>
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-function CitationDrawer({ finding, onClose }: { finding: RiskFinding; onClose: () => void }) {
+function CitationDrawer({ finding, businessDescription, onClose }: {
+  finding: RiskFinding
+  businessDescription: string
+  onClose: () => void
+}) {
   const drawerRef = useRef<HTMLDivElement>(null)
+  const [draftChannel, setDraftChannel] = useState<'email' | 'call_script' | 'landlord'>('email')
+  const [draft, setDraft] = useState<DraftResult | null>(null)
+  const [drafting, setDrafting] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [draftError, setDraftError] = useState('')
 
-  // Esc to close
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  // Focus trap — per accessibility spec §7
   useEffect(() => {
     const el = drawerRef.current
     if (!el) return
-    const focusable = Array.from(
-      el.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])')
-    )
+    const focusable = Array.from(el.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])'))
     focusable[0]?.focus()
-
     function trap(e: KeyboardEvent) {
       if (e.key !== 'Tab') return
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault(); last?.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault(); first?.focus()
-      }
+      const first = focusable[0], last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus() }
     }
     document.addEventListener('keydown', trap)
     return () => document.removeEventListener('keydown', trap)
-  }, [])
+  }, [draft]) // re-bind when draft appears (new focusable elements)
+
+  async function handleDraft() {
+    setDrafting(true)
+    setDraftError('')
+    try {
+      const result = await api.generateDraft({
+        affected_area: finding.affected_area,
+        explanation: finding.explanation,
+        recommended_action: finding.recommended_action,
+        source_url: finding.source_url,
+        who_to_contact: finding.who_to_contact,
+        what_to_ask: finding.what_to_ask,
+        business_description: businessDescription,
+        channel: draftChannel,
+      })
+      setDraft(result)
+    } catch {
+      setDraftError('Could not generate draft. Please try again.')
+    } finally {
+      setDrafting(false)
+    }
+  }
+
+  function handleCopy() {
+    if (!draft) return
+    const text = draft.subject ? `Subject: ${draft.subject}\n\n${draft.body}` : draft.body
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  const CHANNEL_LABELS = { email: 'Email', call_script: 'Call script', landlord: 'Landlord Qs' }
+  const CHANNEL_ICONS = { email: <Mail size={13} strokeWidth={1.5} />, call_script: <Phone size={13} strokeWidth={1.5} />, landlord: <Home size={13} strokeWidth={1.5} /> }
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black/30 z-40 transition-opacity duration-[200ms]"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} aria-hidden="true" />
       <div
         ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label={`Finding detail: ${finding.affected_area}`}
-        className="fixed right-0 top-0 h-full w-full max-w-[420px] bg-surface shadow-3 z-50 flex flex-col overflow-y-auto"
+        className="fixed right-0 top-0 h-full w-full max-w-[460px] bg-surface shadow-3 z-50 flex flex-col overflow-y-auto"
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--cl-border-subtle)]">
-          <RiskBadge level={finding.risk_level} />
-          <button
-            onClick={onClose}
-            aria-label="Close finding detail"
-            className="p-1.5 rounded text-[var(--cl-text-muted)] hover:text-[var(--cl-text)] transition-colors focus-visible:outline-2"
-          >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--cl-border-subtle)] shrink-0">
+          <div className="flex items-center gap-2">
+            <RiskBadge level={finding.risk_level} />
+            {finding.impact_label && <ImpactLabel label={finding.impact_label} />}
+          </div>
+          <button onClick={onClose} aria-label="Close" className="p-1.5 rounded text-[var(--cl-text-muted)] hover:text-[var(--cl-text)] transition-colors">
             <X size={18} strokeWidth={1.5} />
           </button>
         </div>
+
         <div className="px-5 py-5 flex flex-col gap-5 flex-1">
           <h2 className="text-h2 text-[var(--cl-text)]">{finding.affected_area}</h2>
 
+          {/* What this means */}
           <section>
             <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">What this means</p>
             <p className="text-body-lg text-[var(--cl-text)]">{finding.explanation}</p>
           </section>
 
-          <section>
-            <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">What to do</p>
-            <p className="text-body text-[var(--cl-text)]">{finding.recommended_action}</p>
+          {/* Action playbook */}
+          {(finding.who_to_contact || finding.documents_needed?.length || finding.next_steps?.length) && (
+            <section>
+              <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-3">Action playbook</p>
+              <div className="space-y-3">
+                {finding.who_to_contact && (
+                  <div>
+                    <p className="text-caption font-semibold text-[var(--cl-text-secondary)] mb-0.5">Who to contact</p>
+                    <p className="text-body text-[var(--cl-text)]">{finding.who_to_contact}</p>
+                  </div>
+                )}
+                {finding.what_to_ask && (
+                  <div>
+                    <p className="text-caption font-semibold text-[var(--cl-text-secondary)] mb-0.5">What to ask</p>
+                    <p className="text-body text-[var(--cl-text)]">{finding.what_to_ask}</p>
+                  </div>
+                )}
+                {finding.documents_needed && finding.documents_needed.length > 0 && (
+                  <div>
+                    <p className="text-caption font-semibold text-[var(--cl-text-secondary)] mb-1">Documents needed</p>
+                    <ul className="space-y-0.5">
+                      {finding.documents_needed.map((d, i) => (
+                        <li key={i} className="text-body text-[var(--cl-text-secondary)] flex items-start gap-1.5">
+                          <span className="text-[var(--cl-text-muted)] mt-0.5">·</span>{d}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {finding.next_steps && finding.next_steps.length > 0 && (
+                  <div>
+                    <p className="text-caption font-semibold text-[var(--cl-text-secondary)] mb-1">Next steps</p>
+                    <ol className="list-decimal list-inside space-y-0.5">
+                      {finding.next_steps.map((s, i) => (
+                        <li key={i} className="text-body text-[var(--cl-text-secondary)]">{s}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Fallback "what to do" */}
+          {!finding.who_to_contact && !finding.next_steps?.length && (
+            <section>
+              <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">What to do</p>
+              <p className="text-body text-[var(--cl-text)]">{finding.recommended_action}</p>
+            </section>
+          )}
+
+          {/* Draft assistant */}
+          <section className="border border-[var(--cl-border)] rounded p-4 bg-navy-50">
+            <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-3">Draft outreach</p>
+            <div className="flex gap-1.5 mb-3">
+              {(['email', 'call_script', 'landlord'] as const).map(ch => (
+                <button
+                  key={ch}
+                  onClick={() => { setDraftChannel(ch); setDraft(null) }}
+                  className={cn(
+                    'flex items-center gap-1 px-2.5 py-1 rounded text-caption border transition-colors duration-[80ms]',
+                    draftChannel === ch
+                      ? 'bg-navy-600 text-white border-navy-700'
+                      : 'bg-surface text-[var(--cl-text-secondary)] border-[var(--cl-border)] hover:bg-white',
+                  )}
+                >
+                  {CHANNEL_ICONS[ch]}
+                  {CHANNEL_LABELS[ch]}
+                </button>
+              ))}
+            </div>
+            {!draft && (
+              <Button size="sm" onClick={handleDraft} loading={drafting}>
+                <Mail size={13} strokeWidth={1.5} />
+                {drafting ? 'Generating…' : `Generate ${CHANNEL_LABELS[draftChannel]}`}
+              </Button>
+            )}
+            {draftError && <p className="text-caption text-risk-high-fg mt-2">{draftError}</p>}
+            {draft && (
+              <div className="mt-3 space-y-2">
+                {draft.subject && (
+                  <p className="text-caption font-mono text-[var(--cl-text-secondary)]">
+                    <strong>Subject:</strong> {draft.subject}
+                  </p>
+                )}
+                <pre className="text-caption font-mono text-[var(--cl-text)] bg-surface border border-[var(--cl-border)] rounded p-3 whitespace-pre-wrap overflow-auto max-h-48">
+                  {draft.body}
+                </pre>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-1 text-caption text-navy-600 hover:text-navy-700"
+                  >
+                    {copied ? <Check size={12} strokeWidth={1.5} /> : <Copy size={12} strokeWidth={1.5} />}
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
+                    onClick={() => setDraft(null)}
+                    className="text-caption text-[var(--cl-text-muted)] hover:text-[var(--cl-text)]"
+                  >
+                    Regenerate
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
 
+          {/* Source */}
           <section>
             <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">Source</p>
             <div className="bg-sunken border border-[var(--cl-border)] rounded p-3 font-mono text-citation">
-              <p className="text-[var(--cl-text-secondary)] mb-1 break-all">
-                {finding.source_url.replace(/^https?:\/\//, '')}
-              </p>
+              <p className="text-[var(--cl-text-secondary)] mb-1 break-all">{finding.source_url.replace(/^https?:\/\//, '')}</p>
               <a
                 href={finding.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-navy-600 hover:underline focus-visible:outline-2"
+                className="inline-flex items-center gap-1 text-navy-600 hover:underline"
               >
                 Open source <ExternalLink size={11} strokeWidth={1.5} />
               </a>

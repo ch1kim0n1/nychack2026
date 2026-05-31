@@ -14,6 +14,26 @@ export interface RiskFinding {
   explanation: string
   recommended_action: string
   source_url: string
+  // Phase 1 — impact dimensions
+  money_risk?: 'high' | 'medium' | 'low'
+  delay_risk?: 'high' | 'medium' | 'low'
+  legal_severity?: 'high' | 'medium' | 'low'
+  urgency?: 'immediate' | 'soon' | 'ongoing'
+  impact_score?: number
+  impact_label?: string
+  // Phase 1 — action playbook
+  who_to_contact?: string
+  what_to_ask?: string
+  documents_needed?: string[]
+  next_steps?: string[]
+}
+
+export interface DraftResult {
+  channel: 'email' | 'call_script' | 'landlord'
+  subject?: string
+  body: string
+  agency_name: string
+  source_url: string
 }
 
 export interface RiskAnalysisResult {
@@ -70,4 +90,19 @@ export const api = {
 
   getDiff: (scenario = 'scenario-a') =>
     apiFetch<ScenarioDiff>(`/api/diff/${scenario}`),
+
+  generateDraft: (params: {
+    affected_area: string
+    explanation: string
+    recommended_action: string
+    source_url: string
+    who_to_contact?: string
+    what_to_ask?: string
+    business_description: string
+    channel?: 'email' | 'call_script' | 'landlord'
+  }) =>
+    apiFetch<DraftResult>('/api/draft', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
 }
