@@ -15,5 +15,11 @@
 
 # NestJS build
 .build-id
+*.tsbuildinfo
 
 /generated/prisma
+
+# Prisma compiled artifacts
+prisma/*.js
+prisma/*.d.ts
+prisma/*.js.map
