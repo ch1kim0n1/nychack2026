@@ -17,6 +17,8 @@ import {
 } from 'lucide-react'
 import { ConfidenceBadge, JurisdictionBadge } from '@/components/ui/trust-badges'
 import { StakeholderMap } from '@/components/stakeholder-map'
+import { RiskHeatmap } from '@/components/risk-heatmap'
+import { PermitTimeline } from '@/components/permit-timeline'
 import { cn } from '@/lib/utils'
 
 const IMPACT_LABEL_COLORS: Record<string, string> = {
@@ -179,7 +181,9 @@ export default function DashboardPage() {
                   />
                 ))}
               </div>
+              <PermitTimeline findings={result.findings} />
               <StakeholderMap findings={result.findings} />
+              <RiskHeatmap findings={result.findings} />
               </>
             )}
           </>
