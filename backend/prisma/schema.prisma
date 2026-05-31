@@ -54,6 +54,10 @@ model RiskFinding {
   explanation        String
   recommended_action String
   source_url         String
+  // Regulatory intelligence
+  prerequisites         String[] @default([])  // permits/steps that must be done first
+  is_hidden_requirement Boolean? // easy-to-miss requirement from a different agency/jurisdiction
+  response_path         String?  // monitor | contact_agency | update_docs | change_plan | seek_clarification
   // Stakeholder + cost + timing
   permit_fee         String?
   effective_date     String?

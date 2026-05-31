@@ -14,6 +14,10 @@ export interface RiskFinding {
   explanation: string
   recommended_action: string
   source_url: string
+  // Regulatory intelligence
+  prerequisites?: string[]
+  is_hidden_requirement?: boolean
+  response_path?: 'monitor' | 'contact_agency' | 'update_docs' | 'change_plan' | 'seek_clarification'
   // Stakeholder + cost + timing
   permit_fee?: string
   effective_date?: string

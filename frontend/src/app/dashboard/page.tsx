@@ -13,7 +13,7 @@ import { api, type BusinessProfile, type RiskFinding, type RiskAnalysisResult, t
 import { staggerRows } from '@/lib/gsap'
 import {
   ChevronDown, ChevronRight, ExternalLink, X, CheckCircle, AlertTriangle,
-  Mail, Phone, Home, Copy, Check,
+  Mail, Phone, Home, Copy, Check, Sparkles, Lock,
 } from 'lucide-react'
 import { ConfidenceBadge, JurisdictionBadge } from '@/components/ui/trust-badges'
 import { StakeholderMap } from '@/components/stakeholder-map'
@@ -229,9 +229,15 @@ function FindingRow({
           <div className="min-w-0">
             <h3 className="text-h3 text-[var(--cl-text)] leading-snug">{finding.affected_area}</h3>
             <p className="text-body text-[var(--cl-text-secondary)] mt-1 line-clamp-2">{finding.explanation}</p>
-            {finding.impact_label && (
-              <div className="mt-2">
-                <ImpactLabel label={finding.impact_label} />
+            {(finding.impact_label || finding.is_hidden_requirement) && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {finding.impact_label && <ImpactLabel label={finding.impact_label} />}
+                {finding.is_hidden_requirement && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border border-risk-med-border bg-risk-med-bg text-risk-med-fg font-mono text-citation">
+                    <Sparkles size={11} strokeWidth={1.5} />
+                    Easy to miss
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -249,6 +255,21 @@ function FindingRow({
       {expanded && (
         <div className="px-4 pb-4 border-t border-[var(--cl-border-subtle)] pt-3 space-y-3">
           <p className="text-body text-[var(--cl-text)]">{finding.explanation}</p>
+          {finding.prerequisites && finding.prerequisites.length > 0 && (
+            <div className="bg-risk-med-bg border border-risk-med-border rounded px-3 py-2">
+              <p className="text-caption font-semibold text-risk-med-fg flex items-center gap-1.5 mb-1">
+                <Lock size={12} strokeWidth={1.5} />
+                Complete these first
+              </p>
+              <ul className="space-y-0.5">
+                {finding.prerequisites.map((p, i) => (
+                  <li key={i} className="text-caption text-[var(--cl-text-secondary)] flex items-start gap-1.5">
+                    <span className="text-risk-med-fg mt-0.5">→</span>{p}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <p className="text-caption text-[var(--cl-text-secondary)]">
             <strong>Next step:</strong> {finding.recommended_action}
           </p>
