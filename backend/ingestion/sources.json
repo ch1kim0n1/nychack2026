@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Texas Licenses & Permits Guide",
+    "agency": "Texas.gov",
+    "jurisdiction": "Texas",
+    "url": "https://www.texas.gov/topics/business/business-licenses-and-permits/",
+    "type": "guide",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["all"],
+    "activity_tags": ["licensing", "permits"]
+  },
+  {
+    "title": "TABC Licensing Requirements",
+    "agency": "Texas Alcoholic Beverage Commission",
+    "jurisdiction": "Texas",
+    "url": "https://www.tabc.texas.gov/licenses-permits/",
+    "type": "licensing",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["food_service", "retail"],
+    "activity_tags": ["alcohol_planned", "alcohol_service"]
+  },
+  {
+    "title": "Austin Development Services – Permits",
+    "agency": "City of Austin",
+    "jurisdiction": "Austin, TX",
+    "url": "https://www.austintexas.gov/department/permits",
+    "type": "permits",
+    "jurisdiction_tags": ["Austin, TX"],
+    "industry_tags": ["all"],
+    "activity_tags": ["permits", "construction", "zoning"]
+  },
+  {
+    "title": "Dallas Permits & Licenses",
+    "agency": "City of Dallas",
+    "jurisdiction": "Dallas, TX",
+    "url": "https://dallascityhall.com/departments/sustainabledevelopment/permit/Pages/default.aspx",
+    "type": "permits",
+    "jurisdiction_tags": ["Dallas, TX"],
+    "industry_tags": ["all"],
+    "activity_tags": ["permits", "construction", "zoning"]
+  },
+  {
+    "title": "Texas Comptroller – Sales & Use Tax",
+    "agency": "Texas Comptroller of Public Accounts",
+    "jurisdiction": "Texas",
+    "url": "https://comptroller.texas.gov/taxes/sales/",
+    "type": "tax",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["all"],
+    "activity_tags": ["tax", "sales_tax"]
+  },
+  {
+    "title": "Texas Legislature Online – Bill Search",
+    "agency": "Texas Legislature",
+    "jurisdiction": "Texas",
+    "url": "https://legis.state.tx.us/BillSearch/Search.aspx",
+    "type": "legislation",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["all"],
+    "activity_tags": ["legislation", "compliance"]
+  }
+]
