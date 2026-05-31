@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { IntakeTextarea } from '@/components/ui/input'
@@ -94,6 +94,12 @@ type Stage = 'intake' | 'classifying' | 'review' | 'followup' | 'confirming' | '
 export default function IntakePage() {
   const router = useRouter()
   const [text, setText] = useState('')
+
+  // Apply prefill from scenario builder if present
+  useEffect(() => {
+    const prefill = sessionStorage.getItem('cl-prefill')
+    if (prefill) { setText(prefill); sessionStorage.removeItem('cl-prefill') }
+  }, [])
   const [stage, setStage] = useState<Stage>('intake')
   const [profile, setProfile] = useState<BusinessProfile | null>(null)
   const [error, setError] = useState('')

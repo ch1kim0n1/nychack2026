@@ -22,7 +22,13 @@ const STATUS_CONFIG = {
 }
 
 export default function DiffPage() {
-  const [activeScenario, setActiveScenario] = useState('scenario-a')
+  const [activeScenario, setActiveScenario] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('scenario')
+      if (p && SCENARIOS.some(s => s.id === p)) return p
+    }
+    return 'scenario-a'
+  })
   const [diff, setDiff] = useState<ScenarioDiff | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

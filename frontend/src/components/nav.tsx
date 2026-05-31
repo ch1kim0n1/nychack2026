@@ -53,6 +53,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
                 Compare ⊞
               </button>
             )}
+            <Link href="/scenarios" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Scenarios
+            </Link>
             <Link href="/checklist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Checklist
             </Link>
