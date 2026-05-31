@@ -55,7 +55,10 @@ def ingest_source(conn: psycopg2.extensions.connection, source: dict) -> None:
             (source['title'], source['agency'], source['jurisdiction'],
              source['url'], source['type']),
         )
-        source_id = cur.fetchone()[0]
+        row = cur.fetchone()
+        if row is None:
+            raise RuntimeError(f"Failed to upsert source: {source['url']}")
+        source_id = row[0]
 
     with conn.cursor() as cur:
         for i, chunk in enumerate(chunks):
