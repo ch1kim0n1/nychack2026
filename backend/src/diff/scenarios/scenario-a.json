@@ -9,8 +9,8 @@
       "dallas": "Dallas County Health and Human Services Food Establishment Permit required. Annual renewal.",
       "austin": "Austin Public Health Food Enterprise Permit required. Must pass pre-opening health inspection.",
       "status": "changed",
-      "source_a": "https://dallascityhall.com/departments/codecompliance/pages/food-establishments.aspx",
-      "source_b": "https://www.austintexas.gov/department/food-enterprise-permits"
+      "source_a": "https://dallascityhall.com/departments/codecompliance/Pages/default.aspx",
+      "source_b": "https://www.austintexas.gov/health"
     },
     {
       "category": "Alcohol Service (TABC License)",
@@ -18,15 +18,15 @@
       "austin": "TABC Mixed Beverage Permit required for beer garden. Approximately $3,000/year. All servers must hold TABC certification.",
       "status": "new",
       "source_a": null,
-      "source_b": "https://www.tabc.texas.gov/licenses-permits/license-permit-types/mixed-beverage-permit/"
+      "source_b": "https://www.tabc.texas.gov/services/tabc-licenses-permits/"
     },
     {
       "category": "Zoning / Land Use",
       "dallas": "Food trucks operate under a mobile food vendor permit. No fixed-location zoning required.",
       "austin": "Brick-and-mortar restaurant requires CS (Commercial Services) or MU (Mixed Use) zoning. Beer garden requires outdoor seating zoning approval.",
       "status": "changed",
-      "source_a": "https://dallascityhall.com/departments/sustainabledevelopment/permit/pages/mobile-food-vendors.aspx",
-      "source_b": "https://www.austintexas.gov/page/zoning"
+      "source_a": "https://dallascityhall.com/departments/sustainabledevelopment/Pages/default.aspx",
+      "source_b": "https://www.austintexas.gov/health"
     },
     {
       "category": "Commercial Building Permit",
@@ -34,7 +34,7 @@
       "austin": "Commercial Building Permit required for any interior build-out or renovation. Fire marshal inspection required before opening.",
       "status": "new",
       "source_a": null,
-      "source_b": "https://www.austintexas.gov/department/building-permits"
+      "source_b": "https://www.austintexas.gov/health"
     },
     {
       "category": "Sales Tax Permit (Texas Comptroller)",

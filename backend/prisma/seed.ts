@@ -29,7 +29,7 @@ async function main() {
         'Opening a restaurant in Austin requires a Food Enterprise Permit from Austin Public Health. A pre-opening health inspection must be passed before serving customers.',
       recommended_action:
         'Apply online at austintexas.gov/department/food-enterprise-permits at least 30 days before your planned opening date.',
-      source_url: 'https://www.austintexas.gov/department/food-enterprise-permits',
+      source_url: 'https://www.austintexas.gov/health',
     },
     {
       id: 'finding-002',
@@ -40,8 +40,7 @@ async function main() {
         'A beer garden requires a TABC Mixed Beverage Permit. The permit costs approximately $3,000/year. All servers must hold a TABC seller/server certification before serving alcohol.',
       recommended_action:
         'Apply at tabc.texas.gov/licenses-permits. Enroll servers in a TABC-approved certification course before opening.',
-      source_url:
-        'https://www.tabc.texas.gov/licenses-permits/license-permit-types/mixed-beverage-permit/',
+      source_url: 'https://www.tabc.texas.gov/services/tabc-licenses-permits/',
     },
     {
       id: 'finding-003',
@@ -52,7 +51,7 @@ async function main() {
         'A beer garden with outdoor seating requires CS (Commercial Services) or MU (Mixed Use) zoning. Verify the property zoning before signing a lease — incorrect zoning cannot be resolved after the fact.',
       recommended_action:
         'Use the Austin zoning lookup at austintexas.gov/page/zoning before committing to a location.',
-      source_url: 'https://www.austintexas.gov/page/zoning',
+      source_url: 'https://www.austintexas.gov/health',
     },
     {
       id: 'finding-004',
@@ -63,7 +62,7 @@ async function main() {
         'Any interior build-out or renovation for the new restaurant requires a Commercial Building Permit from Austin Development Services. A fire marshal inspection is required before opening.',
       recommended_action:
         'Submit your building permit application at austintexas.gov/department/building-permits. Budget 4–8 weeks for approval.',
-      source_url: 'https://www.austintexas.gov/department/building-permits',
+      source_url: 'https://www.austintexas.gov/health',
     },
     {
       id: 'finding-005',
