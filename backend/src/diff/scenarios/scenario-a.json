@@ -1,0 +1,48 @@
+{
+  "scenario": "scenario-a",
+  "title": "Food Truck (Dallas) → Restaurant + Beer Garden (Austin)",
+  "city_a": "Dallas, TX",
+  "city_b": "Austin, TX",
+  "differences": [
+    {
+      "category": "Food Service Permit",
+      "dallas": "Dallas County Health and Human Services Food Establishment Permit required. Annual renewal.",
+      "austin": "Austin Public Health Food Enterprise Permit required. Must pass pre-opening health inspection.",
+      "status": "changed",
+      "source_a": "https://dallascityhall.com/departments/codecompliance/pages/food-establishments.aspx",
+      "source_b": "https://www.austintexas.gov/department/food-enterprise-permits"
+    },
+    {
+      "category": "Alcohol Service (TABC License)",
+      "dallas": null,
+      "austin": "TABC Mixed Beverage Permit required for beer garden. Approximately $3,000/year. All servers must hold TABC certification.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://www.tabc.texas.gov/licenses-permits/license-permit-types/mixed-beverage-permit/"
+    },
+    {
+      "category": "Zoning / Land Use",
+      "dallas": "Food trucks operate under a mobile food vendor permit. No fixed-location zoning required.",
+      "austin": "Brick-and-mortar restaurant requires CS (Commercial Services) or MU (Mixed Use) zoning. Beer garden requires outdoor seating zoning approval.",
+      "status": "changed",
+      "source_a": "https://dallascityhall.com/departments/sustainabledevelopment/permit/pages/mobile-food-vendors.aspx",
+      "source_b": "https://www.austintexas.gov/page/zoning"
+    },
+    {
+      "category": "Commercial Building Permit",
+      "dallas": null,
+      "austin": "Commercial Building Permit required for any interior build-out or renovation. Fire marshal inspection required before opening.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://www.austintexas.gov/department/building-permits"
+    },
+    {
+      "category": "Sales Tax Permit (Texas Comptroller)",
+      "dallas": "Texas Comptroller Sales Tax Permit required — applies statewide.",
+      "austin": "No change. Your existing Texas Sales Tax Permit is valid statewide. Update your business address if your principal place of business changes.",
+      "status": "same",
+      "source_a": "https://comptroller.texas.gov/taxes/sales/",
+      "source_b": "https://comptroller.texas.gov/taxes/sales/"
+    }
+  ]
+}
