@@ -24,6 +24,7 @@ const fakeChunk = {
 describe('RiskService', () => {
   let service: RiskService;
   let prisma: {
+    dbAvailable: boolean;
     business: { create: jest.Mock };
     riskFinding: { createMany: jest.Mock };
   };
@@ -32,6 +33,7 @@ describe('RiskService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     prisma = {
+      dbAvailable: true,
       business: { create: jest.fn().mockResolvedValue({ id: 'biz-001' }) },
       riskFinding: { createMany: jest.fn().mockResolvedValue({ count: 1 }) },
     };
@@ -180,9 +182,9 @@ describe('RiskService', () => {
     prisma.riskFinding = {
       ...prisma.riskFinding,
       findMany: jest.fn().mockResolvedValue([
-        { risk_level: 'low',    affected_area: 'Sales Tax',    explanation: 'e', recommended_action: 'a', source_url: 'https://comptroller.texas.gov/taxes/sales/' },
-        { risk_level: 'high',   affected_area: 'TABC Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.tabc.texas.gov/services/tabc-licenses-permits/' },
-        { risk_level: 'medium', affected_area: 'Food Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.austintexas.gov/health/divisions/environmental-health-services' },
+        { risk_level: 'low',    affected_area: 'Sales Tax',    explanation: 'e', recommended_action: 'a', source_url: 'https://comptroller.texas.gov/taxes/sales/',  prerequisites: [], documents_needed: [], next_steps: [] },
+        { risk_level: 'high',   affected_area: 'TABC Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.tabc.texas.gov/services/tabc-licenses-permits/', prerequisites: [], documents_needed: [], next_steps: [] },
+        { risk_level: 'medium', affected_area: 'Food Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.austintexas.gov/health/divisions/environmental-health-services', prerequisites: [], documents_needed: [], next_steps: [] },
       ]),
     } as any;
 
@@ -194,6 +196,19 @@ describe('RiskService', () => {
     expect(result.findings[2].risk_level).toBe('low');
     expect(result.risk_score).toBe(50); // 30 + 15 + 5
     expect(result.risk_level).toBe('high');
+    expect(result.disclaimer).toContain('not legal advice');
+  });
+
+  it('getDemo falls back to static findings when DB unavailable', async () => {
+    prisma.dbAvailable = false;
+    prisma.riskFinding = { ...prisma.riskFinding, findMany: jest.fn() } as any;
+
+    const result = await service.getDemo();
+
+    expect(prisma.riskFinding.findMany).not.toHaveBeenCalled(); // skipped when DB down
+    expect(result.findings.length).toBeGreaterThanOrEqual(5);
+    expect(result.findings[0].risk_level).toBe('high'); // sorted high-first
+    expect(result.findings[0].impact_label).toBeDefined(); // enriched fields present
     expect(result.disclaimer).toContain('not legal advice');
   });
 });

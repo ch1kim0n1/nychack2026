@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { PrismaService } from '../database/prisma.service';
 import { RagService, RegulatoryChunk } from '../rag/rag.service';
 import { BusinessProfile } from '../profile/profile.service';
+import { DEMO_FINDINGS } from './demo-data';
 
 export interface RiskFinding {
   risk_level: 'high' | 'medium' | 'low';
@@ -115,9 +116,22 @@ export class RiskService {
   }
 
   async getDemo(): Promise<RiskAnalysisResult> {
-    const rows = await this.prisma.riskFinding.findMany({
-      where: { business_id: DEMO_BUSINESS_ID },
-    });
+    // Static fallback: DB unavailable or unseeded → serve bundled demo findings.
+    // Demo never depends on Postgres or OpenAI (backlog 16.10).
+    let rows: Awaited<ReturnType<PrismaService['riskFinding']['findMany']>> = [];
+    if (this.prisma.dbAvailable) {
+      rows = await this.prisma.riskFinding
+        .findMany({ where: { business_id: DEMO_BUSINESS_ID } })
+        .catch(() => []);
+    }
+
+    if (rows.length === 0) {
+      const findings = [...DEMO_FINDINGS].sort(
+        (a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level],
+      );
+      const risk_score = Math.min(100, findings.reduce((s, f) => s + RISK_POINTS[f.risk_level], 0));
+      return { risk_score, risk_level: this.overallLevel(findings), findings, disclaimer: DISCLAIMER };
+    }
 
     const findings: RiskFinding[] = rows
       .map((r) => ({

@@ -60,14 +60,38 @@ export function staggerRows(rows: NodeListOf<Element> | Element[]) {
   })
 }
 
-/** One-time ScrollTrigger reveal (fade + rise 12px, once). */
+/** One-time ScrollTrigger reveal (fade + rise 12px, once).
+ *  Reduced-motion safe: never hides content if motion is off or ScrollTrigger
+ *  can't fire — content must never get stuck at opacity 0. */
 export function scrollReveal(el: HTMLElement) {
   initGsap()
+
+  const reduce =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+  // If element is already in view on load, or motion is reduced, just show it.
+  if (reduce) {
+    gsap.set(el, { opacity: 1, y: 0 })
+    return
+  }
+
   gsap.set(el, { opacity: 0, y: 12 })
-  ScrollTrigger.create({
+  const trigger = ScrollTrigger.create({
     trigger: el,
     start: 'top 90%',
     once: true,
     onEnter: () => gsap.to(el, { opacity: 1, y: 0, duration: 0.2, ease: 'power3.out' }),
   })
+
+  // Safety net: if the trigger never initializes (already-scrolled, layout race),
+  // reveal after a short beat so content can't be permanently hidden.
+  if (!trigger || trigger.progress > 0) {
+    gsap.to(el, { opacity: 1, y: 0, duration: 0.2, ease: 'power3.out' })
+  }
+  setTimeout(() => {
+    if (Number(gsap.getProperty(el, 'opacity')) < 1) {
+      gsap.to(el, { opacity: 1, y: 0, duration: 0.2, ease: 'power3.out' })
+    }
+  }, 1500)
 }

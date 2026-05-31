@@ -18,9 +18,9 @@ export class MetricsService {
 
   // Citation Coverage Metric (13.10): % of findings with a valid http(s) source_url
   async citationCoverage(): Promise<CitationCoverage> {
-    const findings = await this.prisma.riskFinding.findMany({
-      select: { source_url: true },
-    });
+    const findings = this.prisma.dbAvailable
+      ? await this.prisma.riskFinding.findMany({ select: { source_url: true } }).catch(() => [])
+      : [];
     const total = findings.length;
     const cited = findings.filter(
       (f) => typeof f.source_url === 'string' && /^https?:\/\//.test(f.source_url),
@@ -34,9 +34,9 @@ export class MetricsService {
 
   // RAG query stats from the audit log (13.9)
   async ragStats(): Promise<RagStats> {
-    const logs = await this.prisma.ragQueryLog.findMany({
-      select: { retrieved_chunks: true },
-    });
+    const logs = this.prisma.dbAvailable
+      ? await this.prisma.ragQueryLog.findMany({ select: { retrieved_chunks: true } }).catch(() => [])
+      : [];
     const total = logs.length;
     const avg =
       total === 0

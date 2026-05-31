@@ -23,3 +23,8 @@
 prisma/*.js
 prisma/*.d.ts
 prisma/*.js.map
+
+# compiled script outputs
+scripts/*.js
+scripts/*.d.ts
+scripts/*.map
