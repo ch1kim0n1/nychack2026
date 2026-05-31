@@ -10,6 +10,12 @@ export interface RiskFinding {
   explanation: string;
   recommended_action: string;
   source_url: string;
+  // Stakeholder + cost + timing
+  permit_fee?: string;       // e.g. "~$3,000/year" or "Free"
+  effective_date?: string;   // e.g. "2026-01-01" or "upon application"
+  agency_department?: string; // specific department within agency (for stakeholder map)
+  agency_phone?: string;
+  agency_url?: string;
   // Trust & citation
   confidence_level?: 'high' | 'medium' | 'low';
   jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency';
@@ -78,6 +84,11 @@ export class RiskService {
         explanation: f.explanation,
         recommended_action: f.recommended_action,
         source_url: f.source_url,
+        permit_fee: f.permit_fee ?? null,
+        effective_date: f.effective_date ?? null,
+        agency_department: f.agency_department ?? null,
+        agency_phone: f.agency_phone ?? null,
+        agency_url: f.agency_url ?? null,
         confidence_level: f.confidence_level ?? null,
         jurisdiction_level: f.jurisdiction_level ?? null,
         money_risk: f.money_risk ?? null,
@@ -108,6 +119,11 @@ export class RiskService {
         explanation: r.explanation,
         recommended_action: r.recommended_action,
         source_url: r.source_url,
+        permit_fee: r.permit_fee ?? undefined,
+        effective_date: r.effective_date ?? undefined,
+        agency_department: r.agency_department ?? undefined,
+        agency_phone: r.agency_phone ?? undefined,
+        agency_url: r.agency_url ?? undefined,
         confidence_level: r.confidence_level as RiskFinding['confidence_level'] ?? undefined,
         jurisdiction_level: r.jurisdiction_level as RiskFinding['jurisdiction_level'] ?? undefined,
         money_risk: r.money_risk as RiskFinding['money_risk'] ?? undefined,
@@ -172,6 +188,11 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
     "impact_label": "one of: Could delay opening | Could trigger fine | Must verify before lease | Renewal risk | Informational",
     "confidence_level": "high|medium|low — high=official source with clear requirement, medium=general guidance, low=inferred or ambiguous",
     "jurisdiction_level": "city|county|state|federal|agency",
+    "permit_fee": "estimated cost if mentioned in source (e.g. '~$3,000/year'), otherwise null",
+    "effective_date": "when this requirement takes effect or deadline if mentioned, otherwise null",
+    "agency_department": "specific department or division within the agency",
+    "agency_phone": "agency phone number if available from source, otherwise null",
+    "agency_url": "official agency website URL if mentioned in source, otherwise null",
     "who_to_contact": "specific agency, department, or office name",
     "what_to_ask": "exact question to ask when contacting that agency",
     "documents_needed": ["list of documents required for this compliance step"],

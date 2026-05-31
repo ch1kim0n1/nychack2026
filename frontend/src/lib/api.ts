@@ -14,6 +14,12 @@ export interface RiskFinding {
   explanation: string
   recommended_action: string
   source_url: string
+  // Stakeholder + cost + timing
+  permit_fee?: string
+  effective_date?: string
+  agency_department?: string
+  agency_phone?: string
+  agency_url?: string
   // Trust & citation
   confidence_level?: 'high' | 'medium' | 'low'
   jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency'

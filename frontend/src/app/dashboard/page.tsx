@@ -16,6 +16,7 @@ import {
   Mail, Phone, Home, Copy, Check,
 } from 'lucide-react'
 import { ConfidenceBadge, JurisdictionBadge } from '@/components/ui/trust-badges'
+import { StakeholderMap } from '@/components/stakeholder-map'
 import { cn } from '@/lib/utils'
 
 const IMPACT_LABEL_COLORS: Record<string, string> = {
@@ -162,6 +163,7 @@ export default function DashboardPage() {
             )}
 
             {result.findings.length > 0 && (
+              <>
               <div ref={findingsRef} className="flex flex-col gap-2">
                 {result.findings.map((finding, i) => (
                   <FindingRow
@@ -177,6 +179,8 @@ export default function DashboardPage() {
                   />
                 ))}
               </div>
+              <StakeholderMap findings={result.findings} />
+              </>
             )}
           </>
         )}

@@ -54,6 +54,12 @@ model RiskFinding {
   explanation        String
   recommended_action String
   source_url         String
+  // Stakeholder + cost + timing
+  permit_fee         String?
+  effective_date     String?
+  agency_department  String?
+  agency_phone       String?
+  agency_url         String?
   // Trust & citation fields
   confidence_level   String?  // high | medium | low
   jurisdiction_level String?  // city | county | state | federal | agency
