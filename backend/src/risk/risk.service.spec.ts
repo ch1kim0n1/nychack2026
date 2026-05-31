@@ -47,7 +47,7 @@ describe('RiskService', () => {
     service = module.get<RiskService>(RiskService);
   });
 
-  it('returns risk findings with valid source_url', async () => {
+  it('returns risk_score, disclaimer, and findings with valid source_url', async () => {
     mockChatCreate.mockResolvedValue({
       choices: [{
         message: {
@@ -72,9 +72,12 @@ describe('RiskService', () => {
       employees: null,
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].risk_level).toBe('high');
-    expect(result[0].source_url).toMatch(/^https/);
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].risk_level).toBe('high');
+    expect(result.findings[0].source_url).toMatch(/^https/);
+    expect(result.risk_score).toBe(30);
+    expect(result.risk_level).toBe('high');
+    expect(result.disclaimer).toContain('not legal advice');
     expect(prisma.riskFinding.createMany).toHaveBeenCalledTimes(1);
   });
 
@@ -112,8 +115,8 @@ describe('RiskService', () => {
       employees: null,
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].affected_area).toBe('Valid Finding');
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].affected_area).toBe('Valid Finding');
   });
 
   it('throws InternalServerErrorException when all findings lack citations', async () => {
@@ -142,5 +145,34 @@ describe('RiskService', () => {
         employees: null,
       }),
     ).rejects.toThrow(InternalServerErrorException);
+  });
+
+  it('returns findings sorted high → medium → low', async () => {
+    mockChatCreate.mockResolvedValue({
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            findings: [
+              { risk_level: 'low', affected_area: 'Low', explanation: '', recommended_action: '', source_url: 'https://example.com/low' },
+              { risk_level: 'high', affected_area: 'High', explanation: '', recommended_action: '', source_url: 'https://example.com/high' },
+              { risk_level: 'medium', affected_area: 'Medium', explanation: '', recommended_action: '', source_url: 'https://example.com/medium' },
+            ],
+          }),
+        },
+      }],
+    });
+
+    const result = await service.analyze({
+      industry: 'food_service',
+      location: 'Austin, TX',
+      expansion_locations: [],
+      activities: [],
+      employees: null,
+    });
+
+    expect(result.findings[0].risk_level).toBe('high');
+    expect(result.findings[1].risk_level).toBe('medium');
+    expect(result.findings[2].risk_level).toBe('low');
+    expect(result.risk_score).toBe(50); // 30 + 15 + 5
   });
 });

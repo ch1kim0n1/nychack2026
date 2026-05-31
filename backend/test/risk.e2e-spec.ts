@@ -24,14 +24,19 @@ describe('RiskController (e2e)', () => {
 
   afterEach(() => app.close());
 
-  it('POST /api/risk/analyze returns 201 with findings', async () => {
-    mockAnalyze.mockResolvedValue([{
+  it('POST /api/risk/analyze returns 201 with risk_score, disclaimer, and findings', async () => {
+    mockAnalyze.mockResolvedValue({
+      risk_score: 90,
       risk_level: 'high',
-      affected_area: 'Food Service Permit',
-      explanation: 'You need a permit.',
-      recommended_action: 'Apply now.',
-      source_url: 'https://www.austintexas.gov/department/food-enterprise-permits',
-    }]);
+      findings: [{
+        risk_level: 'high',
+        affected_area: 'Food Service Permit',
+        explanation: 'You need a permit.',
+        recommended_action: 'Apply now.',
+        source_url: 'https://www.austintexas.gov/department/food-enterprise-permits',
+      }],
+      disclaimer: 'This is informational guidance, not legal advice.',
+    });
 
     return request(app.getHttpServer())
       .post('/api/risk/analyze')
@@ -46,8 +51,10 @@ describe('RiskController (e2e)', () => {
       })
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].risk_level).toBe('high');
+        expect(res.body.findings).toHaveLength(1);
+        expect(res.body.findings[0].risk_level).toBe('high');
+        expect(res.body.risk_score).toBe(90);
+        expect(res.body.disclaimer).toContain('not legal advice');
       });
   });
 
