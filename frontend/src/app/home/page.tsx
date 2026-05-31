@@ -1,7 +1,11 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { Button } from '@/components/ui/button'
 import { FileText, Search, CheckCircle, ArrowRight } from 'lucide-react'
+import { heroEntrance, scrollReveal, initGsap } from '@/lib/gsap'
 
 const SOURCES = [
   'Texas.gov', 'TABC', 'City of Austin', 'City of Dallas',
@@ -17,7 +21,7 @@ const HOW_IT_WORKS = [
   {
     icon: <Search size={20} strokeWidth={1.5} />,
     title: 'We map the rules',
-    body: 'Our RAG pipeline searches real government sources and maps every requirement that applies to you.',
+    body: "Our RAG pipeline searches real government sources and maps every requirement that applies to you.",
   },
   {
     icon: <CheckCircle size={20} strokeWidth={1.5} />,
@@ -27,35 +31,48 @@ const HOW_IT_WORKS = [
 ]
 
 export default function LandingPage() {
+  const heroRef = useRef<HTMLDivElement>(null)
+  const howRef = useRef<HTMLDivElement>(null)
+  const proofRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    initGsap()
+    if (heroRef.current) heroEntrance(heroRef.current)
+    if (howRef.current) scrollReveal(howRef.current)
+    if (proofRef.current) scrollReveal(proofRef.current)
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
       <Nav variant="marketing" />
 
       {/* ── Hero ── */}
       <section className="flex flex-col items-center text-center px-8 pt-20 pb-16 max-w-prose mx-auto w-full">
-        <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-4">
-          Regulatory intelligence for Texas business
-        </p>
-        <h1 className="text-display font-semibold text-[var(--cl-text)] mb-5 leading-tight">
-          Know every rule that applies<br className="hidden sm:block" /> to your business.{' '}
-          <span className="text-navy-600">Before it costs you.</span>
-        </h1>
-        <p className="text-body-lg text-[var(--cl-text-secondary)] mb-8 max-w-lg">
-          Small business owners are exposed to compliance risk not because rules are hidden —
-          but because they&apos;re fragmented across agencies, cities, and permits.
-          CivicLens maps them for you, with citations.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/intake">
-            <Button size="lg">
-              Run a free risk scan <ArrowRight size={16} />
-            </Button>
-          </Link>
-          <Link href="/demo">
-            <Button variant="secondary" size="lg">
-              See a live example
-            </Button>
-          </Link>
+        <div ref={heroRef} className="flex flex-col items-center w-full">
+          <p data-hero className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-4">
+            Regulatory intelligence for Texas business
+          </p>
+          <h1 data-hero className="text-display font-semibold text-[var(--cl-text)] mb-5 leading-tight">
+            Know every rule that applies<br className="hidden sm:block" /> to your business.{' '}
+            <span className="text-navy-600">Before it costs you.</span>
+          </h1>
+          <p data-hero className="text-body-lg text-[var(--cl-text-secondary)] mb-8 max-w-lg">
+            Small business owners face compliance risk not because rules are hidden —
+            but because they&apos;re fragmented across agencies, cities, and permits.
+            CivicLens maps them for you, with citations.
+          </p>
+          <div data-hero className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/intake">
+              <Button size="lg">
+                Run a free risk scan <ArrowRight size={16} />
+              </Button>
+            </Link>
+            <Link href="/demo">
+              <Button variant="secondary" size="lg">
+                See a live example
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -77,7 +94,7 @@ export default function LandingPage() {
 
       {/* ── How it works ── */}
       <section id="how-it-works" className="px-8 py-16 max-w-marketing mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div ref={howRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {HOW_IT_WORKS.map((step, i) => (
             <div key={i} className="flex flex-col gap-3">
               <div className="w-10 h-10 rounded flex items-center justify-center bg-navy-50 border border-[var(--cl-border)] text-navy-600">
@@ -92,7 +109,7 @@ export default function LandingPage() {
 
       {/* ── Human story / proof ── */}
       <section className="px-8 py-12 bg-surface border-t border-[var(--cl-border-subtle)]">
-        <div className="max-w-prose mx-auto">
+        <div ref={proofRef} className="max-w-prose mx-auto">
           <blockquote className="border-l-2 border-navy-600 pl-6">
             <p className="text-body-lg text-[var(--cl-text)] mb-3">
               &ldquo;I spent six weeks trying to figure out what licenses I needed to add a beer garden.
