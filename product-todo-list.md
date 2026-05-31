@@ -20,8 +20,9 @@
 
 ## Current Build Status
 
-> **ENHANCED BACKLOG — LARGE BATCH SHIPPED.** ~30 backlog items implemented across 13 commits this session (checklist, report, scenario builder, stakeholder map, heatmap, timeline, dependency graph, hidden-requirement detector, follow-ups, trust badges, fee/date extractors, Pulse 2.0, lease checklist, RAG audit log, citation metrics, enriched demo seed).
-> **REMAINING (need infra, not code):** Sections 10/13 live monitoring & scraping (10.1, 10.6–10.10, 13.4–13.6), Section 9.1 watchlist (needs auth), Section 12.8 admin mode (needs auth), Section 15 monetization (needs billing). All require services beyond the current stack.
+> **BATCH 2 SHIPPED:** Pricing page (Sec 15), Old-vs-New Rule Diff (8.7), Opening-Day Readiness + Gap Analyzer (11.6/9.9).
+> **REMAINING — all need services, not code:** 9.1 watchlist + 12.8 admin (auth), 13.4–13.6 + 10.8/10.9 (scheduled scraping), Sec 15 real billing, email delivery. 14.6/14.7 toggles skipped (low value: findings already plain-English; evidence excerpts need ingested chunks).
+> **GATE:** live bring-up (docker + ingestion + deploy) is the real next step — code is far ahead of verification.
 
 ---
 
@@ -38,7 +39,7 @@
 | Human story / market validation | ⬜ Not started |
 | Demo prep, QA & deployment | ⬜ Not started |
 | **Phase 1 Actionability layer** (info tool → execution tool) | ⬜ Planned — the priority upgrade after MVP, see the Phase 1 section |
-| Enhanced feature backlog (beyond PDD) | 🟡 ~30 of ~120 shipped (Sections 8–14); remainder needs infra (monitoring, auth, billing) |
+| Enhanced feature backlog (beyond PDD) | 🟡 ~40 of ~120 shipped (Sections 8–15); remainder needs infra (monitoring, auth, billing) |
 
 ---
 
@@ -236,7 +237,7 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 8.4 | ⬜ | ⭐ | Regulatory Threat Radar | Monitor proposed bills, ordinances, rule/fee changes relevant to a saved profile. |
 | 8.5 | ⬜ | ⭐ | Compliance Pulse 2.0 | Upgrade the email mock into a personalized digest of new risks, deadlines, and actions. |
 | 8.6 | ✅ | | Stakeholder Map | StakeholderMap component groups findings by agency w/ dept, phone, URL, fee, date. |
-| 8.7 | ⬜ | | Old Rule vs New Rule Diff | Time-based change detection — needs versioned source snapshots (infra). |
+| 8.7 | ✅ | | Old Rule vs New Rule Diff | temporal-tabc-2026 scenario: prev-rule vs 2026-rule in diff viewer (time axis). |
 | 8.8 | ✅ | | Before-You-Sign-Lease Checklist | /lease page filters lease-critical findings (zoning/occupancy/signage/...) w/ checkboxes. |
 | 8.9 | ✅ | | Expansion Readiness Report | /report page: printable assessment w/ summary, findings, consultant handoff. |
 | 8.10 | ✅ | | Permit Path Timeline | PermitTimeline groups findings by urgency (Now / 30–90d / ongoing) w/ steps. |
@@ -253,7 +254,7 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 9.6 | ✅ | | Hidden Requirement Detector | is_hidden_requirement flag → "Easy to miss" badge on findings. |
 | 9.7 | ✅ | | Business Change Detector | Intake follow-up questions triggered by detected activities mutate the profile. |
 | 9.8 | ✅ | | Regulation-to-Action Translator | next_steps[] ordered actions + recommended_action per finding. |
-| 9.9 | 🟡 | | Compliance Gap Analyzer | Checklist progress bar (N/total approved, %) covers done-vs-missing; no separate view. |
+| 9.9 | ✅ | | Compliance Gap Analyzer | /readiness page: done-vs-remaining two-column gap view from checklist states. |
 | 9.10 | ✅ | | Confidence-Aware Findings | confidence_level field → ConfidenceBadge (Verified/Likely/Uncertain) + low-confidence warning. |
 
 ## 10. Monitoring & Threat Radar (Fed10-inspired, compliance-focused)
@@ -280,7 +281,7 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 11.3 | ✅ | | Document Requirement List | documents_needed[] shown in checklist expand + drawer + report. |
 | 11.4 | ✅ | ⭐ | Deadline Tracker | Per-task deadline input; "Due soon" (≤7d) + "Overdue" badges. |
 | 11.5 | 🟡 | ⭐ | Renewal Reminder System | Deadline tracking in place; actual reminders need email/notification infra. |
-| 11.6 | 🟡 | | Opening-Day Readiness Checklist | /checklist + /lease cover pre-open verification; no dedicated opening-day view. |
+| 11.6 | ✅ | | Opening-Day Readiness Checklist | /readiness: Go/No-Go banner + readiness score from approved blocking requirements. |
 | 11.7 | ✅ | | Blocked Step Explainer | prerequisites[] → "Complete these first" block per finding. |
 | 11.8 | 🟡 | | Permit Submission Packet Builder | /report assembles findings + docs + citations + handoff; not a per-permit packet. |
 | 11.9 | ✅ | | Landlord Question Generator | Draft Assistant "landlord" channel generates lease questions. |
@@ -335,16 +336,16 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 
 | # | Status | Pri | Item | One-liner |
 |---|--------|-----|------|-----------|
-| 15.1 | ⬜ | | Free Basic Scan | One free compliance scan to reduce friction and generate leads. |
-| 15.2 | ⬜ | | Paid Monitoring Plan | Charge for saved profiles, alerts, deadline tracking, and ongoing monitoring. |
-| 15.3 | ⬜ | | One-Time Expansion Report | Sell a city-to-city expansion report for a fixed fee. |
-| 15.4 | ⬜ | | Multi-Location Plan | Higher tier for franchises, chains, and multi-location operators. |
-| 15.5 | ⬜ | | Chamber of Commerce Partnership Mode | Dashboard / white-label portal for chambers and local business orgs. |
-| 15.6 | ⬜ | | SBDC Partnership Mode | Package CivicLens as a tool for Small Business Development Centers. |
-| 15.7 | ⬜ | | Accountant/Bookkeeper Referral Mode | Let financial pros generate compliance reports for clients. |
-| 15.8 | ⬜ | | Permit Consultant Pro Mode | Speed up research and client intake for permit consultants. |
-| 15.9 | ⬜ | | Restaurant Association Channel | Focused version for restaurant associations and food-service groups. |
-| 15.10 | ⬜ | | Lead Capture from Reports | Require email to save, export, or monitor a report. |
+| 15.1 | ✅ | | Free Basic Scan | /pricing Free tier; /intake already free, no gate. |
+| 15.2 | 🟡 | | Paid Monitoring Plan | /pricing Pro tier ($15/mo) presented; real billing not wired (needs Stripe). |
+| 15.3 | ✅ | | One-Time Expansion Report | /pricing $49 strip → /scenarios builder. |
+| 15.4 | 🟡 | | Multi-Location Plan | /pricing Multi-Location tier presented; no real billing/team accounts. |
+| 15.5 | ✅ | | Chamber of Commerce Partnership Mode | /pricing partner channels grid lists chamber white-label. |
+| 15.6 | ✅ | | SBDC Partnership Mode | /pricing partner channels grid lists SBDC advisor tool. |
+| 15.7 | ✅ | | Accountant/Bookkeeper Referral Mode | /pricing partner channels grid lists accountant referral. |
+| 15.8 | ✅ | | Permit Consultant Pro Mode | /pricing partner channels grid lists consultant pro tier. |
+| 15.9 | ✅ | | Restaurant Association Channel | /pricing partner channels grid lists restaurant assoc. |
+| 15.10 | ⬜ | | Lead Capture from Reports | Email-gate on export/save — needs auth/email capture backend. |
 
 ## 16. Demo-Specific (de-risk and sharpen the pitch)
 
