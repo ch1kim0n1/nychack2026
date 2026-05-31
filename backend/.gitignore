@@ -15,3 +15,5 @@
 
 # NestJS build
 .build-id
+
+/generated/prisma

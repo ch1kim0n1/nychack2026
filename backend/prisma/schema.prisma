@@ -1,0 +1,58 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+model Business {
+  id              String        @id @default(uuid())
+  name            String?
+  city            String
+  county          String?
+  state           String        @default("TX")
+  industry_code   String
+  activities      Json
+  expansion_plans Json?
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  risk_findings   RiskFinding[]
+}
+
+model RegulatorySource {
+  id              String            @id @default(uuid())
+  title           String
+  agency          String
+  jurisdiction    String
+  source_url      String            @unique
+  source_type     String
+  last_checked_at DateTime?
+  chunks          RegulatoryChunk[]
+}
+
+model RegulatoryChunk {
+  id                String           @id @default(uuid())
+  source_id         String
+  source            RegulatorySource @relation(fields: [source_id], references: [id])
+  text              String
+  embedding         Unsupported("vector(1536)")?
+  jurisdiction_tags String[]
+  industry_tags     String[]
+  activity_tags     String[]
+}
+
+model RiskFinding {
+  id                 String   @id @default(uuid())
+  business_id        String
+  business           Business @relation(fields: [business_id], references: [id])
+  risk_level         String
+  affected_area      String
+  explanation        String
+  recommended_action String
+  source_url         String
+  created_at         DateTime @default(now())
+}
