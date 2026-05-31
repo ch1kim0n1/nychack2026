@@ -5,6 +5,7 @@ import { RagModule } from './rag/rag.module';
 import { RiskModule } from './risk/risk.module';
 import { DiffModule } from './diff/diff.module';
 import { DraftModule } from './draft/draft.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DraftModule } from './draft/draft.module';
     RiskModule,
     DiffModule,
     DraftModule,
+    MetricsModule,
   ],
 })
 export class AppModule {}

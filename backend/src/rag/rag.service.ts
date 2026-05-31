@@ -48,6 +48,17 @@ export class RagService {
       embeddingStr,
     );
 
+    // Audit log — traceability (13.9). Best-effort; never blocks retrieval.
+    void this.prisma.ragQueryLog
+      ?.create({
+        data: {
+          query_text: queryText,
+          retrieved_chunks: chunks.length,
+          retrieved_chunk_ids: chunks.map((c) => c.id),
+        },
+      })
+      ?.catch(() => undefined);
+
     return chunks;
   }
 }

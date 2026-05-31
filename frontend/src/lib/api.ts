@@ -104,6 +104,11 @@ export const api = {
   getDiff: (scenario = 'scenario-a') =>
     apiFetch<ScenarioDiff>(`/api/diff/${scenario}`),
 
+  citationCoverage: () =>
+    apiFetch<{ total_findings: number; cited_findings: number; coverage_percent: number }>(
+      '/api/metrics/citation-coverage',
+    ),
+
   generateDraft: (params: {
     affected_area: string
     explanation: string

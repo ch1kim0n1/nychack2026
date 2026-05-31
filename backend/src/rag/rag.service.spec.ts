@@ -11,11 +11,14 @@ jest.mock('openai', () =>
 
 describe('RagService', () => {
   let service: RagService;
-  let prisma: { $queryRawUnsafe: jest.Mock };
+  let prisma: { $queryRawUnsafe: jest.Mock; ragQueryLog: { create: jest.Mock } };
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    prisma = { $queryRawUnsafe: jest.fn() };
+    prisma = {
+      $queryRawUnsafe: jest.fn(),
+      ragQueryLog: { create: jest.fn().mockResolvedValue({}) },
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RagService,

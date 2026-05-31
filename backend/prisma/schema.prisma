@@ -45,6 +45,14 @@ model RegulatoryChunk {
   activity_tags     String[]
 }
 
+model RagQueryLog {
+  id                 String   @id @default(uuid())
+  query_text         String
+  retrieved_chunks   Int
+  retrieved_chunk_ids String[] @default([])
+  created_at         DateTime @default(now())
+}
+
 model RiskFinding {
   id                 String   @id @default(uuid())
   business_id        String
