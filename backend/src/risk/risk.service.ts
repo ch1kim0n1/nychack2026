@@ -22,6 +22,7 @@ export interface RiskAnalysisResult {
 const RISK_ORDER: Record<'high' | 'medium' | 'low', number> = { high: 0, medium: 1, low: 2 };
 const RISK_POINTS: Record<'high' | 'medium' | 'low', number> = { high: 30, medium: 15, low: 5 };
 const DISCLAIMER = 'This is informational guidance, not legal advice.';
+const DEMO_BUSINESS_ID = 'demo-biz-scenario-a';
 
 @Injectable()
 export class RiskService {
@@ -42,11 +43,7 @@ export class RiskService {
       100,
       findings.reduce((sum, f) => sum + RISK_POINTS[f.risk_level], 0),
     );
-    const risk_level: 'high' | 'medium' | 'low' = findings.some((f) => f.risk_level === 'high')
-      ? 'high'
-      : findings.some((f) => f.risk_level === 'medium')
-        ? 'medium'
-        : 'low';
+    const risk_level = this.overallLevel(findings);
 
     const business = await this.prisma.business.create({
       data: {
@@ -70,6 +67,33 @@ export class RiskService {
     });
 
     return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
+  }
+
+  async getDemo(): Promise<RiskAnalysisResult> {
+    const rows = await this.prisma.riskFinding.findMany({
+      where: { business_id: DEMO_BUSINESS_ID },
+    });
+
+    const findings: RiskFinding[] = rows
+      .map((r) => ({
+        risk_level: r.risk_level as 'high' | 'medium' | 'low',
+        affected_area: r.affected_area,
+        explanation: r.explanation,
+        recommended_action: r.recommended_action,
+        source_url: r.source_url,
+      }))
+      .sort((a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level]);
+
+    const risk_score = Math.min(100, findings.reduce((sum, f) => sum + RISK_POINTS[f.risk_level], 0));
+    const risk_level = this.overallLevel(findings);
+
+    return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
+  }
+
+  private overallLevel(findings: RiskFinding[]): 'high' | 'medium' | 'low' {
+    if (findings.some((f) => f.risk_level === 'high')) return 'high';
+    if (findings.some((f) => f.risk_level === 'medium')) return 'medium';
+    return 'low';
   }
 
   private async synthesize(

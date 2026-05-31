@@ -175,4 +175,25 @@ describe('RiskService', () => {
     expect(result.findings[2].risk_level).toBe('low');
     expect(result.risk_score).toBe(50); // 30 + 15 + 5
   });
+
+  it('getDemo returns seeded findings from DB sorted and scored', async () => {
+    prisma.riskFinding = {
+      ...prisma.riskFinding,
+      findMany: jest.fn().mockResolvedValue([
+        { risk_level: 'low',    affected_area: 'Sales Tax',    explanation: 'e', recommended_action: 'a', source_url: 'https://comptroller.texas.gov/taxes/sales/' },
+        { risk_level: 'high',   affected_area: 'TABC Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.tabc.texas.gov/services/tabc-licenses-permits/' },
+        { risk_level: 'medium', affected_area: 'Food Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.austintexas.gov/health/divisions/environmental-health-services' },
+      ]),
+    } as any;
+
+    const result = await service.getDemo();
+
+    expect(result.findings).toHaveLength(3);
+    expect(result.findings[0].risk_level).toBe('high');
+    expect(result.findings[1].risk_level).toBe('medium');
+    expect(result.findings[2].risk_level).toBe('low');
+    expect(result.risk_score).toBe(50); // 30 + 15 + 5
+    expect(result.risk_level).toBe('high');
+    expect(result.disclaimer).toContain('not legal advice');
+  });
 });

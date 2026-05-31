@@ -10,6 +10,16 @@
     "activity_tags": ["alcohol_planned", "alcohol_service"]
   },
   {
+    "title": "TABC Services Overview",
+    "agency": "Texas Alcoholic Beverage Commission",
+    "jurisdiction": "Texas",
+    "url": "https://www.tabc.texas.gov/services/",
+    "type": "licensing",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["food_service", "retail"],
+    "activity_tags": ["alcohol_planned", "alcohol_service", "licensing"]
+  },
+  {
     "title": "Austin Environmental Health Services – Food Permits",
     "agency": "City of Austin",
     "jurisdiction": "Austin, TX",
@@ -58,5 +68,25 @@
     "jurisdiction_tags": ["Texas"],
     "industry_tags": ["all"],
     "activity_tags": ["tax", "sales_tax"]
+  },
+  {
+    "title": "Texas Comptroller – Sales Tax Forms & Publications",
+    "agency": "Texas Comptroller of Public Accounts",
+    "jurisdiction": "Texas",
+    "url": "https://comptroller.texas.gov/taxes/sales/forms/",
+    "type": "tax",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["all"],
+    "activity_tags": ["tax", "sales_tax", "permits"]
+  },
+  {
+    "title": "Texas Secretary of State – Business Structures",
+    "agency": "Texas Secretary of State",
+    "jurisdiction": "Texas",
+    "url": "https://www.sos.texas.gov/corp/businessstructure.shtml",
+    "type": "registration",
+    "jurisdiction_tags": ["Texas"],
+    "industry_tags": ["all"],
+    "activity_tags": ["registration", "licensing", "business_formation"]
   }
 ]
