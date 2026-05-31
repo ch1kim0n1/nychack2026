@@ -22,7 +22,7 @@
 
 > **BATCH 2 SHIPPED:** Pricing page (Sec 15), Old-vs-New Rule Diff (8.7), Opening-Day Readiness + Gap Analyzer (11.6/9.9).
 > **REMAINING — all need services, not code:** 9.1 watchlist + 12.8 admin (auth), 13.4–13.6 + 10.8/10.9 (scheduled scraping), Sec 15 real billing, email delivery. 14.6/14.7 toggles skipped (low value: findings already plain-English; evidence excerpts need ingested chunks).
-> **GATE:** live bring-up (docker + ingestion + deploy) is the real next step — code is far ahead of verification.
+> **UI/UX VERIFIED LIVE (2026-05-31):** Backend made DB-less (boots on static fallback), launched both servers, drove all 13 routes with Playwright, read every screenshot. Quality high across light+dark; one a11y defect found + fixed (reduced-motion scrollReveal stuck-hidden). Live LLM path (/intake real scan) + real-data ingestion + deploy still pending infra.
 
 ---
 
@@ -206,7 +206,7 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | # | Status | Item | One-liner |
 |---|--------|------|-----------|
 | P1.D | ✅ | Diff Viewer Upgrade (14.3) | 3-scenario switcher + full same/changed/new Δ coding with per-cell CitationChips. |
-| P1.E | 🟡 | Fallback Static Data Mode (16.10) | /demo route + /api/risk/demo endpoint exist; dashboard auto-falls back to cached demo on live failure. |
+| P1.E | ✅ | Fallback Static Data Mode (16.10) | Backend boots DB-less; getDemo() serves bundled static findings; demo needs zero infra. |
 
 > **Why these ride along:** they're the other two Phase-1 build-order items (Section 20). The diff upgrade strengthens the "wow" beat; the static cache guarantees the actionability demo runs flawlessly even if the LLM/API is slow or down.
 
@@ -360,7 +360,7 @@ These are explicitly deferred per the PDD §15 and roadmap §17 and should **not
 | 16.7 | ⛔ | | Regulatory Alert Mock Moment | Show a Compliance Pulse alert about a relevant proposed/recent change. |
 | 16.8 | ⛔ | | Before/After Diff Moment | Show Dallas vs Austin with new/changed/same/unknown — the strongest unique beat. |
 | 16.9 | ⛔ | | Export Report Moment | Show a printable report with findings, next steps, and citations. |
-| 16.10 | ⬜ | ⭐ | Fallback Static Data Mode | Cache all demo outputs locally so the live demo never depends on real-time APIs. |
+| 16.10 | ✅ | ⭐ | Fallback Static Data Mode | Backend degrades gracefully w/o DB; bundled demo-data.ts powers /api/risk/demo with zero infra. |
 
 ## 17. Vertical & Jurisdiction Expansion
 
