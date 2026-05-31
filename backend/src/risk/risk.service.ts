@@ -10,6 +10,18 @@ export interface RiskFinding {
   explanation: string;
   recommended_action: string;
   source_url: string;
+  // Phase 1 — impact dimensions
+  money_risk?: 'high' | 'medium' | 'low';
+  delay_risk?: 'high' | 'medium' | 'low';
+  legal_severity?: 'high' | 'medium' | 'low';
+  urgency?: 'immediate' | 'soon' | 'ongoing';
+  impact_score?: number;
+  impact_label?: string;
+  // Phase 1 — action playbook
+  who_to_contact?: string;
+  what_to_ask?: string;
+  documents_needed?: string[];
+  next_steps?: string[];
 }
 
 export interface RiskAnalysisResult {
@@ -63,6 +75,16 @@ export class RiskService {
         explanation: f.explanation,
         recommended_action: f.recommended_action,
         source_url: f.source_url,
+        money_risk: f.money_risk ?? null,
+        delay_risk: f.delay_risk ?? null,
+        legal_severity: f.legal_severity ?? null,
+        urgency: f.urgency ?? null,
+        impact_score: f.impact_score ?? null,
+        impact_label: f.impact_label ?? null,
+        who_to_contact: f.who_to_contact ?? null,
+        what_to_ask: f.what_to_ask ?? null,
+        documents_needed: f.documents_needed ?? [],
+        next_steps: f.next_steps ?? [],
       })),
     });
 
@@ -81,6 +103,16 @@ export class RiskService {
         explanation: r.explanation,
         recommended_action: r.recommended_action,
         source_url: r.source_url,
+        money_risk: r.money_risk as RiskFinding['money_risk'] ?? undefined,
+        delay_risk: r.delay_risk as RiskFinding['delay_risk'] ?? undefined,
+        legal_severity: r.legal_severity as RiskFinding['legal_severity'] ?? undefined,
+        urgency: r.urgency as RiskFinding['urgency'] ?? undefined,
+        impact_score: r.impact_score ?? undefined,
+        impact_label: r.impact_label ?? undefined,
+        who_to_contact: r.who_to_contact ?? undefined,
+        what_to_ask: r.what_to_ask ?? undefined,
+        documents_needed: r.documents_needed as string[],
+        next_steps: r.next_steps as string[],
       }))
       .sort((a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level]);
 
@@ -114,17 +146,27 @@ Given a business profile and regulatory source text, identify compliance require
 
 RULES:
 - Every finding MUST have a source_url copied exactly from the provided context
-- Do NOT invent findings that are not supported by the provided sources
+- Do NOT invent findings not supported by the provided sources
 - Return ONLY valid JSON — no markdown, no explanation
 
-Return a JSON object with a "findings" array:
+Return a JSON object with a "findings" array. Each finding must have ALL of these fields:
 {
   "findings": [{
     "risk_level": "high|medium|low",
     "affected_area": "short label, e.g. Food Service Permit",
     "explanation": "plain-English explanation of what is required",
     "recommended_action": "specific next step the owner should take",
-    "source_url": "exact URL from SOURCE: lines in the context"
+    "source_url": "exact URL from SOURCE: lines in the context",
+    "money_risk": "high|medium|low",
+    "delay_risk": "high|medium|low",
+    "legal_severity": "high|medium|low",
+    "urgency": "immediate|soon|ongoing",
+    "impact_score": 0-100,
+    "impact_label": "one of: Could delay opening | Could trigger fine | Must verify before lease | Renewal risk | Informational",
+    "who_to_contact": "specific agency, department, or office name",
+    "what_to_ask": "exact question to ask when contacting that agency",
+    "documents_needed": ["list of documents required for this compliance step"],
+    "next_steps": ["ordered list of concrete next actions"]
   }]
 }`,
         },

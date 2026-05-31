@@ -54,5 +54,17 @@ model RiskFinding {
   explanation        String
   recommended_action String
   source_url         String
+  // Phase 1 — impact dimensions
+  money_risk         String?  // high | medium | low
+  delay_risk         String?  // high | medium | low
+  legal_severity     String?  // high | medium | low
+  urgency            String?  // immediate | soon | ongoing
+  impact_score       Int?     // 0-100 composite
+  impact_label       String?  // "Could delay opening" etc.
+  // Phase 1 — action playbook
+  who_to_contact     String?
+  what_to_ask        String?
+  documents_needed   String[] @default([])
+  next_steps         String[] @default([])
   created_at         DateTime @default(now())
 }
