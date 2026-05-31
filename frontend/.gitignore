@@ -3,3 +3,7 @@ node_modules/
 .env.local
 .env
 out/
+
+# build artifacts
+tsconfig.tsbuildinfo
+next-env.d.ts
