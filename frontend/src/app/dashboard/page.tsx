@@ -15,6 +15,7 @@ import {
   ChevronDown, ChevronRight, ExternalLink, X, CheckCircle, AlertTriangle,
   Mail, Phone, Home, Copy, Check,
 } from 'lucide-react'
+import { ConfidenceBadge, JurisdictionBadge } from '@/components/ui/trust-badges'
 import { cn } from '@/lib/utils'
 
 const IMPACT_LABEL_COLORS: Record<string, string> = {
@@ -250,11 +251,13 @@ function FindingRow({
               ))}
             </ol>
           )}
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1 items-center">
             <CitationChip url={finding.source_url} onClick={onCitationClick} />
+            {finding.confidence_level && <ConfidenceBadge level={finding.confidence_level} />}
+            {finding.jurisdiction_level && <JurisdictionBadge level={finding.jurisdiction_level} />}
             <button
               onClick={onCitationClick}
-              className="inline-flex items-center gap-1.5 text-caption text-navy-600 border border-[var(--cl-border)] bg-navy-50 hover:bg-navy-100 rounded-sm px-2 py-0.5 transition-colors"
+              className="inline-flex items-center gap-1.5 text-caption text-navy-600 border border-[var(--cl-border)] bg-navy-50 hover:bg-navy-100 rounded-sm px-2 py-0.5 transition-colors ml-auto"
             >
               <Mail size={12} strokeWidth={1.5} />
               Draft email
@@ -472,7 +475,16 @@ function CitationDrawer({ finding, businessDescription, onClose }: {
 
           {/* Source */}
           <section>
-            <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">Source</p>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)]">Source</p>
+              {finding.confidence_level && <ConfidenceBadge level={finding.confidence_level} />}
+              {finding.jurisdiction_level && <JurisdictionBadge level={finding.jurisdiction_level} />}
+            </div>
+            {finding.confidence_level === 'low' && (
+              <p className="text-caption text-risk-med-fg bg-risk-med-bg border border-risk-med-border rounded px-2 py-1 mb-2">
+                Low-confidence finding — verify directly with the agency before taking action.
+              </p>
+            )}
             <div className="bg-sunken border border-[var(--cl-border)] rounded p-3 font-mono text-citation">
               <p className="text-[var(--cl-text-secondary)] mb-1 break-all">{finding.source_url.replace(/^https?:\/\//, '')}</p>
               <a

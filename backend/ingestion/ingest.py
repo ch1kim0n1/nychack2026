@@ -47,10 +47,10 @@ def ingest_source(conn: psycopg2.extensions.connection, source: dict) -> None:
         cur.execute(
             """
             INSERT INTO "RegulatorySource"
-              (id, title, agency, jurisdiction, source_url, source_type)
-            VALUES (gen_random_uuid(), %s, %s, %s, %s, %s)
+              (id, title, agency, jurisdiction, source_url, source_type, last_checked_at)
+            VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, NOW())
             ON CONFLICT (source_url) DO UPDATE
-              SET title = EXCLUDED.title
+              SET title = EXCLUDED.title, last_checked_at = NOW()
             RETURNING id
             """,
             (source['title'], source['agency'], source['jurisdiction'],

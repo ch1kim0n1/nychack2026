@@ -10,6 +10,9 @@ export interface RiskFinding {
   explanation: string;
   recommended_action: string;
   source_url: string;
+  // Trust & citation
+  confidence_level?: 'high' | 'medium' | 'low';
+  jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency';
   // Phase 1 — impact dimensions
   money_risk?: 'high' | 'medium' | 'low';
   delay_risk?: 'high' | 'medium' | 'low';
@@ -75,6 +78,8 @@ export class RiskService {
         explanation: f.explanation,
         recommended_action: f.recommended_action,
         source_url: f.source_url,
+        confidence_level: f.confidence_level ?? null,
+        jurisdiction_level: f.jurisdiction_level ?? null,
         money_risk: f.money_risk ?? null,
         delay_risk: f.delay_risk ?? null,
         legal_severity: f.legal_severity ?? null,
@@ -103,6 +108,8 @@ export class RiskService {
         explanation: r.explanation,
         recommended_action: r.recommended_action,
         source_url: r.source_url,
+        confidence_level: r.confidence_level as RiskFinding['confidence_level'] ?? undefined,
+        jurisdiction_level: r.jurisdiction_level as RiskFinding['jurisdiction_level'] ?? undefined,
         money_risk: r.money_risk as RiskFinding['money_risk'] ?? undefined,
         delay_risk: r.delay_risk as RiskFinding['delay_risk'] ?? undefined,
         legal_severity: r.legal_severity as RiskFinding['legal_severity'] ?? undefined,
@@ -163,6 +170,8 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
     "urgency": "immediate|soon|ongoing",
     "impact_score": 0-100,
     "impact_label": "one of: Could delay opening | Could trigger fine | Must verify before lease | Renewal risk | Informational",
+    "confidence_level": "high|medium|low — high=official source with clear requirement, medium=general guidance, low=inferred or ambiguous",
+    "jurisdiction_level": "city|county|state|federal|agency",
     "who_to_contact": "specific agency, department, or office name",
     "what_to_ask": "exact question to ask when contacting that agency",
     "documents_needed": ["list of documents required for this compliance step"],

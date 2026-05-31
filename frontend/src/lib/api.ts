@@ -14,6 +14,9 @@ export interface RiskFinding {
   explanation: string
   recommended_action: string
   source_url: string
+  // Trust & citation
+  confidence_level?: 'high' | 'medium' | 'low'
+  jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency'
   // Phase 1 — impact dimensions
   money_risk?: 'high' | 'medium' | 'low'
   delay_risk?: 'high' | 'medium' | 'low'

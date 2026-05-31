@@ -54,6 +54,9 @@ model RiskFinding {
   explanation        String
   recommended_action String
   source_url         String
+  // Trust & citation fields
+  confidence_level   String?  // high | medium | low
+  jurisdiction_level String?  // city | county | state | federal | agency
   // Phase 1 — impact dimensions
   money_risk         String?  // high | medium | low
   delay_risk         String?  // high | medium | low
