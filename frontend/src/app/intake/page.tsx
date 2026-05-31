@@ -7,7 +7,7 @@ import { IntakeTextarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { api, type BusinessProfile } from '@/lib/api'
-import { CheckCircle, Edit2 } from 'lucide-react'
+import { CheckCircle, Edit2, HelpCircle, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const EXAMPLE_SCENARIOS = [
@@ -25,7 +25,71 @@ const EXAMPLE_SCENARIOS = [
   },
 ]
 
-type Stage = 'intake' | 'classifying' | 'review' | 'error'
+// Follow-up questions triggered by detected activities (9.7 Business Change Detector)
+interface FollowUpQuestion {
+  id: string
+  trigger: (profile: BusinessProfile) => boolean
+  question: string
+  options: { label: string; value: string; detail?: string }[]
+  applyAnswer: (profile: BusinessProfile, answer: string) => BusinessProfile
+}
+
+const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
+  {
+    id: 'outdoor_seating',
+    trigger: p => p.activities.includes('alcohol_planned') && !p.activities.includes('outdoor_seating'),
+    question: 'You mentioned alcohol service — will there be outdoor seating (e.g. a beer garden or patio)?',
+    options: [
+      { label: 'Yes, outdoor seating planned', value: 'yes', detail: 'Adds zoning + outdoor service permit requirements' },
+      { label: 'No, indoors only', value: 'no' },
+    ],
+    applyAnswer: (profile, answer) =>
+      answer === 'yes'
+        ? { ...profile, activities: [...profile.activities, 'outdoor_seating'] }
+        : profile,
+  },
+  {
+    id: 'tabc_existing',
+    trigger: p => p.activities.includes('alcohol_planned') && p.expansion_locations.length > 0,
+    question: 'Do you already hold a TABC license at your current location?',
+    options: [
+      { label: 'Yes, I have an existing TABC license', value: 'yes', detail: 'Affects transfer vs. new application path' },
+      { label: 'No, this is my first alcohol license', value: 'no' },
+    ],
+    applyAnswer: (profile, answer) =>
+      answer === 'yes'
+        ? { ...profile, activities: [...profile.activities, 'tabc_existing'] }
+        : profile,
+  },
+  {
+    id: 'employees_hiring',
+    trigger: p => (p.employees ?? 0) < 5 && p.expansion_locations.length > 0,
+    question: 'Will you hire employees for the new location?',
+    options: [
+      { label: 'Yes, I plan to hire staff', value: 'yes', detail: 'May trigger employer registration and withholding requirements' },
+      { label: 'No, owner-operated', value: 'no' },
+    ],
+    applyAnswer: (profile, answer) =>
+      answer === 'yes'
+        ? { ...profile, activities: [...profile.activities, 'hiring_employees'] }
+        : profile,
+  },
+  {
+    id: 'food_delivery',
+    trigger: p => p.industry === 'food_service' && !p.activities.includes('delivery'),
+    question: 'Will the new location offer delivery (e.g. DoorDash, Uber Eats, or own drivers)?',
+    options: [
+      { label: 'Yes, delivery planned', value: 'yes', detail: 'May require additional permits in some jurisdictions' },
+      { label: 'No, dine-in / carry-out only', value: 'no' },
+    ],
+    applyAnswer: (profile, answer) =>
+      answer === 'yes'
+        ? { ...profile, activities: [...profile.activities, 'delivery'] }
+        : profile,
+  },
+]
+
+type Stage = 'intake' | 'classifying' | 'review' | 'followup' | 'confirming' | 'error'
 
 export default function IntakePage() {
   const router = useRouter()
@@ -34,6 +98,9 @@ export default function IntakePage() {
   const [profile, setProfile] = useState<BusinessProfile | null>(null)
   const [error, setError] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
+  // Follow-up state
+  const [followupQueue, setFollowupQueue] = useState<FollowUpQuestion[]>([])
+  const [currentFollowup, setCurrentFollowup] = useState(0)
 
   async function handleAnalyze() {
     if (!text || text.length < 15) return
@@ -43,7 +110,16 @@ export default function IntakePage() {
     try {
       const result = await api.classifyProfile(text)
       setProfile(result)
-      setStage('review')
+
+      // Determine which follow-up questions apply (9.7 Business Change Detector)
+      const applicable = FOLLOW_UP_QUESTIONS.filter(q => q.trigger(result))
+      if (applicable.length > 0) {
+        setFollowupQueue(applicable)
+        setCurrentFollowup(0)
+        setStage('followup')
+      } else {
+        setStage('review')
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
       setStage('error')
@@ -52,9 +128,21 @@ export default function IntakePage() {
     }
   }
 
+  function handleFollowupAnswer(answer: string) {
+    if (!profile) return
+    const q = followupQueue[currentFollowup]
+    const updated = q.applyAnswer(profile, answer)
+    setProfile(updated)
+
+    if (currentFollowup + 1 < followupQueue.length) {
+      setCurrentFollowup(i => i + 1)
+    } else {
+      setStage('review')
+    }
+  }
+
   function handleConfirm() {
     if (!profile) return
-    // Store profile in sessionStorage for the dashboard to read
     sessionStorage.setItem('cl-profile', JSON.stringify(profile))
     sessionStorage.setItem('cl-input', text)
     router.push('/dashboard')
@@ -63,6 +151,8 @@ export default function IntakePage() {
   function handleEdit() {
     setStage('intake')
     setProfile(null)
+    setFollowupQueue([])
+    setCurrentFollowup(0)
   }
 
   return (
@@ -112,7 +202,7 @@ export default function IntakePage() {
 
         {/* ── Classifying ── */}
         {stage === 'classifying' && (
-          <div className="w-full space-y-3">
+          <div className="w-full">
             <div className="bg-surface border border-[var(--cl-border)] rounded p-5">
               <p className="text-caption text-[var(--cl-text-muted)] font-mono animate-pulse">
                 Reading regulations…
@@ -121,7 +211,55 @@ export default function IntakePage() {
           </div>
         )}
 
-        {/* ── Classification review panel ── */}
+        {/* ── Follow-up questions (14.5, 9.7) ── */}
+        {stage === 'followup' && followupQueue.length > 0 && (
+          <div className="w-full">
+            {/* Progress */}
+            <div className="flex items-center gap-2 mb-4 text-caption text-[var(--cl-text-muted)]">
+              <HelpCircle size={13} strokeWidth={1.5} />
+              <span>Follow-up {currentFollowup + 1} of {followupQueue.length} — helps us be more accurate</span>
+              <span className="ml-auto font-mono">{Math.round(((currentFollowup) / followupQueue.length) * 100)}%</span>
+            </div>
+            <div className="h-1 bg-sunken rounded-full mb-5 overflow-hidden">
+              <div className="h-full bg-navy-600 rounded-full transition-all" style={{ width: `${(currentFollowup / followupQueue.length) * 100}%` }} />
+            </div>
+
+            <div className="bg-surface border border-[var(--cl-border)] rounded p-5 shadow-1">
+              <p className="text-body-lg text-[var(--cl-text)] mb-5">
+                {followupQueue[currentFollowup].question}
+              </p>
+              <div className="flex flex-col gap-2">
+                {followupQueue[currentFollowup].options.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleFollowupAnswer(opt.value)}
+                    className={cn(
+                      'flex items-start gap-3 text-left px-4 py-3 rounded border transition-colors duration-[80ms]',
+                      'border-[var(--cl-border)] bg-surface hover:bg-navy-50 hover:border-navy-600',
+                    )}
+                  >
+                    <ChevronRight size={16} strokeWidth={1.5} className="text-navy-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-body font-semibold text-[var(--cl-text)]">{opt.label}</p>
+                      {opt.detail && <p className="text-caption text-[var(--cl-text-muted)] mt-0.5">{opt.detail}</p>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => {
+                  if (currentFollowup + 1 < followupQueue.length) setCurrentFollowup(i => i + 1)
+                  else setStage('review')
+                }}
+                className="mt-4 text-caption text-[var(--cl-text-muted)] hover:text-[var(--cl-text)] underline"
+              >
+                Skip this question
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Classification review ── */}
         {stage === 'review' && profile && (
           <div className="w-full">
             <div className="bg-surface border border-[var(--cl-border)] rounded p-5 shadow-1">
@@ -157,9 +295,7 @@ export default function IntakePage() {
                   <CheckCircle size={15} strokeWidth={1.5} />
                   Looks right — analyze
                 </Button>
-                <Button variant="ghost" onClick={handleEdit} size="md">
-                  Edit
-                </Button>
+                <Button variant="ghost" onClick={handleEdit} size="md">Edit</Button>
               </div>
             </div>
           </div>
