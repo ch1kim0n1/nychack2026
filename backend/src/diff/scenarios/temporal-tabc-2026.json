@@ -1,0 +1,40 @@
+{
+  "scenario": "temporal-tabc-2026",
+  "title": "TABC Rule Changes — What Changed in 2026",
+  "city_a": "Previous rule",
+  "city_b": "Current rule (2026)",
+  "differences": [
+    {
+      "category": "Mixed Beverage Permit Fee",
+      "dallas": "$2,500/year for the original Mixed Beverage Permit.",
+      "austin": "$3,000/year following the 2026 fee schedule adjustment. Budget the higher amount for renewals.",
+      "status": "changed",
+      "source_a": "https://www.tabc.texas.gov/services/tabc-licenses-permits/",
+      "source_b": "https://www.tabc.texas.gov/services/tabc-licenses-permits/"
+    },
+    {
+      "category": "Server Certification Renewal",
+      "dallas": "TABC seller/server certification valid for 2 years.",
+      "austin": "Certification window unchanged at 2 years — no action needed if your staff is already certified.",
+      "status": "same",
+      "source_a": "https://www.tabc.texas.gov/services/",
+      "source_b": "https://www.tabc.texas.gov/services/"
+    },
+    {
+      "category": "Outdoor Service Hours",
+      "dallas": "Outdoor alcohol service permitted until 11:00 PM.",
+      "austin": "Extended to 12:00 AM Friday/Saturday under the 2026 local ordinance — review your beer garden conditions.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://www.austintexas.gov/health"
+    },
+    {
+      "category": "Online Application Portal",
+      "dallas": "Paper applications mailed to regional office.",
+      "austin": "All new permit applications must be submitted through the TABC online portal as of 2026.",
+      "status": "changed",
+      "source_a": "https://www.tabc.texas.gov/services/",
+      "source_b": "https://www.tabc.texas.gov/services/tabc-licenses-permits/"
+    }
+  ]
+}

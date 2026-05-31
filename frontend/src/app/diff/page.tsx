@@ -13,6 +13,7 @@ const SCENARIOS = [
   { id: 'scenario-a', label: 'Food truck → Austin restaurant' },
   { id: 'scenario-b', label: 'Salon → Nail + waxing' },
   { id: 'scenario-c', label: 'Retail → E-commerce' },
+  { id: 'temporal-tabc-2026', label: 'TABC: old vs new rules' },
 ]
 
 const STATUS_CONFIG = {
