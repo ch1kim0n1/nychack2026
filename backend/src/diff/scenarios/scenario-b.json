@@ -1,0 +1,48 @@
+{
+  "scenario": "scenario-b",
+  "title": "Hair Salon → Add Nail + Waxing Services (Houston)",
+  "city_a": "Houston, TX",
+  "city_b": "Houston, TX",
+  "differences": [
+    {
+      "category": "Cosmetology License (Nail)",
+      "dallas": "Not applicable — hair salon only.",
+      "austin": "Each nail technician must hold a Texas Nail Technology license issued by the Texas Department of Licensing and Regulation (TDLR). Minimum 600 hours of training required.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://www.tdlr.texas.gov/cosmet/cosmetfaq.htm"
+    },
+    {
+      "category": "Cosmetology License (Esthetics / Waxing)",
+      "dallas": "Not applicable — hair salon only.",
+      "austin": "Each esthetics/waxing technician must hold a Texas Esthetician license (TDLR). Minimum 750 hours of training. Temporary certificates allowed during training.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://www.tdlr.texas.gov/cosmet/cosmetfaq.htm"
+    },
+    {
+      "category": "Salon Permit (TDLR)",
+      "dallas": "Your existing Cosmetology Salon permit covers hair services only.",
+      "austin": "Adding nail or esthetic services requires amending your Cosmetology Salon permit with TDLR to include the additional service categories. Each category has separate inspection requirements.",
+      "status": "changed",
+      "source_a": "https://www.tdlr.texas.gov/cosmet/cosmetfaq.htm",
+      "source_b": "https://www.tdlr.texas.gov/cosmet/cosmetfaq.htm"
+    },
+    {
+      "category": "Ventilation Requirements",
+      "dallas": "Standard salon ventilation meets hair-only requirements.",
+      "austin": "Nail services require enhanced ventilation per Texas Administrative Code (chemical fumes from nail products). A ventilation inspection by the local fire marshal or building department may be required before adding nail stations.",
+      "status": "changed",
+      "source_a": null,
+      "source_b": "https://www.tdlr.texas.gov/cosmet/cosmetfaq.htm"
+    },
+    {
+      "category": "Texas Sales Tax (Services)",
+      "dallas": "Hair salon services: sales tax applies to certain beauty services in Texas.",
+      "austin": "Nail and waxing services are also subject to Texas sales tax. No additional permit needed — update your existing Texas Sales Tax Permit to reflect the new service categories.",
+      "status": "same",
+      "source_a": "https://comptroller.texas.gov/taxes/sales/",
+      "source_b": "https://comptroller.texas.gov/taxes/sales/"
+    }
+  ]
+}

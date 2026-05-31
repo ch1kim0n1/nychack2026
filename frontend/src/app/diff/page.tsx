@@ -9,6 +9,12 @@ import { api, type ScenarioDiff, type DiffItem } from '@/lib/api'
 import { Printer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+const SCENARIOS = [
+  { id: 'scenario-a', label: 'Food truck → Austin restaurant' },
+  { id: 'scenario-b', label: 'Salon → Nail + waxing' },
+  { id: 'scenario-c', label: 'Retail → E-commerce' },
+]
+
 const STATUS_CONFIG = {
   new:     { label: 'NEW',     classes: 'text-risk-high-fg bg-risk-high-bg border-risk-high-border' },
   changed: { label: 'CHANGED', classes: 'text-risk-med-fg bg-risk-med-bg border-risk-med-border' },
@@ -16,16 +22,19 @@ const STATUS_CONFIG = {
 }
 
 export default function DiffPage() {
+  const [activeScenario, setActiveScenario] = useState('scenario-a')
   const [diff, setDiff] = useState<ScenarioDiff | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    api.getDiff('scenario-a')
+    setLoading(true)
+    setError('')
+    api.getDiff(activeScenario)
       .then(setDiff)
       .catch(() => setError('Could not load comparison data.'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [activeScenario])
 
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
@@ -33,8 +42,8 @@ export default function DiffPage() {
       <DisclaimerBanner />
 
       <main className="flex-1 px-6 py-6 max-w-app mx-auto w-full">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6 no-print">
+        {/* Header + scenario switcher */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
           <div>
             <h1 className="text-h1 text-[var(--cl-text)]">
               {diff?.title ?? 'Regulatory Comparison'}
@@ -45,13 +54,29 @@ export default function DiffPage() {
               </p>
             )}
           </div>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 text-caption text-[var(--cl-text-secondary)] border border-[var(--cl-border)] bg-surface rounded px-3 py-1.5 hover:bg-navy-50 transition-colors"
-          >
-            <Printer size={14} strokeWidth={1.5} />
-            Print / Save
-          </button>
+          <div className="flex items-center gap-2 flex-wrap no-print">
+            {SCENARIOS.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setActiveScenario(s.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded text-caption border transition-colors duration-[80ms]',
+                  activeScenario === s.id
+                    ? 'bg-navy-600 text-white border-navy-700'
+                    : 'bg-surface text-[var(--cl-text-secondary)] border-[var(--cl-border)] hover:bg-navy-50',
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 text-caption text-[var(--cl-text-secondary)] border border-[var(--cl-border)] bg-surface rounded px-3 py-1.5 hover:bg-navy-50 transition-colors"
+            >
+              <Printer size={14} strokeWidth={1.5} />
+              Print / Save
+            </button>
+          </div>
         </div>
 
         {loading && (
@@ -84,12 +109,8 @@ export default function DiffPage() {
                 <thead>
                   <tr className="bg-navy-800 text-white">
                     <th className="text-left px-4 py-2.5 text-label uppercase tracking-[0.06em] w-1/4">Requirement</th>
-                    <th className="text-left px-4 py-2.5 text-label uppercase tracking-[0.06em] w-[30%]">
-                      {diff.city_a}
-                    </th>
-                    <th className="text-left px-4 py-2.5 text-label uppercase tracking-[0.06em] w-[30%]">
-                      {diff.city_b}
-                    </th>
+                    <th className="text-left px-4 py-2.5 text-label uppercase tracking-[0.06em] w-[30%]">{diff.city_a}</th>
+                    <th className="text-left px-4 py-2.5 text-label uppercase tracking-[0.06em] w-[30%]">{diff.city_b}</th>
                     <th className="text-left px-4 py-2.5 text-label uppercase tracking-[0.06em] w-16">Δ</th>
                   </tr>
                 </thead>
@@ -127,30 +148,17 @@ function DiffRow({ row, index }: { row: DiffItem; index: number }) {
       index % 2 === 1 && 'bg-canvas',
       'hover:bg-navy-50 transition-colors duration-[120ms]',
     )}>
-      <td className="px-4 py-3 font-semibold text-body text-[var(--cl-text)] align-top">
-        {row.category}
-      </td>
+      <td className="px-4 py-3 font-semibold text-body text-[var(--cl-text)] align-top">{row.category}</td>
       <td className="px-4 py-3 text-body text-[var(--cl-text-secondary)] align-top">
         {row.dallas ?? <span className="text-[var(--cl-text-muted)] italic">N/A</span>}
-        {row.source_a && (
-          <div className="mt-1.5">
-            <CitationChip url={row.source_a} />
-          </div>
-        )}
+        {row.source_a && <div className="mt-1.5"><CitationChip url={row.source_a} /></div>}
       </td>
       <td className="px-4 py-3 text-body text-[var(--cl-text-secondary)] align-top">
         {row.austin ?? <span className="text-[var(--cl-text-muted)] italic">N/A</span>}
-        {row.source_b && (
-          <div className="mt-1.5">
-            <CitationChip url={row.source_b} />
-          </div>
-        )}
+        {row.source_b && <div className="mt-1.5"><CitationChip url={row.source_b} /></div>}
       </td>
       <td className="px-4 py-3 align-top">
-        <span className={cn(
-          'inline-block font-mono text-citation px-2 py-0.5 rounded-sm border whitespace-nowrap',
-          cfg.classes,
-        )}>
+        <span className={cn('inline-block font-mono text-citation px-2 py-0.5 rounded-sm border whitespace-nowrap', cfg.classes)}>
           {cfg.label}
         </span>
       </td>

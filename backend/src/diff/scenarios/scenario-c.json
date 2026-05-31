@@ -1,0 +1,48 @@
+{
+  "scenario": "scenario-c",
+  "title": "Retail Store → Add E-Commerce + Delivery (Texas)",
+  "city_a": "Texas (retail only)",
+  "city_b": "Texas (+ e-commerce/delivery)",
+  "differences": [
+    {
+      "category": "Texas Sales Tax Permit",
+      "dallas": "Your existing Texas Sales Tax Permit covers in-store sales.",
+      "austin": "Online sales to Texas customers require the same Texas Sales Tax Permit — already covered. However, you must now collect and remit sales tax on all Texas-destination orders, including those shipped from out-of-state inventory. Update your filing to include remote sales.",
+      "status": "changed",
+      "source_a": "https://comptroller.texas.gov/taxes/sales/",
+      "source_b": "https://comptroller.texas.gov/taxes/sales/"
+    },
+    {
+      "category": "Out-of-State / Nexus Tax (Economic Nexus)",
+      "dallas": "Not applicable — physical store only.",
+      "austin": "If you sell to customers in other states via your online store, you may trigger economic nexus in those states (typically $100,000 in sales or 200 transactions per year). Each state has separate registration and remittance requirements.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://comptroller.texas.gov/taxes/sales/"
+    },
+    {
+      "category": "Delivery Vehicle Requirements",
+      "dallas": "Not applicable — no delivery.",
+      "austin": "If using company vehicles for delivery, Texas requires commercial auto insurance. Vehicles over 26,000 lbs require a CDL and DOT number. Light delivery vehicles (vans, pickup trucks) need only standard commercial auto insurance.",
+      "status": "new",
+      "source_a": null,
+      "source_b": "https://www.sos.texas.gov/corp/businessstructure.shtml"
+    },
+    {
+      "category": "Business Structure / DBA",
+      "dallas": "Your existing entity covers in-store retail.",
+      "austin": "If operating your e-commerce store under a different brand name than your registered entity, you must file a DBA (Assumed Name Certificate) with the Texas Secretary of State or your county clerk.",
+      "status": "changed",
+      "source_a": "https://www.sos.texas.gov/corp/businessstructure.shtml",
+      "source_b": "https://www.sos.texas.gov/corp/businessstructure.shtml"
+    },
+    {
+      "category": "City Business License",
+      "dallas": "Standard retail business license applies.",
+      "austin": "Adding e-commerce delivery does not typically require an additional city license unless you open a warehouse or fulfillment location. Verify with your city if you add a second physical site.",
+      "status": "same",
+      "source_a": "https://dallascityhall.com/departments/sustainabledevelopment/Pages/default.aspx",
+      "source_b": "https://dallascityhall.com/departments/sustainabledevelopment/Pages/default.aspx"
+    }
+  ]
+}
