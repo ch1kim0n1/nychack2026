@@ -42,6 +42,8 @@ export default function DashboardPage() {
   const hasAnimated = useRef(false)
 
   useEffect(() => {
+    const controller = new AbortController()
+
     async function load() {
       try {
         const profileJson = sessionStorage.getItem('cl-profile')
@@ -50,31 +52,42 @@ export default function DashboardPage() {
         if (profileJson) {
           const profile: BusinessProfile = JSON.parse(profileJson)
           try {
-            data = await api.analyzeRisk(profile)
+            data = await api.analyzeRisk(profile, controller.signal)
           } catch (err) {
+            if ((err as Error).name === 'AbortError') return
             const msg = err instanceof Error ? err.message : ''
             const is503 = msg.startsWith('API 503')
             const isNetwork = !msg.startsWith('API ')
             if (is503 || isNetwork) {
-              data = await api.getDemoRisk()
+              data = await api.getDemoRisk(controller.signal)
+              if (controller.signal.aborted) return
               setDegraded(true)
             } else {
               throw err
             }
           }
         } else {
-          data = await api.getDemoRisk()
+          data = await api.getDemoRisk(controller.signal)
         }
+
+        if (controller.signal.aborted) return
         setResult(data)
         // Persist full result so checklist/report pages can read without re-fetching
         sessionStorage.setItem('cl-risk-result', JSON.stringify(data))
-      } catch {
-        setError('Could not load risk analysis. Try the demo scenario or go back to retry.')
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          setError('Could not load risk analysis. Try the demo scenario or go back to retry.')
+        }
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
-    load()
+
+    const loadTimer = window.setTimeout(() => void load(), 0)
+    return () => {
+      window.clearTimeout(loadTimer)
+      controller.abort()
+    }
   }, [])
 
   useEffect(() => {

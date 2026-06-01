@@ -1,4 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ProfileService } from './profile.service';
 
 const mockCreate = jest.fn();
@@ -77,6 +81,57 @@ describe('ProfileService', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({ model: 'gpt-4o' }),
       expect.objectContaining({ timeout: 30_000 }),
+    );
+  });
+
+  it('throws a clear 500 when OpenAI returns null content', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: null } }],
+    });
+
+    await expect(service.classify('I run a retail shop in Houston.')).rejects.toThrow(
+      InternalServerErrorException,
+    );
+  });
+
+  it('throws a clear 500 when OpenAI returns invalid JSON', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: '{not json' } }],
+    });
+
+    await expect(service.classify('I run a retail shop in Houston.')).rejects.toThrow(
+      InternalServerErrorException,
+    );
+  });
+
+  it('defaults missing array fields to empty arrays', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              industry: 'retail',
+              location: 'Houston, TX',
+              employees: null,
+            }),
+          },
+        },
+      ],
+    });
+
+    const result = await service.classify('I run a retail shop in Houston.');
+
+    expect(result.activities).toEqual([]);
+    expect(result.expansion_locations).toEqual([]);
+  });
+
+  it('throws 422 when required profile fields are missing', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: JSON.stringify({}) } }],
+    });
+
+    await expect(service.classify('I run a retail shop in Houston.')).rejects.toThrow(
+      UnprocessableEntityException,
     );
   });
 });

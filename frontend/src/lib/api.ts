@@ -92,14 +92,15 @@ export const api = {
       body: JSON.stringify({ input }),
     }),
 
-  analyzeRisk: (profile: BusinessProfile) =>
+  analyzeRisk: (profile: BusinessProfile, signal?: AbortSignal) =>
     apiFetch<RiskAnalysisResult>('/api/risk/analyze', {
       method: 'POST',
       body: JSON.stringify({ profile }),
+      signal,
     }),
 
-  getDemoRisk: () =>
-    apiFetch<RiskAnalysisResult>('/api/risk/demo'),
+  getDemoRisk: (signal?: AbortSignal) =>
+    apiFetch<RiskAnalysisResult>('/api/risk/demo', { signal }),
 
   getDiff: (scenario = 'scenario-a') =>
     apiFetch<ScenarioDiff>(`/api/diff/${scenario}`),

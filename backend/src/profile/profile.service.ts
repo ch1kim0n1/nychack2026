@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import OpenAI from 'openai';
 
 export interface BusinessProfile {
@@ -35,6 +39,64 @@ Return exactly this shape:
       response_format: { type: 'json_object' },
     }, { timeout: 30_000 });
 
-    return JSON.parse(response.choices[0].message.content!) as BusinessProfile;
+    const content = response.choices[0]?.message.content;
+    if (!content) {
+      throw new InternalServerErrorException(
+        'Classification returned empty response',
+      );
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      throw new InternalServerErrorException(
+        'Classification returned invalid JSON',
+      );
+    }
+
+    return this.validateProfile(parsed);
+  }
+
+  private validateProfile(parsed: unknown): BusinessProfile {
+    if (!parsed || typeof parsed !== 'object') {
+      throw new UnprocessableEntityException(
+        'Classification returned malformed profile',
+      );
+    }
+
+    const profile = parsed as Record<string, unknown>;
+    if (typeof profile.industry !== 'string' || !profile.industry.trim()) {
+      throw new UnprocessableEntityException(
+        'Could not extract industry from description',
+      );
+    }
+    if (typeof profile.location !== 'string' || !profile.location.trim()) {
+      throw new UnprocessableEntityException(
+        'Could not extract location from description',
+      );
+    }
+    if (
+      profile.employees !== null &&
+      profile.employees !== undefined &&
+      typeof profile.employees !== 'number'
+    ) {
+      throw new UnprocessableEntityException(
+        'Could not extract employee count from description',
+      );
+    }
+
+    return {
+      industry: profile.industry,
+      location: profile.location,
+      expansion_locations: this.asStringArray(profile.expansion_locations),
+      activities: this.asStringArray(profile.activities),
+      employees: profile.employees ?? null,
+    };
+  }
+
+  private asStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter((item): item is string => typeof item === 'string');
   }
 }
