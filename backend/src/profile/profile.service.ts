@@ -33,7 +33,7 @@ Return exactly this shape:
         { role: 'user', content: input },
       ],
       response_format: { type: 'json_object' },
-    });
+    }, { timeout: 30_000 });
 
     return JSON.parse(response.choices[0].message.content!) as BusinessProfile;
   }

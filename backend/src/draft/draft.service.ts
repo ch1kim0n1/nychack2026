@@ -70,7 +70,7 @@ ${channelInstructions[channel]}`,
         },
       ],
       response_format: { type: 'json_object' },
-    });
+    }, { timeout: 30_000 });
 
     const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
       subject?: string;
