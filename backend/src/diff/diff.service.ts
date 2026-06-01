@@ -19,9 +19,20 @@ export interface ScenarioDiff {
   differences: DiffItem[];
 }
 
+const VALID_SCENARIOS = new Set([
+  'scenario-a',
+  'scenario-b',
+  'scenario-c',
+  'temporal-tabc-2026',
+]);
+
 @Injectable()
 export class DiffService {
   getScenario(scenarioId: string): ScenarioDiff {
+    if (!VALID_SCENARIOS.has(scenarioId)) {
+      throw new NotFoundException(`Scenario '${scenarioId}' not found.`);
+    }
+
     const filePath = path.join(__dirname, 'scenarios', `${scenarioId}.json`);
 
     if (!fs.existsSync(filePath)) {

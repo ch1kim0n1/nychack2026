@@ -44,4 +44,12 @@ describe('DiffService', () => {
     (fs.existsSync as jest.Mock).mockReturnValue(false);
     expect(() => service.getScenario('scenario-z')).toThrow(NotFoundException);
   });
+
+  it('blocks path traversal with ../ sequences', () => {
+    expect(() => service.getScenario('../package')).toThrow(NotFoundException);
+  });
+
+  it('blocks deep path traversal before touching the filesystem', () => {
+    expect(() => service.getScenario('../../tsconfig.build')).toThrow(NotFoundException);
+  });
 });
