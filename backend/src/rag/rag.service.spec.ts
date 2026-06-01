@@ -12,6 +12,7 @@ jest.mock('openai', () =>
 describe('RagService', () => {
   let service: RagService;
   let prisma: {
+    dbAvailable: boolean;
     $queryRawUnsafe: jest.Mock;
     ragQueryLog: { create: jest.Mock };
   };
@@ -19,6 +20,7 @@ describe('RagService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     prisma = {
+      dbAvailable: true,
       $queryRawUnsafe: jest.fn(),
       ragQueryLog: { create: jest.fn().mockResolvedValue({}) },
     };

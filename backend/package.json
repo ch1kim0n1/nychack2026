@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "build:prod": "tsc -p tsconfig.build.json --noEmitOnError false && node -e \"const fs=require('fs');const d='dist/diff/scenarios';fs.mkdirSync(d,{recursive:true});['scenario-a','scenario-b','scenario-c','temporal-tabc-2026'].forEach(s=>fs.copyFileSync('src/diff/scenarios/'+s+'.json',d+'/'+s+'.json'));console.log('Scenario assets copied.')\"",
+    "build:prod": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('tsconfig.build.tsbuildinfo',{force:true})\" && tsc -p tsconfig.build.json --noEmitOnError false && node -e \"const fs=require('fs');if(!fs.existsSync('dist/main.js')){console.error('BUILD FAILED: dist/main.js missing');process.exit(1)}const d='dist/diff/scenarios';fs.mkdirSync(d,{recursive:true});['scenario-a','scenario-b','scenario-c','temporal-tabc-2026'].forEach(s=>fs.copyFileSync('src/diff/scenarios/'+s+'.json',d+'/'+s+'.json'));console.log('Scenario assets copied.')\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

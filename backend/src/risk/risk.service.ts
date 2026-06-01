@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+  Logger,
+} from '@nestjs/common';
 import OpenAI from 'openai';
 import { PrismaService } from '../database/prisma.service';
 import { RagService, RegulatoryChunk } from '../rag/rag.service';
@@ -65,6 +70,7 @@ const DEMO_BUSINESS_ID = 'demo-biz-scenario-a';
 
 @Injectable()
 export class RiskService {
+  private readonly logger = new Logger(RiskService.name);
   private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   constructor(
@@ -73,6 +79,14 @@ export class RiskService {
   ) {}
 
   async analyze(profile: BusinessProfile): Promise<RiskAnalysisResult> {
+    // Live analysis needs the vector store. Without a DB there is nothing to
+    // retrieve, so fail with a clear, actionable error instead of an opaque 500.
+    if (!this.prisma.dbAvailable) {
+      throw new ServiceUnavailableException(
+        'Live analysis requires the database and ingested sources. Start Postgres and run ingestion, or use GET /api/risk/demo for the validated demo.',
+      );
+    }
+
     const chunks = await this.ragService.retrieve(profile);
     const findings = await this.synthesize(profile, chunks);
 
@@ -86,46 +100,54 @@ export class RiskService {
     );
     const risk_level = this.overallLevel(findings);
 
-    const business = await this.prisma.business.create({
-      data: {
-        city: profile.location.split(',')[0].trim(),
-        state: 'TX',
-        industry_code: profile.industry,
-        activities: profile.activities,
-        expansion_plans: { locations: profile.expansion_locations },
-      },
-    });
+    // Persistence is secondary to the computed result: never let a write
+    // failure drop a successful analysis. Save best-effort.
+    try {
+      const business = await this.prisma.business.create({
+        data: {
+          city: profile.location.split(',')[0].trim(),
+          state: 'TX',
+          industry_code: profile.industry,
+          activities: profile.activities,
+          expansion_plans: { locations: profile.expansion_locations },
+        },
+      });
 
-    await this.prisma.riskFinding.createMany({
-      data: findings.map((f) => ({
-        business_id: business.id,
-        risk_level: f.risk_level,
-        affected_area: f.affected_area,
-        explanation: f.explanation,
-        recommended_action: f.recommended_action,
-        source_url: f.source_url,
-        prerequisites: f.prerequisites ?? [],
-        is_hidden_requirement: f.is_hidden_requirement ?? null,
-        response_path: f.response_path ?? null,
-        permit_fee: f.permit_fee ?? null,
-        effective_date: f.effective_date ?? null,
-        agency_department: f.agency_department ?? null,
-        agency_phone: f.agency_phone ?? null,
-        agency_url: f.agency_url ?? null,
-        confidence_level: f.confidence_level ?? null,
-        jurisdiction_level: f.jurisdiction_level ?? null,
-        money_risk: f.money_risk ?? null,
-        delay_risk: f.delay_risk ?? null,
-        legal_severity: f.legal_severity ?? null,
-        urgency: f.urgency ?? null,
-        impact_score: f.impact_score ?? null,
-        impact_label: f.impact_label ?? null,
-        who_to_contact: f.who_to_contact ?? null,
-        what_to_ask: f.what_to_ask ?? null,
-        documents_needed: f.documents_needed ?? [],
-        next_steps: f.next_steps ?? [],
-      })),
-    });
+      await this.prisma.riskFinding.createMany({
+        data: findings.map((f) => ({
+          business_id: business.id,
+          risk_level: f.risk_level,
+          affected_area: f.affected_area,
+          explanation: f.explanation,
+          recommended_action: f.recommended_action,
+          source_url: f.source_url,
+          prerequisites: f.prerequisites ?? [],
+          is_hidden_requirement: f.is_hidden_requirement ?? null,
+          response_path: f.response_path ?? null,
+          permit_fee: f.permit_fee ?? null,
+          effective_date: f.effective_date ?? null,
+          agency_department: f.agency_department ?? null,
+          agency_phone: f.agency_phone ?? null,
+          agency_url: f.agency_url ?? null,
+          confidence_level: f.confidence_level ?? null,
+          jurisdiction_level: f.jurisdiction_level ?? null,
+          money_risk: f.money_risk ?? null,
+          delay_risk: f.delay_risk ?? null,
+          legal_severity: f.legal_severity ?? null,
+          urgency: f.urgency ?? null,
+          impact_score: f.impact_score ?? null,
+          impact_label: f.impact_label ?? null,
+          who_to_contact: f.who_to_contact ?? null,
+          what_to_ask: f.what_to_ask ?? null,
+          documents_needed: f.documents_needed ?? [],
+          next_steps: f.next_steps ?? [],
+        })),
+      });
+    } catch (err) {
+      this.logger.warn(
+        `Analysis computed but could not be saved: ${(err as Error).message}`,
+      );
+    }
 
     return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
   }

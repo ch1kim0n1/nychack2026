@@ -28,6 +28,10 @@ export class RagService {
   }
 
   async retrieve(profile: BusinessProfile): Promise<RegulatoryChunk[]> {
+    // No DB → no vector store to search. Return empty so callers can degrade
+    // cleanly instead of throwing a raw connection error.
+    if (!this.prisma.dbAvailable) return [];
+
     const queryText = [
       profile.industry,
       profile.location,
