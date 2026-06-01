@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DatabaseModule } from './database/prisma.module';
 import { ProfileModule } from './profile/profile.module';
 import { RagModule } from './rag/rag.module';
@@ -9,6 +11,7 @@ import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 60 }]),
     DatabaseModule,
     ProfileModule,
     RagModule,
@@ -17,5 +20,6 @@ import { MetricsModule } from './metrics/metrics.module';
     DraftModule,
     MetricsModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
