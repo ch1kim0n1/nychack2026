@@ -51,9 +51,16 @@ export default function DashboardPage() {
           const profile: BusinessProfile = JSON.parse(profileJson)
           try {
             data = await api.analyzeRisk(profile)
-          } catch {
-            data = await api.getDemoRisk()
-            setDegraded(true)
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : ''
+            const is503 = msg.startsWith('API 503')
+            const isNetwork = !msg.startsWith('API ')
+            if (is503 || isNetwork) {
+              data = await api.getDemoRisk()
+              setDegraded(true)
+            } else {
+              throw err
+            }
           }
         } else {
           data = await api.getDemoRisk()
