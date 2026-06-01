@@ -69,4 +69,44 @@ describe('RagService', () => {
     );
     expect(prisma.$queryRawUnsafe).toHaveBeenCalledTimes(1);
   });
+
+  it('passes jurisdiction filter array as second parameter to pgvector query', async () => {
+    const fakeEmbedding = Array(1536).fill(0.1);
+    mockEmbed.mockResolvedValue({ data: [{ embedding: fakeEmbedding }] });
+    prisma.$queryRawUnsafe.mockResolvedValue([]);
+
+    await service.retrieve({
+      industry: 'food_service',
+      location: 'Austin, TX',
+      expansion_locations: ['Dallas, TX'],
+      activities: [],
+      employees: null,
+    });
+
+    const [sql, , pgArray] = prisma.$queryRawUnsafe.mock.calls[0];
+    expect(sql).toContain('WHERE rc.jurisdiction_tags &&');
+    expect(pgArray).toContain('Austin, TX');
+    expect(pgArray).toContain('Dallas, TX');
+    expect(pgArray).toContain('Texas');
+    expect(pgArray).toContain('Federal');
+  });
+
+  it('includes Texas and Federal catch-alls even with no expansion locations', async () => {
+    const fakeEmbedding = Array(1536).fill(0.1);
+    mockEmbed.mockResolvedValue({ data: [{ embedding: fakeEmbedding }] });
+    prisma.$queryRawUnsafe.mockResolvedValue([]);
+
+    await service.retrieve({
+      industry: 'retail',
+      location: 'Houston, TX',
+      expansion_locations: [],
+      activities: [],
+      employees: null,
+    });
+
+    const [, , pgArray] = prisma.$queryRawUnsafe.mock.calls[0];
+    expect(pgArray).toContain('Houston, TX');
+    expect(pgArray).toContain('Texas');
+    expect(pgArray).toContain('Federal');
+  });
 });

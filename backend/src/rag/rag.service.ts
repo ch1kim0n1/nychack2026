@@ -42,14 +42,25 @@ export class RagService {
     const embedding = await this.embed(queryText);
     const embeddingStr = `[${embedding.join(',')}]`;
 
+    const locations = [
+      profile.location,
+      ...profile.expansion_locations,
+      'Texas',
+      'Federal',
+      'State',
+    ];
+    const pgArray = `{${locations.map(l => `"${l.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
+
     const chunks = await this.prisma.$queryRawUnsafe<RegulatoryChunk[]>(
       `SELECT rc.id, rc.text, rc.source_id, rs.source_url,
               rc.jurisdiction_tags, rc.industry_tags, rc.activity_tags
        FROM "RegulatoryChunk" rc
        JOIN "RegulatorySource" rs ON rc.source_id = rs.id
+       WHERE rc.jurisdiction_tags && $2::text[]
        ORDER BY rc.embedding <=> $1::vector
        LIMIT 10`,
       embeddingStr,
+      pgArray,
     );
 
     // Audit log — traceability (13.9). Best-effort; never blocks retrieval.
