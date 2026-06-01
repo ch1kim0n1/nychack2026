@@ -60,6 +60,7 @@ def ingest_source(conn: psycopg2.extensions.connection, source: dict) -> None:
         if row is None:
             raise RuntimeError(f"Failed to upsert source: {source['url']}")
         source_id = row[0]
+        cur.execute('DELETE FROM "RegulatoryChunk" WHERE source_id = %s', (source_id,))
 
     with conn.cursor() as cur:
         for i, chunk in enumerate(chunks):
