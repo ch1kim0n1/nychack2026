@@ -4,6 +4,7 @@ import type { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { RiskService } from '../src/risk/risk.service';
+import { OPENAI_CLIENT } from '../src/openai/openai.provider';
 
 interface RiskBody {
   findings: { risk_level: string }[];
@@ -19,6 +20,8 @@ describe('RiskController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideProvider(OPENAI_CLIENT)
+      .useValue({})
       .overrideProvider(RiskService)
       .useValue({ analyze: mockAnalyze })
       .compile();

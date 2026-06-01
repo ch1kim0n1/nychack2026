@@ -2,17 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import type { Server } from 'http';
 import request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { ProfileModule } from '../src/profile/profile.module';
 import { ProfileService } from '../src/profile/profile.service';
+import { OPENAI_CLIENT } from '../src/openai/openai.provider';
 
 describe('ProfileController (e2e)', () => {
   let app: INestApplication;
   const mockClassify = jest.fn();
 
   beforeEach(async () => {
+    mockClassify.mockReset();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [ProfileModule],
     })
+      .overrideProvider(OPENAI_CLIENT)
+      .useValue({})
       .overrideProvider(ProfileService)
       .useValue({ classify: mockClassify })
       .compile();
@@ -50,5 +55,14 @@ describe('ProfileController (e2e)', () => {
       .post('/api/profile/classify')
       .send({})
       .expect(400);
+  });
+
+  it('POST /api/profile/classify returns 400 before service for oversized input', async () => {
+    await request(app.getHttpServer() as Server)
+      .post('/api/profile/classify')
+      .send({ input: 'A'.repeat(5000) })
+      .expect(400);
+
+    expect(mockClassify).not.toHaveBeenCalled();
   });
 });

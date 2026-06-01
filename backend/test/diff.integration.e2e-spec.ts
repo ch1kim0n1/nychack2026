@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import type { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { OPENAI_CLIENT } from '../src/openai/openai.provider';
 
 interface DiffItem {
   status: string;
@@ -27,7 +28,10 @@ describe('DiffController (integration — real JSON file)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(OPENAI_CLIENT)
+      .useValue({})
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');

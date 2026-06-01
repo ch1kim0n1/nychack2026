@@ -27,6 +27,12 @@ describe('AnalyzeRiskDto', () => {
     expect(errors).toHaveLength(0);
   });
 
+  it('fails when profile is missing', async () => {
+    const dto = plainToInstance(AnalyzeRiskDto, {});
+    const errors = await validate(dto, { whitelist: true });
+    expect(errors.some((e) => e.property === 'profile')).toBe(true);
+  });
+
   it('fails when activities is not an array', async () => {
     const dto = plainToInstance(AnalyzeRiskDto, {
       profile: {

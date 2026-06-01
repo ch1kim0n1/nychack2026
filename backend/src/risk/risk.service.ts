@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   ServiceUnavailableException,
@@ -8,6 +9,7 @@ import OpenAI from 'openai';
 import { PrismaService } from '../database/prisma.service';
 import { RagService, RegulatoryChunk } from '../rag/rag.service';
 import { BusinessProfile } from '../profile/profile.service';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 import { DEMO_FINDINGS } from './demo-data';
 
 export interface RiskFinding {
@@ -60,22 +62,36 @@ const RISK_ORDER: Record<'high' | 'medium' | 'low', number> = {
   medium: 1,
   low: 2,
 };
-const RISK_POINTS: Record<'high' | 'medium' | 'low', number> = {
-  high: 30,
-  medium: 15,
-  low: 5,
+const RISK_WEIGHTS: Record<'high' | 'medium' | 'low', number> = {
+  high: 3,
+  medium: 1.5,
+  low: 0.5,
 };
+const EXPECTED_VERY_HIGH_RISK_WEIGHT = 15;
 const DISCLAIMER = 'This is informational guidance, not legal advice.';
 const DEMO_BUSINESS_ID = 'demo-biz-scenario-a';
+
+export function calculateRiskScore(
+  findings: Pick<RiskFinding, 'risk_level'>[],
+): number {
+  // Normalize weighted severity against a reference "very high risk" profile
+  // of five high-risk findings. This preserves room above three highs while
+  // preventing a few medium/low findings from immediately collapsing to 100.
+  const raw = findings.reduce((sum, f) => sum + RISK_WEIGHTS[f.risk_level], 0);
+  return Math.min(
+    100,
+    Math.round((raw / EXPECTED_VERY_HIGH_RISK_WEIGHT) * 100),
+  );
+}
 
 @Injectable()
 export class RiskService {
   private readonly logger = new Logger(RiskService.name);
-  private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   constructor(
     private prisma: PrismaService,
     private ragService: RagService,
+    @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
   ) {}
 
   async analyze(profile: BusinessProfile): Promise<RiskAnalysisResult> {
@@ -94,10 +110,7 @@ export class RiskService {
       (a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level],
     );
 
-    const risk_score = Math.min(
-      100,
-      findings.reduce((sum, f) => sum + RISK_POINTS[f.risk_level], 0),
-    );
+    const risk_score = calculateRiskScore(findings);
     const risk_level = this.overallLevel(findings);
 
     // Persistence is secondary to the computed result: never let a write
@@ -167,10 +180,7 @@ export class RiskService {
       const findings = [...DEMO_FINDINGS].sort(
         (a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level],
       );
-      const risk_score = Math.min(
-        100,
-        findings.reduce((s, f) => s + RISK_POINTS[f.risk_level], 0),
-      );
+      const risk_score = calculateRiskScore(findings);
       return {
         risk_score,
         risk_level: this.overallLevel(findings),
@@ -214,10 +224,7 @@ export class RiskService {
       }))
       .sort((a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level]);
 
-    const risk_score = Math.min(
-      100,
-      findings.reduce((sum, f) => sum + RISK_POINTS[f.risk_level], 0),
-    );
+    const risk_score = calculateRiskScore(findings);
     const risk_level = this.overallLevel(findings);
 
     return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };

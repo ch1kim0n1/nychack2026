@@ -74,9 +74,13 @@ export interface ScenarioDiff {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers)
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...init,
+    headers,
+    signal: init?.signal,
   })
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText)
@@ -92,14 +96,15 @@ export const api = {
       body: JSON.stringify({ input }),
     }),
 
-  analyzeRisk: (profile: BusinessProfile) =>
+  analyzeRisk: (profile: BusinessProfile, signal?: AbortSignal) =>
     apiFetch<RiskAnalysisResult>('/api/risk/analyze', {
       method: 'POST',
       body: JSON.stringify({ profile }),
+      signal,
     }),
 
-  getDemoRisk: () =>
-    apiFetch<RiskAnalysisResult>('/api/risk/demo'),
+  getDemoRisk: (signal?: AbortSignal) =>
+    apiFetch<RiskAnalysisResult>('/api/risk/demo', { signal }),
 
   getDiff: (scenario = 'scenario-a') =>
     apiFetch<ScenarioDiff>(`/api/diff/${scenario}`),
