@@ -9,9 +9,10 @@ interface NavProps {
   variant?: 'marketing' | 'app'
   businessSummary?: string
   onCompare?: () => void
+  loadingData?: boolean
 }
 
-export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavProps) {
+export function Nav({ variant = 'marketing', businessSummary, onCompare, loadingData = false }: NavProps) {
   const { theme, toggle } = useTheme()
   const isApp = variant === 'app'
 
@@ -59,18 +60,29 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
             <Link href="/scenarios" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Scenarios
             </Link>
-            <Link href="/checklist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
-              Checklist
-            </Link>
-            <Link href="/lease" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
-              Lease check
-            </Link>
-            <Link href="/readiness" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
-              Readiness
-            </Link>
-            <Link href="/report" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
-              Report
-            </Link>
+            {loadingData ? (
+              <>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden md:inline">Checklist</span>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden lg:inline">Lease check</span>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden lg:inline">Readiness</span>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden md:inline">Report</span>
+              </>
+            ) : (
+              <>
+                <Link href="/checklist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+                  Checklist
+                </Link>
+                <Link href="/lease" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
+                  Lease check
+                </Link>
+                <Link href="/readiness" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
+                  Readiness
+                </Link>
+                <Link href="/report" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+                  Report
+                </Link>
+              </>
+            )}
           </>
         )}
         <Link
