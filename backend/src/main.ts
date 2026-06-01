@@ -1,9 +1,12 @@
-// Load .env into process.env before anything reads it (services read process.env
-// directly at construction). Must be the first import side-effect.
-import 'dotenv/config';
+// Load backend/.env relative to this file so runtime config does not depend on
+// the process working directory used to launch the app.
+import { config as loadEnv } from 'dotenv';
+import { resolve } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
+
+loadEnv({ path: resolve(__dirname, '../.env') });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
