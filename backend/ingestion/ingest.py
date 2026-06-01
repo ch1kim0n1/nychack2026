@@ -101,6 +101,7 @@ def main() -> None:
             ingest_source(conn, source)
         except Exception as e:
             print(f"  Failed '{source['title']}': {e}\n", file=sys.stderr)
+            conn.rollback()
 
     conn.close()
     print("Ingestion complete.")
