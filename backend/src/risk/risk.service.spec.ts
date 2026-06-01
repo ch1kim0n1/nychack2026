@@ -259,6 +259,19 @@ describe('RiskService', () => {
     expect(result.disclaimer).toContain('not legal advice');
   });
 
+  it('calls OpenAI synthesize with a 60-second timeout', async () => {
+    mockChatCreate.mockResolvedValue({
+      choices: [{ message: { content: JSON.stringify({ findings: [{ risk_level: 'high', affected_area: 'Permit', explanation: '', recommended_action: '', source_url: 'https://example.com' }] }) } }],
+    });
+
+    await service.analyze({ industry: 'food_service', location: 'Austin, TX', expansion_locations: [], activities: [], employees: null });
+
+    expect(mockChatCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gpt-4o' }),
+      expect.objectContaining({ timeout: 60_000 }),
+    );
+  });
+
   it('getDemo falls back to static findings when DB unavailable', async () => {
     prisma.dbAvailable = false;
     prisma.riskFinding = { ...prisma.riskFinding, findMany: jest.fn() };

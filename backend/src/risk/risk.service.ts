@@ -287,7 +287,7 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
         },
       ],
       response_format: { type: 'json_object' },
-    });
+    }, { timeout: 60_000 });
 
     const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
       findings?: RiskFinding[];

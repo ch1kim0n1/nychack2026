@@ -66,4 +66,17 @@ describe('ProfileService', () => {
     const result = await service.classify('I run a retail shop in Houston.');
     expect(result.employees).toBeNull();
   });
+
+  it('calls OpenAI with a 30-second timeout', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: JSON.stringify({ industry: 'retail', location: 'Houston, TX', expansion_locations: [], activities: [], employees: null }) } }],
+    });
+
+    await service.classify('A retail shop in Houston.');
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gpt-4o' }),
+      expect.objectContaining({ timeout: 30_000 }),
+    );
+  });
 });
