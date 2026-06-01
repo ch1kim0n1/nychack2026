@@ -5,6 +5,7 @@ import {
   IsInt,
   Min,
   Max,
+  IsDefined,
   MaxLength,
   ArrayMaxSize,
   ValidateNested,
@@ -41,6 +42,7 @@ export class BusinessProfileDto implements BusinessProfile {
 }
 
 export class AnalyzeRiskDto {
+  @IsDefined()
   @ValidateNested()
   @Type(() => BusinessProfileDto)
   profile: BusinessProfileDto;

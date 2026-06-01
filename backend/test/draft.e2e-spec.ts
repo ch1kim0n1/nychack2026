@@ -59,4 +59,30 @@ describe('DraftController (e2e)', () => {
 
     expect(mockGenerate).not.toHaveBeenCalled();
   });
+
+  it('POST /api/draft accepts HTTPS bare-domain source URLs', async () => {
+    mockGenerate.mockResolvedValue({
+      channel: 'email',
+      body: 'Draft body',
+      agency_name: 'Texas Comptroller',
+      source_url: 'https://comptroller.texas.gov',
+    });
+
+    await request(app.getHttpServer() as Server)
+      .post('/api/draft')
+      .send({
+        affected_area: 'Sales Tax',
+        explanation: 'A valid explanation',
+        recommended_action: 'Register with the comptroller',
+        source_url: 'https://comptroller.texas.gov',
+        business_description: 'A small bakery in Dallas.',
+      })
+      .expect(201);
+
+    expect(mockGenerate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source_url: 'https://comptroller.texas.gov',
+      }),
+    );
+  });
 });

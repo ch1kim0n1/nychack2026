@@ -1,12 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DraftService } from './draft.service';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 const mockCreate = jest.fn();
-jest.mock('openai', () =>
-  jest.fn().mockImplementation(() => ({
-    chat: { completions: { create: mockCreate } },
-  })),
-);
 
 const baseDto = {
   affected_area: 'TABC Mixed Beverage Permit',
@@ -24,7 +20,13 @@ describe('DraftService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [DraftService],
+      providers: [
+        DraftService,
+        {
+          provide: OPENAI_CLIENT,
+          useValue: { chat: { completions: { create: mockCreate } } },
+        },
+      ],
     }).compile();
     service = module.get<DraftService>(DraftService);
   });

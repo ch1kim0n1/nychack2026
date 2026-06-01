@@ -14,7 +14,7 @@ export class CreateDraftDto {
   recommended_action: string;
 
   @IsString()
-  @IsUrl()
+  @IsUrl({ require_tld: true, require_protocol: true })
   @MaxLength(500)
   source_url: string;
 
