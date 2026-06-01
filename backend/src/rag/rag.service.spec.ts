@@ -1,13 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RagService } from './rag.service';
 import { PrismaService } from '../database/prisma.service';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 const mockEmbed = jest.fn();
-jest.mock('openai', () =>
-  jest.fn().mockImplementation(() => ({
-    embeddings: { create: mockEmbed },
-  })),
-);
 
 describe('RagService', () => {
   let service: RagService;
@@ -25,7 +21,14 @@ describe('RagService', () => {
       ragQueryLog: { create: jest.fn().mockResolvedValue({}) },
     };
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RagService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        RagService,
+        { provide: PrismaService, useValue: prisma },
+        {
+          provide: OPENAI_CLIENT,
+          useValue: { embeddings: { create: mockEmbed } },
+        },
+      ],
     }).compile();
     service = module.get<RagService>(RagService);
   });

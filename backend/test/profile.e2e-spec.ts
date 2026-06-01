@@ -4,6 +4,7 @@ import type { Server } from 'http';
 import request from 'supertest';
 import { ProfileModule } from '../src/profile/profile.module';
 import { ProfileService } from '../src/profile/profile.service';
+import { OPENAI_CLIENT } from '../src/openai/openai.provider';
 
 describe('ProfileController (e2e)', () => {
   let app: INestApplication;
@@ -15,6 +16,8 @@ describe('ProfileController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [ProfileModule],
     })
+      .overrideProvider(OPENAI_CLIENT)
+      .useValue({})
       .overrideProvider(ProfileService)
       .useValue({ classify: mockClassify })
       .compile();

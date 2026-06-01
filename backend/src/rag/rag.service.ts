@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { PrismaService } from '../database/prisma.service';
 import { BusinessProfile } from '../profile/profile.service';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 export interface RegulatoryChunk {
   id: string;
@@ -15,9 +16,10 @@ export interface RegulatoryChunk {
 
 @Injectable()
 export class RagService {
-  private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
+  ) {}
 
   async embed(text: string): Promise<number[]> {
     const response = await this.openai.embeddings.create({

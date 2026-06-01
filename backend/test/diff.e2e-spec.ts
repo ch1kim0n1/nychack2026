@@ -5,6 +5,7 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { DiffService } from '../src/diff/diff.service';
 import { NotFoundException } from '@nestjs/common';
+import { OPENAI_CLIENT } from '../src/openai/openai.provider';
 
 interface DiffBody {
   scenario: string;
@@ -21,6 +22,8 @@ describe('DiffController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideProvider(OPENAI_CLIENT)
+      .useValue({})
       .overrideProvider(DiffService)
       .useValue({ getScenario: mockGetScenario })
       .compile();

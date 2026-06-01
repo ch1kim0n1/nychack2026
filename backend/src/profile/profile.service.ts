@@ -1,9 +1,11 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import OpenAI from 'openai';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 export interface BusinessProfile {
   industry: string;
@@ -15,7 +17,7 @@ export interface BusinessProfile {
 
 @Injectable()
 export class ProfileService {
-  private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  constructor(@Inject(OPENAI_CLIENT) private readonly openai: OpenAI) {}
 
   async classify(input: string): Promise<BusinessProfile> {
     const response = await this.openai.chat.completions.create({

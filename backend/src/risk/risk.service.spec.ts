@@ -1,15 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RiskService } from './risk.service';
+import { calculateRiskScore, RiskService } from './risk.service';
 import { PrismaService } from '../database/prisma.service';
 import { RagService } from '../rag/rag.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 const mockChatCreate = jest.fn();
-jest.mock('openai', () =>
-  jest.fn().mockImplementation(() => ({
-    chat: { completions: { create: mockChatCreate } },
-  })),
-);
 
 const fakeChunk = {
   id: 'chunk-1',
@@ -44,6 +40,10 @@ describe('RiskService', () => {
         RiskService,
         { provide: PrismaService, useValue: prisma },
         { provide: RagService, useValue: ragService },
+        {
+          provide: OPENAI_CLIENT,
+          useValue: { chat: { completions: { create: mockChatCreate } } },
+        },
       ],
     }).compile();
     service = module.get<RiskService>(RiskService);
@@ -82,7 +82,7 @@ describe('RiskService', () => {
     expect(result.findings).toHaveLength(1);
     expect(result.findings[0].risk_level).toBe('high');
     expect(result.findings[0].source_url).toMatch(/^https/);
-    expect(result.risk_score).toBe(30);
+    expect(result.risk_score).toBe(20);
     expect(result.risk_level).toBe('high');
     expect(result.disclaimer).toContain('not legal advice');
     expect(prisma.riskFinding.createMany).toHaveBeenCalledTimes(1);
@@ -206,7 +206,7 @@ describe('RiskService', () => {
     expect(result.findings[0].risk_level).toBe('high');
     expect(result.findings[1].risk_level).toBe('medium');
     expect(result.findings[2].risk_level).toBe('low');
-    expect(result.risk_score).toBe(50); // 30 + 15 + 5
+    expect(result.risk_score).toBe(33);
   });
 
   it('getDemo returns seeded findings from DB sorted and scored', async () => {
@@ -254,7 +254,7 @@ describe('RiskService', () => {
     expect(result.findings[0].risk_level).toBe('high');
     expect(result.findings[1].risk_level).toBe('medium');
     expect(result.findings[2].risk_level).toBe('low');
-    expect(result.risk_score).toBe(50); // 30 + 15 + 5
+    expect(result.risk_score).toBe(33);
     expect(result.risk_level).toBe('high');
     expect(result.disclaimer).toContain('not legal advice');
   });
@@ -283,5 +283,20 @@ describe('RiskService', () => {
     expect(result.findings[0].risk_level).toBe('high'); // sorted high-first
     expect(result.findings[0].impact_label).toBeDefined(); // enriched fields present
     expect(result.disclaimer).toContain('not legal advice');
+  });
+
+  it('calculates normalized risk scores without early collapse to 100', () => {
+    const high = { risk_level: 'high' as const };
+    const medium = { risk_level: 'medium' as const };
+    const low = { risk_level: 'low' as const };
+
+    expect(calculateRiskScore([high, high, high])).toBeLessThan(
+      calculateRiskScore(Array(10).fill(high)),
+    );
+    expect(calculateRiskScore([high, high, high])).toBe(60);
+    expect(calculateRiskScore(Array(10).fill(high))).toBe(100);
+    expect(calculateRiskScore(Array(7).fill(medium))).toBe(70);
+    expect(calculateRiskScore(Array(30).fill(low))).toBe(100);
+    expect(calculateRiskScore([high, medium, low])).toBe(33);
   });
 });

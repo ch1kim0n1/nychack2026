@@ -4,13 +4,9 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 const mockCreate = jest.fn();
-jest.mock('openai', () =>
-  jest.fn().mockImplementation(() => ({
-    chat: { completions: { create: mockCreate } },
-  })),
-);
 
 describe('ProfileService', () => {
   let service: ProfileService;
@@ -18,7 +14,13 @@ describe('ProfileService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProfileService],
+      providers: [
+        ProfileService,
+        {
+          provide: OPENAI_CLIENT,
+          useValue: { chat: { completions: { create: mockCreate } } },
+        },
+      ],
     }).compile();
     service = module.get<ProfileService>(ProfileService);
   });

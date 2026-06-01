@@ -4,6 +4,7 @@ import type { Server } from 'http';
 import request from 'supertest';
 import { DraftModule } from '../src/draft/draft.module';
 import { DraftService } from '../src/draft/draft.service';
+import { OPENAI_CLIENT } from '../src/openai/openai.provider';
 
 describe('DraftController (e2e)', () => {
   let app: INestApplication;
@@ -15,6 +16,8 @@ describe('DraftController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [DraftModule],
     })
+      .overrideProvider(OPENAI_CLIENT)
+      .useValue({})
       .overrideProvider(DraftService)
       .useValue({ generate: mockGenerate })
       .compile();

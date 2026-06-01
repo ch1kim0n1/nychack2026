@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { CreateDraftDto } from './dto/create-draft.dto';
+import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 export interface DraftResult {
   channel: 'email' | 'call_script' | 'landlord';
@@ -12,7 +13,7 @@ export interface DraftResult {
 
 @Injectable()
 export class DraftService {
-  private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  constructor(@Inject(OPENAI_CLIENT) private readonly openai: OpenAI) {}
 
   async generate(dto: CreateDraftDto): Promise<DraftResult> {
     const channel = dto.channel ?? 'email';
