@@ -20,7 +20,7 @@ export class MetricsService {
   async citationCoverage(): Promise<CitationCoverage> {
     const findings = this.prisma.dbAvailable
       ? await this.prisma.riskFinding
-          .findMany({ select: { source_url: true } })
+          .findMany({ take: 1000, select: { source_url: true } })
           .catch(() => [])
       : [];
     const total = findings.length;
@@ -39,7 +39,7 @@ export class MetricsService {
   async ragStats(): Promise<RagStats> {
     const logs = this.prisma.dbAvailable
       ? await this.prisma.ragQueryLog
-          .findMany({ select: { retrieved_chunks: true } })
+          .findMany({ take: 1000, select: { retrieved_chunks: true } })
           .catch(() => [])
       : [];
     const total = logs.length;
