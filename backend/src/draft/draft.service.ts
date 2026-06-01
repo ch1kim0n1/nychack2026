@@ -72,12 +72,16 @@ ${channelInstructions[channel]}`,
       response_format: { type: 'json_object' },
     });
 
-    const parsed = JSON.parse(response.choices[0].message.content!);
+    const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
+      subject?: string;
+      body?: string;
+      agency_name?: string;
+    };
 
     return {
       channel,
       subject: parsed.subject,
-      body: parsed.body,
+      body: parsed.body ?? '',
       agency_name: parsed.agency_name ?? dto.who_to_contact ?? 'Agency',
       source_url: dto.source_url,
     };

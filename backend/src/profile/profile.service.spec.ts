@@ -21,17 +21,19 @@ describe('ProfileService', () => {
 
   it('classifies a food truck business profile', async () => {
     mockCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            industry: 'food_service',
-            location: 'Dallas, TX',
-            expansion_locations: ['Austin, TX'],
-            activities: ['food_preparation', 'alcohol_planned'],
-            employees: 3,
-          }),
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              industry: 'food_service',
+              location: 'Dallas, TX',
+              expansion_locations: ['Austin, TX'],
+              activities: ['food_preparation', 'alcohol_planned'],
+              employees: 3,
+            }),
+          },
         },
-      }],
+      ],
     });
 
     const result = await service.classify(
@@ -46,17 +48,19 @@ describe('ProfileService', () => {
 
   it('returns null employees when not mentioned', async () => {
     mockCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            industry: 'retail',
-            location: 'Houston, TX',
-            expansion_locations: [],
-            activities: ['retail_sales'],
-            employees: null,
-          }),
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              industry: 'retail',
+              location: 'Houston, TX',
+              expansion_locations: [],
+              activities: ['retail_sales'],
+              employees: null,
+            }),
+          },
         },
-      }],
+      ],
     });
 
     const result = await service.classify('I run a retail shop in Houston.');

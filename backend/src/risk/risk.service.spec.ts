@@ -26,7 +26,7 @@ describe('RiskService', () => {
   let prisma: {
     dbAvailable: boolean;
     business: { create: jest.Mock };
-    riskFinding: { createMany: jest.Mock };
+    riskFinding: { createMany: jest.Mock; findMany?: jest.Mock };
   };
   let ragService: { retrieve: jest.Mock };
 
@@ -51,19 +51,24 @@ describe('RiskService', () => {
 
   it('returns risk_score, disclaimer, and findings with valid source_url', async () => {
     mockChatCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            findings: [{
-              risk_level: 'high',
-              affected_area: 'Food Service Permit',
-              explanation: 'Austin requires a Food Enterprise Permit.',
-              recommended_action: 'Apply at Austin Public Health.',
-              source_url: 'https://www.austintexas.gov/department/food-enterprise-permits',
-            }],
-          }),
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'Food Service Permit',
+                  explanation: 'Austin requires a Food Enterprise Permit.',
+                  recommended_action: 'Apply at Austin Public Health.',
+                  source_url:
+                    'https://www.austintexas.gov/department/food-enterprise-permits',
+                },
+              ],
+            }),
+          },
         },
-      }],
+      ],
     });
 
     const result = await service.analyze({
@@ -85,28 +90,30 @@ describe('RiskService', () => {
 
   it('strips findings that lack a valid source_url', async () => {
     mockChatCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            findings: [
-              {
-                risk_level: 'high',
-                affected_area: 'Valid Finding',
-                explanation: 'Has a source.',
-                recommended_action: 'Do something.',
-                source_url: 'https://example.com/source',
-              },
-              {
-                risk_level: 'medium',
-                affected_area: 'Invalid Finding',
-                explanation: 'No source.',
-                recommended_action: 'Do something.',
-                source_url: '',
-              },
-            ],
-          }),
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'Valid Finding',
+                  explanation: 'Has a source.',
+                  recommended_action: 'Do something.',
+                  source_url: 'https://example.com/source',
+                },
+                {
+                  risk_level: 'medium',
+                  affected_area: 'Invalid Finding',
+                  explanation: 'No source.',
+                  recommended_action: 'Do something.',
+                  source_url: '',
+                },
+              ],
+            }),
+          },
         },
-      }],
+      ],
     });
 
     const result = await service.analyze({
@@ -123,19 +130,23 @@ describe('RiskService', () => {
 
   it('throws InternalServerErrorException when all findings lack citations', async () => {
     mockChatCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            findings: [{
-              risk_level: 'high',
-              affected_area: 'Bad Finding',
-              explanation: 'No source.',
-              recommended_action: 'Do something.',
-              source_url: '',
-            }],
-          }),
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'Bad Finding',
+                  explanation: 'No source.',
+                  recommended_action: 'Do something.',
+                  source_url: '',
+                },
+              ],
+            }),
+          },
         },
-      }],
+      ],
     });
 
     await expect(
@@ -151,17 +162,37 @@ describe('RiskService', () => {
 
   it('returns findings sorted high → medium → low', async () => {
     mockChatCreate.mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            findings: [
-              { risk_level: 'low', affected_area: 'Low', explanation: '', recommended_action: '', source_url: 'https://example.com/low' },
-              { risk_level: 'high', affected_area: 'High', explanation: '', recommended_action: '', source_url: 'https://example.com/high' },
-              { risk_level: 'medium', affected_area: 'Medium', explanation: '', recommended_action: '', source_url: 'https://example.com/medium' },
-            ],
-          }),
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'low',
+                  affected_area: 'Low',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com/low',
+                },
+                {
+                  risk_level: 'high',
+                  affected_area: 'High',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com/high',
+                },
+                {
+                  risk_level: 'medium',
+                  affected_area: 'Medium',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com/medium',
+                },
+              ],
+            }),
+          },
         },
-      }],
+      ],
     });
 
     const result = await service.analyze({
@@ -182,11 +213,40 @@ describe('RiskService', () => {
     prisma.riskFinding = {
       ...prisma.riskFinding,
       findMany: jest.fn().mockResolvedValue([
-        { risk_level: 'low',    affected_area: 'Sales Tax',    explanation: 'e', recommended_action: 'a', source_url: 'https://comptroller.texas.gov/taxes/sales/',  prerequisites: [], documents_needed: [], next_steps: [] },
-        { risk_level: 'high',   affected_area: 'TABC Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.tabc.texas.gov/services/tabc-licenses-permits/', prerequisites: [], documents_needed: [], next_steps: [] },
-        { risk_level: 'medium', affected_area: 'Food Permit',  explanation: 'e', recommended_action: 'a', source_url: 'https://www.austintexas.gov/health/divisions/environmental-health-services', prerequisites: [], documents_needed: [], next_steps: [] },
+        {
+          risk_level: 'low',
+          affected_area: 'Sales Tax',
+          explanation: 'e',
+          recommended_action: 'a',
+          source_url: 'https://comptroller.texas.gov/taxes/sales/',
+          prerequisites: [],
+          documents_needed: [],
+          next_steps: [],
+        },
+        {
+          risk_level: 'high',
+          affected_area: 'TABC Permit',
+          explanation: 'e',
+          recommended_action: 'a',
+          source_url:
+            'https://www.tabc.texas.gov/services/tabc-licenses-permits/',
+          prerequisites: [],
+          documents_needed: [],
+          next_steps: [],
+        },
+        {
+          risk_level: 'medium',
+          affected_area: 'Food Permit',
+          explanation: 'e',
+          recommended_action: 'a',
+          source_url:
+            'https://www.austintexas.gov/health/divisions/environmental-health-services',
+          prerequisites: [],
+          documents_needed: [],
+          next_steps: [],
+        },
       ]),
-    } as any;
+    };
 
     const result = await service.getDemo();
 
@@ -201,7 +261,7 @@ describe('RiskService', () => {
 
   it('getDemo falls back to static findings when DB unavailable', async () => {
     prisma.dbAvailable = false;
-    prisma.riskFinding = { ...prisma.riskFinding, findMany: jest.fn() } as any;
+    prisma.riskFinding = { ...prisma.riskFinding, findMany: jest.fn() };
 
     const result = await service.getDemo();
 

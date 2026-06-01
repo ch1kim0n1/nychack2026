@@ -12,12 +12,17 @@ export interface RiskFinding {
   recommended_action: string;
   source_url: string;
   // Regulatory intelligence
-  prerequisites?: string[];           // permits/steps that must be done first
-  is_hidden_requirement?: boolean;    // easy-to-miss requirement from a different agency
-  response_path?: 'monitor' | 'contact_agency' | 'update_docs' | 'change_plan' | 'seek_clarification';
+  prerequisites?: string[]; // permits/steps that must be done first
+  is_hidden_requirement?: boolean; // easy-to-miss requirement from a different agency
+  response_path?:
+    | 'monitor'
+    | 'contact_agency'
+    | 'update_docs'
+    | 'change_plan'
+    | 'seek_clarification';
   // Stakeholder + cost + timing
-  permit_fee?: string;       // e.g. "~$3,000/year" or "Free"
-  effective_date?: string;   // e.g. "2026-01-01" or "upon application"
+  permit_fee?: string; // e.g. "~$3,000/year" or "Free"
+  effective_date?: string; // e.g. "2026-01-01" or "upon application"
   agency_department?: string; // specific department within agency (for stakeholder map)
   agency_phone?: string;
   agency_url?: string;
@@ -45,8 +50,16 @@ export interface RiskAnalysisResult {
   disclaimer: string;
 }
 
-const RISK_ORDER: Record<'high' | 'medium' | 'low', number> = { high: 0, medium: 1, low: 2 };
-const RISK_POINTS: Record<'high' | 'medium' | 'low', number> = { high: 30, medium: 15, low: 5 };
+const RISK_ORDER: Record<'high' | 'medium' | 'low', number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
+};
+const RISK_POINTS: Record<'high' | 'medium' | 'low', number> = {
+  high: 30,
+  medium: 15,
+  low: 5,
+};
 const DISCLAIMER = 'This is informational guidance, not legal advice.';
 const DEMO_BUSINESS_ID = 'demo-biz-scenario-a';
 
@@ -63,7 +76,9 @@ export class RiskService {
     const chunks = await this.ragService.retrieve(profile);
     const findings = await this.synthesize(profile, chunks);
 
-    findings.sort((a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level]);
+    findings.sort(
+      (a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level],
+    );
 
     const risk_score = Math.min(
       100,
@@ -118,7 +133,8 @@ export class RiskService {
   async getDemo(): Promise<RiskAnalysisResult> {
     // Static fallback: DB unavailable or unseeded → serve bundled demo findings.
     // Demo never depends on Postgres or OpenAI (backlog 16.10).
-    let rows: Awaited<ReturnType<PrismaService['riskFinding']['findMany']>> = [];
+    let rows: Awaited<ReturnType<PrismaService['riskFinding']['findMany']>> =
+      [];
     if (this.prisma.dbAvailable) {
       rows = await this.prisma.riskFinding
         .findMany({ where: { business_id: DEMO_BUSINESS_ID } })
@@ -129,8 +145,16 @@ export class RiskService {
       const findings = [...DEMO_FINDINGS].sort(
         (a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level],
       );
-      const risk_score = Math.min(100, findings.reduce((s, f) => s + RISK_POINTS[f.risk_level], 0));
-      return { risk_score, risk_level: this.overallLevel(findings), findings, disclaimer: DISCLAIMER };
+      const risk_score = Math.min(
+        100,
+        findings.reduce((s, f) => s + RISK_POINTS[f.risk_level], 0),
+      );
+      return {
+        risk_score,
+        risk_level: this.overallLevel(findings),
+        findings,
+        disclaimer: DISCLAIMER,
+      };
     }
 
     const findings: RiskFinding[] = rows
@@ -140,30 +164,38 @@ export class RiskService {
         explanation: r.explanation,
         recommended_action: r.recommended_action,
         source_url: r.source_url,
-        prerequisites: r.prerequisites as string[],
+        prerequisites: r.prerequisites,
         is_hidden_requirement: r.is_hidden_requirement ?? undefined,
-        response_path: r.response_path as RiskFinding['response_path'] ?? undefined,
+        response_path:
+          (r.response_path as RiskFinding['response_path']) ?? undefined,
         permit_fee: r.permit_fee ?? undefined,
         effective_date: r.effective_date ?? undefined,
         agency_department: r.agency_department ?? undefined,
         agency_phone: r.agency_phone ?? undefined,
         agency_url: r.agency_url ?? undefined,
-        confidence_level: r.confidence_level as RiskFinding['confidence_level'] ?? undefined,
-        jurisdiction_level: r.jurisdiction_level as RiskFinding['jurisdiction_level'] ?? undefined,
-        money_risk: r.money_risk as RiskFinding['money_risk'] ?? undefined,
-        delay_risk: r.delay_risk as RiskFinding['delay_risk'] ?? undefined,
-        legal_severity: r.legal_severity as RiskFinding['legal_severity'] ?? undefined,
-        urgency: r.urgency as RiskFinding['urgency'] ?? undefined,
+        confidence_level:
+          (r.confidence_level as RiskFinding['confidence_level']) ?? undefined,
+        jurisdiction_level:
+          (r.jurisdiction_level as RiskFinding['jurisdiction_level']) ??
+          undefined,
+        money_risk: (r.money_risk as RiskFinding['money_risk']) ?? undefined,
+        delay_risk: (r.delay_risk as RiskFinding['delay_risk']) ?? undefined,
+        legal_severity:
+          (r.legal_severity as RiskFinding['legal_severity']) ?? undefined,
+        urgency: (r.urgency as RiskFinding['urgency']) ?? undefined,
         impact_score: r.impact_score ?? undefined,
         impact_label: r.impact_label ?? undefined,
         who_to_contact: r.who_to_contact ?? undefined,
         what_to_ask: r.what_to_ask ?? undefined,
-        documents_needed: r.documents_needed as string[],
-        next_steps: r.next_steps as string[],
+        documents_needed: r.documents_needed,
+        next_steps: r.next_steps,
       }))
       .sort((a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level]);
 
-    const risk_score = Math.min(100, findings.reduce((sum, f) => sum + RISK_POINTS[f.risk_level], 0));
+    const risk_score = Math.min(
+      100,
+      findings.reduce((sum, f) => sum + RISK_POINTS[f.risk_level], 0),
+    );
     const risk_level = this.overallLevel(findings);
 
     return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
@@ -235,11 +267,14 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
       response_format: { type: 'json_object' },
     });
 
-    const parsed = JSON.parse(response.choices[0].message.content!);
+    const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
+      findings?: RiskFinding[];
+    };
     const raw: RiskFinding[] = parsed.findings ?? [];
 
     const verified = raw.filter(
-      (f) => typeof f.source_url === 'string' && f.source_url.startsWith('http'),
+      (f) =>
+        typeof f.source_url === 'string' && f.source_url.startsWith('http'),
     );
 
     if (verified.length === 0) {

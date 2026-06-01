@@ -1,8 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { RiskService } from '../src/risk/risk.service';
+
+interface RiskBody {
+  findings: { risk_level: string }[];
+  risk_score: number;
+  disclaimer: string;
+}
 
 describe('RiskController (e2e)', () => {
   let app: INestApplication;
@@ -28,17 +35,20 @@ describe('RiskController (e2e)', () => {
     mockAnalyze.mockResolvedValue({
       risk_score: 90,
       risk_level: 'high',
-      findings: [{
-        risk_level: 'high',
-        affected_area: 'Food Service Permit',
-        explanation: 'You need a permit.',
-        recommended_action: 'Apply now.',
-        source_url: 'https://www.austintexas.gov/department/food-enterprise-permits',
-      }],
+      findings: [
+        {
+          risk_level: 'high',
+          affected_area: 'Food Service Permit',
+          explanation: 'You need a permit.',
+          recommended_action: 'Apply now.',
+          source_url:
+            'https://www.austintexas.gov/department/food-enterprise-permits',
+        },
+      ],
       disclaimer: 'This is informational guidance, not legal advice.',
     });
 
-    return request(app.getHttpServer())
+    return request(app.getHttpServer() as Server)
       .post('/api/risk/analyze')
       .send({
         profile: {
@@ -51,15 +61,16 @@ describe('RiskController (e2e)', () => {
       })
       .expect(201)
       .expect((res) => {
-        expect(res.body.findings).toHaveLength(1);
-        expect(res.body.findings[0].risk_level).toBe('high');
-        expect(res.body.risk_score).toBe(90);
-        expect(res.body.disclaimer).toContain('not legal advice');
+        const body = res.body as RiskBody;
+        expect(body.findings).toHaveLength(1);
+        expect(body.findings[0].risk_level).toBe('high');
+        expect(body.risk_score).toBe(90);
+        expect(body.disclaimer).toContain('not legal advice');
       });
   });
 
   it('POST /api/risk/analyze returns 400 when profile is missing', () => {
-    return request(app.getHttpServer())
+    return request(app.getHttpServer() as Server)
       .post('/api/risk/analyze')
       .send({})
       .expect(400);

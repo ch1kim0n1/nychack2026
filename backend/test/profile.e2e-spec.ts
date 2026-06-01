@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ProfileService } from '../src/profile/profile.service';
@@ -33,18 +34,19 @@ describe('ProfileController (e2e)', () => {
       employees: 3,
     });
 
-    return request(app.getHttpServer())
+    return request(app.getHttpServer() as Server)
       .post('/api/profile/classify')
       .send({ input: 'I own a food truck in Dallas with 3 employees.' })
       .expect(201)
       .expect((res) => {
-        expect(res.body.industry).toBe('food_service');
-        expect(res.body.location).toBe('Dallas, TX');
+        const body = res.body as { industry: string; location: string };
+        expect(body.industry).toBe('food_service');
+        expect(body.location).toBe('Dallas, TX');
       });
   });
 
   it('POST /api/profile/classify returns 400 when input is missing', () => {
-    return request(app.getHttpServer())
+    return request(app.getHttpServer() as Server)
       .post('/api/profile/classify')
       .send({})
       .expect(400);

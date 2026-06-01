@@ -95,6 +95,26 @@ cd backend && npm run validate:citations
 
 ---
 
+## Troubleshooting
+
+**Frontend renders unstyled / missing `/_next` CSS or route chunks.**
+Next.js dev can enter a state where `.next` build artifacts are stale or partial
+(empty `.next/static/css/app` or `.next/static/chunks/app/<route>`), serving 404s for
+CSS and chunks. Recovery — purge and restart:
+
+```bash
+cd frontend
+npm run clean      # removes .next
+npm run dev        # regenerates cleanly
+# or in one step:
+npm run dev:clean
+```
+
+**Backend live routes return 500 (`/api/profile/classify`, `/api/risk/analyze`, `/api/draft`).**
+These call OpenAI. Confirm `backend/.env` has a real `OPENAI_API_KEY` and the process
+loads it (`main.ts` imports `dotenv/config` at startup). The demo/static routes
+(`/api/risk/demo`, `/api/diff/*`) work without a key or database.
+
 ## Pre-demo checklist
 
 - [ ] `npm run validate:citations` passes at 100%

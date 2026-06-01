@@ -11,7 +11,10 @@ jest.mock('openai', () =>
 
 describe('RagService', () => {
   let service: RagService;
-  let prisma: { $queryRawUnsafe: jest.Mock; ragQueryLog: { create: jest.Mock } };
+  let prisma: {
+    $queryRawUnsafe: jest.Mock;
+    ragQueryLog: { create: jest.Mock };
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -20,10 +23,7 @@ describe('RagService', () => {
       ragQueryLog: { create: jest.fn().mockResolvedValue({}) },
     };
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RagService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [RagService, { provide: PrismaService, useValue: prisma }],
     }).compile();
     service = module.get<RagService>(RagService);
   });
@@ -45,7 +45,8 @@ describe('RagService', () => {
         id: 'chunk-1',
         text: 'Food establishments in Austin require a permit.',
         source_id: 'src-1',
-        source_url: 'https://www.austintexas.gov/department/food-enterprise-permits',
+        source_url:
+          'https://www.austintexas.gov/department/food-enterprise-permits',
         jurisdiction_tags: ['Austin, TX'],
         industry_tags: ['food_service'],
         activity_tags: ['food_preparation'],
@@ -61,7 +62,9 @@ describe('RagService', () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].source_url).toBe('https://www.austintexas.gov/department/food-enterprise-permits');
+    expect(result[0].source_url).toBe(
+      'https://www.austintexas.gov/department/food-enterprise-permits',
+    );
     expect(prisma.$queryRawUnsafe).toHaveBeenCalledTimes(1);
   });
 });
