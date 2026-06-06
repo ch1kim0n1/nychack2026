@@ -88,6 +88,42 @@ describe('RiskService', () => {
     expect(prisma.riskFinding.createMany).toHaveBeenCalledTimes(1);
   });
 
+  it('returns a cached result verbatim for repeated identical profiles', async () => {
+    const profile = {
+      industry: 'food_service',
+      location: 'Austin, TX',
+      expansion_locations: [],
+      activities: ['food_preparation'],
+      employees: null,
+    };
+    mockChatCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'First',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com/a',
+                },
+              ],
+            }),
+          },
+        },
+      ],
+    });
+    const first = await service.analyze(profile);
+    // Second identical request (order-insensitive key) must hit the cache and
+    // return the first result verbatim without re-invoking the model.
+    const second = await service.analyze({ ...profile });
+
+    expect(second).toEqual(first);
+    expect(mockChatCreate).toHaveBeenCalledTimes(1);
+  });
+
   it('strips findings that lack a valid source_url', async () => {
     mockChatCreate.mockResolvedValue({
       choices: [

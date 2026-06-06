@@ -109,11 +109,31 @@ export function calculateRiskScore(
 export class RiskService {
   private readonly logger = new Logger(RiskService.name);
 
+  // Idempotency cache: identical profiles return the first computed result
+  // verbatim. LLM generation is only near-deterministic (temperature 0 + seed
+  // still allow occasional risk_level drift), which would otherwise make the
+  // risk_score wobble across repeated identical requests. Caching guarantees a
+  // stable, reproducible answer for the same input — required for a trustworthy
+  // regulatory tool — and avoids redundant OpenAI calls during a demo.
+  private readonly analysisCache = new Map<string, RiskAnalysisResult>();
+
   constructor(
     private prisma: PrismaService,
     private ragService: RagService,
     @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
   ) {}
+
+  /** Canonical key for a profile — order-insensitive so equivalent inputs map together. */
+  private profileKey(profile: BusinessProfile): string {
+    const norm = (s: string) => s.trim().toLowerCase();
+    return JSON.stringify({
+      industry: norm(profile.industry),
+      location: norm(profile.location),
+      employees: profile.employees ?? null,
+      activities: [...profile.activities].map(norm).sort(),
+      expansion_locations: [...profile.expansion_locations].map(norm).sort(),
+    });
+  }
 
   async analyze(profile: BusinessProfile): Promise<RiskAnalysisResult> {
     // Live analysis needs the vector store. Without a DB there is nothing to
@@ -122,6 +142,13 @@ export class RiskService {
       throw new ServiceUnavailableException(
         'Live analysis requires the database and ingested sources. Start Postgres and run ingestion, or use GET /api/risk/demo for the validated demo.',
       );
+    }
+
+    // Return a prior identical analysis verbatim (deterministic per input).
+    const cacheKey = this.profileKey(profile);
+    const cached = this.analysisCache.get(cacheKey);
+    if (cached) {
+      return cached;
     }
 
     const chunks = await this.ragService.retrieve(profile);
@@ -183,7 +210,14 @@ export class RiskService {
       );
     }
 
-    return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
+    const result: RiskAnalysisResult = {
+      risk_score,
+      risk_level,
+      findings,
+      disclaimer: DISCLAIMER,
+    };
+    this.analysisCache.set(cacheKey, result);
+    return result;
   }
 
   async getDemo(): Promise<RiskAnalysisResult> {
