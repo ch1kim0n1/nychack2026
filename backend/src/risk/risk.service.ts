@@ -269,6 +269,9 @@ export class RiskService {
       {
         model: OPENAI_CHAT_MODEL,
         temperature: 0,
+        // Fixed seed + temperature 0 makes repeated identical requests
+        // near-deterministic (stable findings, scores, and label wording).
+        seed: 42,
         messages: [
           {
             role: 'system',
