@@ -68,6 +68,15 @@ model SourceChangeLog {
   removed_chunks Int              @default(0)
 }
 
+model SavedProfile {
+  id           String   @id @default(uuid())
+  client_id    String
+  label        String
+  profile_json Json
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
 model RiskFinding {
   id                 String   @id @default(uuid())
   business_id        String

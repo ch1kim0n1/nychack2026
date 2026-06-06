@@ -37,6 +37,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
     { label: 'Lease check', href: '/lease' },
     { label: 'Readiness', href: '/readiness' },
     { label: 'Report', href: '/report' },
+    { label: 'Watchlist', href: '/watchlist' },
   ]
 
   return (
@@ -106,6 +107,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
                 </Link>
               </>
             )}
+            <Link href="/watchlist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Watchlist
+            </Link>
           </>
         )}
         <Link

@@ -10,6 +10,7 @@ import { DiffModule } from './diff/diff.module';
 import { DraftModule } from './draft/draft.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { SourceDiffModule } from './source-diff/source-diff.module';
+import { WatchlistModule } from './watchlist/watchlist.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SourceDiffModule } from './source-diff/source-diff.module';
     DraftModule,
     MetricsModule,
     SourceDiffModule,
+    WatchlistModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

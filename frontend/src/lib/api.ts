@@ -56,6 +56,15 @@ export interface RiskAnalysisResult {
   disclaimer: string
 }
 
+export interface SavedProfile {
+  id: string
+  client_id: string
+  label: string
+  profile_json: BusinessProfile
+  created_at: string
+  updated_at: string
+}
+
 export interface DiffItem {
   category: string
   dallas: string | null
@@ -128,4 +137,21 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(params),
     }),
+
+  watchlist: {
+    list: (clientId: string) =>
+      apiFetch<SavedProfile[]>(`/api/watchlist?client_id=${encodeURIComponent(clientId)}`),
+
+    save: (params: { client_id: string; label: string; profile: BusinessProfile }) =>
+      apiFetch<SavedProfile>('/api/watchlist', {
+        method: 'POST',
+        body: JSON.stringify(params),
+      }),
+
+    remove: (id: string, clientId: string) =>
+      apiFetch<void>(`/api/watchlist/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ client_id: clientId }),
+      }),
+  },
 }
