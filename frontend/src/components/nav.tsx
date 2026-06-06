@@ -161,13 +161,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
                       setMenuOpen(false)
                       onCompare()
                     }}
-                    disabled={loadingData}
-                    className={cn(
-                      'text-left text-caption py-2.5 px-2 rounded transition-colors',
-                      loadingData
-                        ? 'text-[var(--cl-text-muted)] opacity-40'
-                        : 'text-[var(--cl-text-muted)] hover:text-white hover:bg-navy-800',
-                    )}
+                    className="text-left text-caption py-2.5 px-2 rounded transition-colors text-[var(--cl-text-muted)] hover:text-white hover:bg-navy-800"
                   >
                     Compare ⊞
                   </button>
@@ -178,12 +172,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
                   key={route.label}
                   href={route.href}
                   onClick={() => setMenuOpen(false)}
-                  className={cn(
-                    'text-caption py-2.5 px-2 rounded transition-colors',
-                    loadingData
-                      ? 'text-[var(--cl-text-muted)] opacity-40 pointer-events-none'
-                      : 'text-[var(--cl-text-muted)] hover:text-white hover:bg-navy-800',
-                  )}
+                  className="text-caption py-2.5 px-2 rounded transition-colors text-[var(--cl-text-muted)] hover:text-white hover:bg-navy-800"
                 >
                   {route.label}
                 </Link>
