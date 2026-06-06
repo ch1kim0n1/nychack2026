@@ -51,7 +51,7 @@ export class RagService {
       'Federal',
       'State',
     ];
-    const pgArray = `{${locations.map(l => `"${l.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
+    const pgArray = `{${locations.map((l) => `"${l.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
 
     const chunks = await this.prisma.$queryRawUnsafe<RegulatoryChunk[]>(
       `SELECT rc.id, rc.text, rc.source_id, rs.source_url,

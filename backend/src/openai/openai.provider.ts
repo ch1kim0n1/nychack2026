@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 
 export const OPENAI_CLIENT = 'OPENAI_CLIENT';
+export const OPENAI_CHAT_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 export const OpenAIProvider = {
   provide: OPENAI_CLIENT,

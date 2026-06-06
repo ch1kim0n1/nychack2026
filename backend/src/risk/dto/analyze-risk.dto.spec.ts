@@ -45,7 +45,9 @@ describe('AnalyzeRiskDto', () => {
     });
     const errors = await validate(dto, { whitelist: true });
     const profileErrors = errors.find((e) => e.property === 'profile');
-    expect(profileErrors?.children?.some((c) => c.property === 'activities')).toBe(true);
+    expect(
+      profileErrors?.children?.some((c) => c.property === 'activities'),
+    ).toBe(true);
   });
 
   it('fails when expansion_locations is not an array', async () => {
@@ -60,24 +62,36 @@ describe('AnalyzeRiskDto', () => {
     });
     const errors = await validate(dto, { whitelist: true });
     const profileErrors = errors.find((e) => e.property === 'profile');
-    expect(profileErrors?.children?.some((c) => c.property === 'expansion_locations')).toBe(true);
+    expect(
+      profileErrors?.children?.some(
+        (c) => c.property === 'expansion_locations',
+      ),
+    ).toBe(true);
   });
 
   it('fails when industry exceeds MaxLength', async () => {
     const errors = await validate(makeDto({ industry: 'x'.repeat(101) }));
     const profileErrors = errors.find((e) => e.property === 'profile');
-    expect(profileErrors?.children?.some((c) => c.property === 'industry')).toBe(true);
+    expect(
+      profileErrors?.children?.some((c) => c.property === 'industry'),
+    ).toBe(true);
   });
 
   it('fails when activities array exceeds ArrayMaxSize', async () => {
-    const errors = await validate(makeDto({ activities: Array(51).fill('tag') }));
+    const errors = await validate(
+      makeDto({ activities: Array(51).fill('tag') }),
+    );
     const profileErrors = errors.find((e) => e.property === 'profile');
-    expect(profileErrors?.children?.some((c) => c.property === 'activities')).toBe(true);
+    expect(
+      profileErrors?.children?.some((c) => c.property === 'activities'),
+    ).toBe(true);
   });
 
   it('fails when employees is a non-integer', async () => {
     const errors = await validate(makeDto({ employees: 1.5 }));
     const profileErrors = errors.find((e) => e.property === 'profile');
-    expect(profileErrors?.children?.some((c) => c.property === 'employees')).toBe(true);
+    expect(
+      profileErrors?.children?.some((c) => c.property === 'employees'),
+    ).toBe(true);
   });
 });
