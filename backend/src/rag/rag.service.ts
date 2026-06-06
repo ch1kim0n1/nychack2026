@@ -53,7 +53,7 @@ export class RagService {
     ];
     const pgArray = `{${locations.map((l) => `"${l.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
 
-    const chunks = (await this.prisma.$queryRawUnsafe(
+    const chunks = await this.prisma.$queryRawUnsafe<RegulatoryChunk[]>(
       `SELECT rc.id, rc.text, rc.source_id, rs.source_url,
               rc.jurisdiction_tags, rc.industry_tags, rc.activity_tags
        FROM "RegulatoryChunk" rc
@@ -63,7 +63,7 @@ export class RagService {
        LIMIT 10`,
       embeddingStr,
       pgArray,
-    )) as RegulatoryChunk[];
+    );
 
     // Audit log — traceability (13.9). Best-effort; never blocks retrieval.
     void this.prisma.ragQueryLog
