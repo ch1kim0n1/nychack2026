@@ -202,7 +202,9 @@ export class RiskService {
           what_to_ask: f.what_to_ask ?? null,
           documents_needed: f.documents_needed ?? [],
           next_steps: f.next_steps ?? [],
-          review_state: this.requiresReview(f.affected_area) ? 'pending' : 'auto_approved',
+          review_state: this.requiresReview(f.affected_area)
+            ? 'pending'
+            : 'auto_approved',
         })),
       });
     } catch (err) {

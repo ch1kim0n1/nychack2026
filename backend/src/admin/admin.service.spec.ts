@@ -23,10 +23,7 @@ describe('AdminService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AdminService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [AdminService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<AdminService>(AdminService);
@@ -76,13 +73,18 @@ describe('AdminService', () => {
       };
       prisma.riskFinding.update.mockResolvedValue(updated);
 
-      const result = await service.reviewFinding('f1', 'approved', 'Looks good');
+      const result = await service.reviewFinding(
+        'f1',
+        'approved',
+        'Looks good',
+      );
 
       expect(prisma.riskFinding.update).toHaveBeenCalledWith({
         where: { id: 'f1' },
         data: {
           review_state: 'approved',
           reviewer_note: 'Looks good',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           reviewed_at: expect.any(Date),
         },
       });
@@ -90,7 +92,10 @@ describe('AdminService', () => {
     });
 
     it('accepts rejected state without a note', async () => {
-      prisma.riskFinding.update.mockResolvedValue({ id: 'f2', review_state: 'rejected' });
+      prisma.riskFinding.update.mockResolvedValue({
+        id: 'f2',
+        review_state: 'rejected',
+      });
 
       await service.reviewFinding('f2', 'rejected');
 
@@ -99,6 +104,7 @@ describe('AdminService', () => {
         data: {
           review_state: 'rejected',
           reviewer_note: undefined,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           reviewed_at: expect.any(Date),
         },
       });
@@ -122,7 +128,12 @@ describe('AdminService', () => {
 
       const result = await service.getStats();
 
-      expect(result).toEqual({ pending: 3, approved: 10, rejected: 2, auto_approved: 45 });
+      expect(result).toEqual({
+        pending: 3,
+        approved: 10,
+        rejected: 2,
+        auto_approved: 45,
+      });
     });
 
     it('returns zeros for states with no rows', async () => {
@@ -132,7 +143,12 @@ describe('AdminService', () => {
 
       const result = await service.getStats();
 
-      expect(result).toEqual({ pending: 0, approved: 5, rejected: 0, auto_approved: 0 });
+      expect(result).toEqual({
+        pending: 0,
+        approved: 5,
+        rejected: 0,
+        auto_approved: 0,
+      });
     });
   });
 });

@@ -23,8 +23,9 @@ export class AdminService {
   }
 
   async reviewFinding(id: string, state: ReviewState, note?: string) {
-    if (state !== 'approved' && state !== 'rejected') {
-      throw new BadRequestException(`Invalid review state: ${state}`);
+    const stateValue: string = state;
+    if (stateValue !== 'approved' && stateValue !== 'rejected') {
+      throw new BadRequestException(`Invalid review state: ${stateValue}`);
     }
     return this.prisma.riskFinding.update({
       where: { id },
