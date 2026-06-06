@@ -128,6 +128,7 @@ export default function DashboardPage() {
         variant="app"
         businessSummary={profileInput ? profileInput.slice(0, 60) + (profileInput.length > 60 ? '…' : '') : undefined}
         onCompare={() => router.push('/diff')}
+        loadingData={loading}
       />
       <DisclaimerBanner />
 
@@ -495,7 +496,15 @@ function CitationDrawer({ finding, businessDescription, onClose }: {
                 {drafting ? 'Generating…' : `Generate ${CHANNEL_LABELS[draftChannel]}`}
               </Button>
             )}
-            {draftError && <p className="text-caption text-risk-high-fg mt-2">{draftError}</p>}
+            {draftError && (
+              <div className="mt-2 space-y-2">
+                <p className="text-caption text-risk-high-fg">{draftError}</p>
+                <p className="text-caption text-[var(--cl-text-muted)]">Starting template:</p>
+                <pre className="text-caption font-mono text-[var(--cl-text)] bg-surface border border-[var(--cl-border)] rounded p-3 whitespace-pre-wrap overflow-auto max-h-40">
+                  {`Subject: Question about ${finding.affected_area}\n\nHello,\n\nI am opening a small business and have a question about the following requirement:\n\n${finding.affected_area}: ${finding.recommended_action}\n\nCould you please confirm the current requirements and typical timeline?\n\nThank you for your time.`}
+                </pre>
+              </div>
+            )}
             {draft && (
               <div className="mt-3 space-y-2">
                 {draft.subject && (

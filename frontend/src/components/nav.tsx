@@ -11,9 +11,14 @@ interface NavProps {
   variant?: 'marketing' | 'app'
   businessSummary?: string
   onCompare?: () => void
+  loadingData?: boolean
 }
 
-export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavProps) {
+// Routes whose pages depend on the loaded analysis result and bounce to
+// /intake when it isn't ready yet — disabled while the dashboard is loading.
+const DATA_DEPENDENT_ROUTES = new Set(['/checklist', '/lease', '/readiness', '/report'])
+
+export function Nav({ variant = 'marketing', businessSummary, onCompare, loadingData = false }: NavProps) {
   const { theme, toggle } = useTheme()
   const isApp = variant === 'app'
   const pathname = usePathname()
@@ -78,18 +83,29 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
             <Link href="/scenarios" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Scenarios
             </Link>
-            <Link href="/checklist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
-              Checklist
-            </Link>
-            <Link href="/lease" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
-              Lease check
-            </Link>
-            <Link href="/readiness" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
-              Readiness
-            </Link>
-            <Link href="/report" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
-              Report
-            </Link>
+            {loadingData ? (
+              <>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden md:inline">Checklist</span>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden lg:inline">Lease check</span>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden lg:inline">Readiness</span>
+                <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden md:inline">Report</span>
+              </>
+            ) : (
+              <>
+                <Link href="/checklist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+                  Checklist
+                </Link>
+                <Link href="/lease" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
+                  Lease check
+                </Link>
+                <Link href="/readiness" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden lg:inline">
+                  Readiness
+                </Link>
+                <Link href="/report" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+                  Report
+                </Link>
+              </>
+            )}
           </>
         )}
         <Link
@@ -165,6 +181,18 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare }: NavPr
                   >
                     Compare ⊞
                   </button>
+                )
+              }
+              // Routes that read the analysis result redirect to /intake if it's
+              // not ready — disable them while dashboard data is loading (#30).
+              if (loadingData && DATA_DEPENDENT_ROUTES.has(route.href)) {
+                return (
+                  <span
+                    key={route.label}
+                    className="text-caption py-2.5 px-2 rounded text-[var(--cl-text-muted)] opacity-40"
+                  >
+                    {route.label}
+                  </span>
                 )
               }
               return (

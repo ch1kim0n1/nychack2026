@@ -182,9 +182,18 @@ export default function IntakePage() {
               analyzing={analyzing}
             />
             {stage === 'error' && (
-              <p className="text-caption text-risk-high-fg bg-risk-high-bg border border-risk-high-border rounded px-3 py-2">
-                {error}
-              </p>
+              <div className="text-caption text-risk-high-fg bg-risk-high-bg border border-risk-high-border rounded px-3 py-2 space-y-2">
+                <p>{error}</p>
+                <p>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/demo')}
+                    className="underline hover:no-underline font-semibold"
+                  >
+                    Use demo data instead →
+                  </button>
+                </p>
+              </div>
             )}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-caption text-[var(--cl-text-muted)]">Try an example:</span>
