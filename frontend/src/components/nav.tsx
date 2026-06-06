@@ -33,10 +33,12 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
   const appRoutes: { label: string; href: string }[] = [
     { label: 'Compare', href: '/diff' },
     { label: 'Scenarios', href: '/scenarios' },
+    { label: 'Radar', href: '/radar' },
     { label: 'Checklist', href: '/checklist' },
     { label: 'Lease check', href: '/lease' },
     { label: 'Readiness', href: '/readiness' },
     { label: 'Report', href: '/report' },
+    { label: 'Watchlist', href: '/watchlist' },
   ]
 
   return (
@@ -83,6 +85,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
             <Link href="/scenarios" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Scenarios
             </Link>
+            <Link href="/radar" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Radar
+            </Link>
             {loadingData ? (
               <>
                 <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden md:inline">Checklist</span>
@@ -106,6 +111,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
                 </Link>
               </>
             )}
+            <Link href="/watchlist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Watchlist
+            </Link>
           </>
         )}
         <Link

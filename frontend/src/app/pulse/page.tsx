@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
-import { type RiskAnalysisResult, type RiskFinding } from '@/lib/api'
+import { type RiskAnalysisResult, type RiskFinding, type PulseDigest, api } from '@/lib/api'
 import { AlertTriangle, Clock, Info, ExternalLink } from 'lucide-react'
 
 // Compliance Pulse 2.0 — personalized weekly digest built from the user's own findings (8.5).
@@ -61,11 +61,15 @@ function buildPersonalDigest(result: RiskAnalysisResult): DigestItem[] {
 export default function PulsePage() {
   const [digest, setDigest] = useState<DigestItem[]>(STATIC_DIGEST)
   const [personalized, setPersonalized] = useState(false)
+  const [apiPersonalized, setApiPersonalized] = useState(false)
   const [businessName, setBusinessName] = useState('your Austin restaurant')
 
   useEffect(() => {
+    // Step 1: Read sessionStorage for immediate display
     const json = sessionStorage.getItem('cl-risk-result')
     const input = sessionStorage.getItem('cl-input')
+    const profileJson = sessionStorage.getItem('cl-profile')
+
     if (json) {
       try {
         const result: RiskAnalysisResult = JSON.parse(json)
@@ -77,6 +81,29 @@ export default function PulsePage() {
       } catch { /* keep static */ }
     }
     if (input) setBusinessName(input.length > 40 ? input.slice(0, 40) + '…' : input)
+
+    // Step 2: Best-effort API call — prefer over sessionStorage if personalized
+    if (profileJson) {
+      try {
+        const profile = JSON.parse(profileJson) as Parameters<typeof api.getPulseDigest>[0]
+        api.getPulseDigest(profile)
+          .then((apiDigest: PulseDigest) => {
+            if (apiDigest.personalized && apiDigest.items.length > 0) {
+              setDigest(apiDigest.items)
+              setPersonalized(true)
+              setApiPersonalized(true)
+              if (apiDigest.business_label) {
+                setBusinessName(
+                  apiDigest.business_label.length > 40
+                    ? apiDigest.business_label.slice(0, 40) + '…'
+                    : apiDigest.business_label,
+                )
+              }
+            }
+          })
+          .catch(() => { /* keep sessionStorage/static digest on error */ })
+      } catch { /* keep existing digest if profile parse fails */ }
+    }
   }, [])
 
   return (
@@ -86,9 +113,11 @@ export default function PulsePage() {
       <main className="flex-1 px-4 py-8">
         <div className="max-w-[640px] mx-auto mb-6">
           <p className="text-caption text-[var(--cl-text-muted)] border border-[var(--cl-border-subtle)] bg-sunken rounded px-3 py-2 font-mono">
-            {personalized
-              ? 'PREVIEW — Personalized from your scan. This is what lands in your inbox every Monday.'
-              : 'PREVIEW — This is what lands in your inbox every Monday.'}
+            {apiPersonalized
+              ? 'LIVE — Personalized from your scan.'
+              : personalized
+                ? 'PREVIEW — Personalized from your scan. This is what lands in your inbox every Monday.'
+                : 'PREVIEW — This is what lands in your inbox every Monday.'}
           </p>
         </div>
 

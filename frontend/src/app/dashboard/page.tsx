@@ -234,6 +234,25 @@ function ImpactLabel({ label }: { label: string }) {
   )
 }
 
+function ReviewStateBadge({ state }: { state?: string }) {
+  if (!state || state === 'auto_approved' || state === 'approved') return null
+  if (state === 'pending') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border border-yellow-300 bg-yellow-50 text-yellow-800 font-mono text-citation whitespace-nowrap">
+        &#9203; Pending review
+      </span>
+    )
+  }
+  if (state === 'rejected') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border border-risk-high-border bg-risk-high-bg text-risk-high-fg font-mono text-citation whitespace-nowrap">
+        &#9888; Flagged
+      </span>
+    )
+  }
+  return null
+}
+
 function FindingRow({
   finding, expanded, onToggle, onCitationClick,
 }: {
@@ -250,6 +269,7 @@ function FindingRow({
       >
         <div className="flex items-start gap-3 min-w-0">
           <RiskBadge level={finding.risk_level} className="shrink-0 mt-0.5" />
+          <ReviewStateBadge state={finding.review_state} />
           <div className="min-w-0">
             <h3 className="text-h3 text-[var(--cl-text)] leading-snug break-words">{finding.affected_area}</h3>
             {!expanded && <p className="text-body text-[var(--cl-text-secondary)] mt-1 line-clamp-2">{finding.explanation}</p>}
