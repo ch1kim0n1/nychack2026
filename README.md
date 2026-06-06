@@ -5,7 +5,7 @@ CivicLens — frontend on Vercel, backend + Postgres (pgvector) on Railway.
 ## Local development
 
 One-command bootstrap for a fresh clone (Windows / macOS / Linux). Requires
-Node 18+, Docker, and (for ingestion only) Python 3.
+Node 24.16.0 (or any Node >=24 <25), Docker, and (for ingestion only) Python 3.
 
 ```bash
 npm install          # installs root tooling (concurrently)

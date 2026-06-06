@@ -2,7 +2,7 @@
 
 # ---------- Stage 1: build ----------
 # Install ALL deps (incl. dev), generate the Prisma client, and compile.
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 
 # OpenSSL is required by Prisma's query engine at generate/runtime.
 RUN apt-get update -y \
@@ -33,7 +33,7 @@ RUN npm run build:prod
 RUN npm prune --omit=dev
 
 # ---------- Stage 2: runtime ----------
-FROM node:20-slim AS runner
+FROM node:24-slim AS runner
 
 # OpenSSL needed at runtime by the Prisma query engine.
 RUN apt-get update -y \

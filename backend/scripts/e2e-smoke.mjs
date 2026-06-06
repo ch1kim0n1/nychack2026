@@ -4,7 +4,7 @@
  * Exercises the real flow over HTTP against a running backend:
  *   demo -> intake/classify -> live analyze (RAG) -> determinism -> diff -> draft
  *
- * Repeatable and dependency-free (Node 18+ built-in fetch). Use against a
+ * Repeatable and dependency-free (Node >=24 <25 built-in fetch). Use against a
  * local instance or a deployed one:
  *   node scripts/e2e-smoke.mjs
  *   BASE_URL=https://api.example.com node scripts/e2e-smoke.mjs

@@ -21,9 +21,11 @@ import { spawnSync } from 'node:child_process';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { concurrently } from 'concurrently';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
+const backendDir = resolve(rootDir, 'backend');
 
 const DB_HOST = '127.0.0.1';
 const DB_PORT = 5432;
@@ -113,33 +115,38 @@ async function main() {
   // 3. Apply migrations.
   runStep('Applying migrations', 'node', ['scripts/migrate.mjs']);
 
-  // 4. Run both servers together. concurrently is a root devDependency.
+  // 4. Generate Prisma client so the API can import @prisma/client.
+  runStep('Generating Prisma client', 'npx', ['prisma', 'generate'], {
+    cwd: backendDir,
+  });
+
+  // 5. Run both servers together. concurrently is a root devDependency.
   //    --kill-others-on-fail: if api or web dies, tear the other down too.
   console.log('[dev] Starting servers: api (:3001) + web (:3000). Ctrl+C to stop.');
-  const servers = spawnSync(
-    'npx',
+  const { result } = concurrently(
     [
-      'concurrently',
-      '--kill-others-on-fail',
-      '--names',
-      'api,web',
-      '--prefix-colors',
-      'cyan,magenta',
-      'npm --prefix backend run start:dev',
-      'npm --prefix frontend run dev',
+      { command: 'npm --prefix backend run start:dev', name: 'api' },
+      { command: 'npm --prefix frontend run dev', name: 'web' },
     ],
     {
       cwd: rootDir,
-      stdio: 'inherit',
-      shell: true,
+      killOthersOn: ['failure'],
+      prefix: 'name',
+      prefixColors: ['cyan', 'magenta'],
     },
   );
 
-  // concurrently exits non-zero on Ctrl+C / a failing child; surface it but
-  // do not treat a manual interrupt as a scary error.
-  if (servers.status && servers.status !== 0) {
-    console.error(`[dev] Servers exited with code ${servers.status}.`);
-    process.exit(servers.status);
+  // concurrently rejects when a child exits non-zero or the process is
+  // interrupted. Surface a concise exit code for the parent npm script.
+  try {
+    await result;
+  } catch (events) {
+    const failed = Array.isArray(events)
+      ? events.find((event) => event.exitCode && event.exitCode !== 0)
+      : undefined;
+    const code = failed?.exitCode ?? 1;
+    console.error(`[dev] Servers exited with code ${code}.`);
+    process.exit(code);
   }
 }
 
