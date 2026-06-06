@@ -24,14 +24,16 @@ model Business {
 }
 
 model RegulatorySource {
-  id              String            @id @default(uuid())
-  title           String
-  agency          String
-  jurisdiction    String
-  source_url      String            @unique
-  source_type     String
-  last_checked_at DateTime?
-  chunks          RegulatoryChunk[]
+  id               String            @id @default(uuid())
+  title            String
+  agency           String
+  jurisdiction     String
+  source_url       String            @unique
+  source_type      String
+  last_checked_at  DateTime?
+  source_text_hash String?
+  chunks           RegulatoryChunk[]
+  change_logs      SourceChangeLog[]
 }
 
 model RegulatoryChunk {
@@ -51,6 +53,19 @@ model RagQueryLog {
   retrieved_chunks   Int
   retrieved_chunk_ids String[] @default([])
   created_at         DateTime @default(now())
+}
+
+model SourceChangeLog {
+  id             String           @id @default(uuid())
+  source_id      String
+  source         RegulatorySource @relation(fields: [source_id], references: [id])
+  detected_at    DateTime         @default(now())
+  old_hash       String?
+  new_hash       String
+  change_type    String
+  diff_summary   String?
+  added_chunks   Int              @default(0)
+  removed_chunks Int              @default(0)
 }
 
 model RiskFinding {
