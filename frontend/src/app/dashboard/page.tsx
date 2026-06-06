@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [degraded, setDegraded] = useState(false)
   const [expanded, setExpanded] = useState<Set<number>>(new Set())
   const [drawerFinding, setDrawerFinding] = useState<RiskFinding | null>(null)
+  const [profileInput, setProfileInput] = useState<string | undefined>(undefined)
   const scoreRef = useRef<HTMLSpanElement>(null)
   const findingsRef = useRef<HTMLDivElement>(null)
   const hasAnimated = useRef(false)
@@ -111,9 +112,11 @@ export default function DashboardPage() {
     if (rows.length) staggerRows(rows)
   }, [result])
 
-  const profileInput = typeof window !== 'undefined'
-    ? sessionStorage.getItem('cl-input') ?? undefined
-    : undefined
+  // Read sessionStorage only after mount so SSR and the first client render
+  // produce identical markup (avoids the Nav <span> hydration mismatch).
+  useEffect(() => {
+    setProfileInput(sessionStorage.getItem('cl-input') ?? undefined)
+  }, [])
 
   const highCount = result?.findings.filter(f => f.risk_level === 'high').length ?? 0
   const medCount  = result?.findings.filter(f => f.risk_level === 'medium').length ?? 0
