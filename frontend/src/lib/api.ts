@@ -98,6 +98,21 @@ export interface RadarResponse {
   profile_summary: string
 }
 
+export interface DigestItem {
+  level: 'high' | 'medium' | 'low'
+  title: string
+  body: string
+  link: string
+  agency: string
+}
+
+export interface PulseDigest {
+  items: DigestItem[]
+  generated_at: string
+  personalized: boolean
+  business_label: string
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers)
   if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
@@ -175,5 +190,11 @@ export const api = {
     apiFetch<RadarResponse>('/api/radar', {
       method: 'POST',
       body: JSON.stringify({ profile, days }),
+    }),
+
+  getPulseDigest: (profile: BusinessProfile) =>
+    apiFetch<PulseDigest>('/api/pulse', {
+      method: 'POST',
+      body: JSON.stringify({ profile }),
     }),
 }

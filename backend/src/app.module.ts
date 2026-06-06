@@ -12,6 +12,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { SourceDiffModule } from './source-diff/source-diff.module';
 import { WatchlistModule } from './watchlist/watchlist.module';
 import { RadarModule } from './radar/radar.module';
+import { PulseModule } from './pulse/pulse.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RadarModule } from './radar/radar.module';
     SourceDiffModule,
     WatchlistModule,
     RadarModule,
+    PulseModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
