@@ -1,3 +1,6 @@
 
 # UX test artifacts
 .ux-test/
+
+# Root tooling deps (concurrently, etc.)
+/node_modules/
