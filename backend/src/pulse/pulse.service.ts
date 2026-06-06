@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { BusinessProfile } from '../profile/profile.service';
@@ -178,7 +177,7 @@ export class PulseService {
         last_checked_at: { gte: thirtyDaysAgo },
         jurisdiction: { in: allLocations },
       },
-      select: { id: true, name: true, url: true, jurisdiction: true },
+      select: { id: true, title: true, source_url: true, jurisdiction: true },
       take: 10,
     });
 

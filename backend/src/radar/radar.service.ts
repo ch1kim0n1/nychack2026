@@ -119,7 +119,6 @@ export class RadarService {
       // the query generic (no pgarray operators needed).
       // The Prisma client is typed as `any` in this project (client not generated);
       // explicit interface assertions restore type safety on the result.
-      /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
       const sources: SourceWithChunks[] =
         await this.prisma.regulatorySource.findMany({
           where: {
@@ -137,7 +136,6 @@ export class RadarService {
           },
           orderBy: { last_checked_at: 'desc' },
         });
-      /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
       const threats: RadarThreat[] = [];
 
