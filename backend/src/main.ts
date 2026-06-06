@@ -18,8 +18,12 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  Logger.log(`CivicLens API -> http://localhost:${port}/api`, 'Bootstrap');
+  // Bind to all interfaces so the container is reachable on Railway.
+  await app.listen(port, '0.0.0.0');
+  Logger.log(
+    `CivicLens API listening on port ${port} (prefix /api)`,
+    'Bootstrap',
+  );
 }
 
 void bootstrap();

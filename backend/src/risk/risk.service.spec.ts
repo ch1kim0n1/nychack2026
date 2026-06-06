@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { calculateRiskScore, RiskService } from './risk.service';
+import { calculateRiskScore, RiskFinding, RiskService } from './risk.service';
 import { PrismaService } from '../database/prisma.service';
 import { RagService } from '../rag/rag.service';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -86,6 +86,42 @@ describe('RiskService', () => {
     expect(result.risk_level).toBe('high');
     expect(result.disclaimer).toContain('not legal advice');
     expect(prisma.riskFinding.createMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a cached result verbatim for repeated identical profiles', async () => {
+    const profile = {
+      industry: 'food_service',
+      location: 'Austin, TX',
+      expansion_locations: [],
+      activities: ['food_preparation'],
+      employees: null,
+    };
+    mockChatCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'First',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com/a',
+                },
+              ],
+            }),
+          },
+        },
+      ],
+    });
+    const first = await service.analyze(profile);
+    // Second identical request (order-insensitive key) must hit the cache and
+    // return the first result verbatim without re-invoking the model.
+    const second = await service.analyze({ ...profile });
+
+    expect(second).toEqual(first);
+    expect(mockChatCreate).toHaveBeenCalledTimes(1);
   });
 
   it('strips findings that lack a valid source_url', async () => {
@@ -261,13 +297,35 @@ describe('RiskService', () => {
 
   it('calls OpenAI synthesize with a 60-second timeout', async () => {
     mockChatCreate.mockResolvedValue({
-      choices: [{ message: { content: JSON.stringify({ findings: [{ risk_level: 'high', affected_area: 'Permit', explanation: '', recommended_action: '', source_url: 'https://example.com' }] }) } }],
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'Permit',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com',
+                },
+              ],
+            }),
+          },
+        },
+      ],
     });
 
-    await service.analyze({ industry: 'food_service', location: 'Austin, TX', expansion_locations: [], activities: [], employees: null });
+    await service.analyze({
+      industry: 'food_service',
+      location: 'Austin, TX',
+      expansion_locations: [],
+      activities: [],
+      employees: null,
+    });
 
     expect(mockChatCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'gpt-4o' }),
+      expect.objectContaining({ model: 'gpt-4o-mini' }),
       expect.objectContaining({ timeout: 60_000 }),
     );
   });
@@ -291,12 +349,26 @@ describe('RiskService', () => {
     const low = { risk_level: 'low' as const };
 
     expect(calculateRiskScore([high, high, high])).toBeLessThan(
-      calculateRiskScore(Array(10).fill(high)),
+      calculateRiskScore(
+        Array(10).fill(high) as Pick<RiskFinding, 'risk_level'>[],
+      ),
     );
     expect(calculateRiskScore([high, high, high])).toBe(60);
-    expect(calculateRiskScore(Array(10).fill(high))).toBe(100);
-    expect(calculateRiskScore(Array(7).fill(medium))).toBe(70);
-    expect(calculateRiskScore(Array(30).fill(low))).toBe(100);
+    expect(
+      calculateRiskScore(
+        Array(10).fill(high) as Pick<RiskFinding, 'risk_level'>[],
+      ),
+    ).toBe(100);
+    expect(
+      calculateRiskScore(
+        Array(7).fill(medium) as Pick<RiskFinding, 'risk_level'>[],
+      ),
+    ).toBe(70);
+    expect(
+      calculateRiskScore(
+        Array(30).fill(low) as Pick<RiskFinding, 'risk_level'>[],
+      ),
+    ).toBe(100);
     expect(calculateRiskScore([high, medium, low])).toBe(33);
   });
 });

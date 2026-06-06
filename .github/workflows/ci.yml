@@ -1,0 +1,197 @@
+name: CI
+
+# Run on every PR and on pushes to main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Backend: lint, unit tests (jest, 46), and production build.
+  # Prisma client must be generated before tsc/jest can resolve @prisma/client.
+  # ---------------------------------------------------------------------------
+  backend:
+    name: Backend (lint, test, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      # prisma.config requires DATABASE_URL even for `prisma generate`, which
+      # does not open a connection. A throwaway value satisfies the config;
+      # unit tests mock PrismaService, so no real database is contacted.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build:prod
+
+  # ---------------------------------------------------------------------------
+  # Frontend: Next.js 14 production build (also runs `next lint` via build).
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: Frontend (build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  # ---------------------------------------------------------------------------
+  # E2E smoke: boot the real backend against a Postgres+pgvector DB and hit it.
+  # Default mode is SKIP_LIVE=1 -> only the demo + diff endpoints are exercised,
+  # which need neither OpenAI nor seeded data. See the commented block at the
+  # bottom of this job for enabling the FULL live smoke (classify/analyze/draft).
+  # ---------------------------------------------------------------------------
+  e2e-smoke:
+    name: E2E smoke (demo + diff)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15
+        env:
+          POSTGRES_USER: civiclens
+          POSTGRES_PASSWORD: civiclens
+          POSTGRES_DB: civiclens
+        ports:
+          - 5432:5432
+        # Wait until Postgres is accepting connections before steps run.
+        options: >-
+          --health-cmd "pg_isready -U civiclens -d civiclens"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Prisma + the app both read DATABASE_URL. The pgvector image exposes the
+      # standard Postgres port, mapped to localhost:5432 on the runner.
+      DATABASE_URL: postgresql://civiclens:civiclens@localhost:5432/civiclens?schema=public
+      # Backend binds PORT (defaults to 3001); pin it so the wait-loop matches.
+      PORT: 3001
+      # The OpenAI provider validates this key at startup, so the app cannot
+      # boot without it — even for the demo/diff routes that never call OpenAI.
+      # SKIP_LIVE=1 means this dummy key is never actually used for a request.
+      OPENAI_API_KEY: sk-ci-dummy-not-used
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+
+      - name: Production build
+        run: npm run build:prod
+
+      - name: Start backend (background)
+        # Launch detached, persist the PID so we can kill it in cleanup.
+        run: |
+          node dist/main.js > server.log 2>&1 &
+          echo $! > server.pid
+          echo "Backend started with PID $(cat server.pid)"
+
+      - name: Wait for readiness
+        # Poll /api/health first (added by a parallel change); fall back to
+        # /api/risk/demo so the loop succeeds either way. ~30s timeout.
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf "http://localhost:${PORT}/api/health" > /dev/null \
+               || curl -sf "http://localhost:${PORT}/api/risk/demo" > /dev/null; then
+              echo "Backend is ready after ${i}s."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend did not become ready within 30s." >&2
+          echo "----- server.log -----" >&2
+          cat server.log >&2 || true
+          exit 1
+
+      - name: Run smoke (skip live OpenAI/DB-seeded paths)
+        # SKIP_LIVE=1 => demo + diff endpoints only. No OPENAI_API_KEY needed.
+        env:
+          SKIP_LIVE: "1"
+          BASE_URL: http://localhost:3001
+        run: npm run e2e:smoke
+
+      # -----------------------------------------------------------------------
+      # FULL live smoke (classify / analyze / draft) — disabled by default.
+      # These paths require a real OpenAI key and exercise the DB. To enable:
+      #   1. Add an `OPENAI_API_KEY` repository secret in GitHub settings.
+      #   2. (Optionally) seed the DB:  - run: npx prisma db seed
+      #   3. Uncomment the step below and remove/disable the SKIP_LIVE step above.
+      #
+      # - name: Run smoke (FULL live)
+      #   env:
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #     BASE_URL: http://localhost:3001
+      #   run: npm run e2e:smoke
+      # -----------------------------------------------------------------------
+
+      - name: Stop backend
+        # always() so the server is cleaned up even if the smoke step failed.
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)" 2>/dev/null || true
+            echo "Backend stopped."
+          fi

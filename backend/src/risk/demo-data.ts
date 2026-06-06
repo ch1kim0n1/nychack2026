@@ -12,7 +12,8 @@ export const DEMO_FINDINGS: RiskFinding[] = [
       'Opening a restaurant in Austin requires a Food Enterprise Permit from Austin Public Health. A pre-opening health inspection must be passed before serving customers.',
     recommended_action:
       'Apply online at austintexas.gov/department/food-enterprise-permits at least 30 days before your planned opening date.',
-    source_url: 'https://www.austintexas.gov/health',
+    source_url:
+      'https://www.austintexas.gov/health/programs/fixed-food-establishments',
     money_risk: 'medium',
     delay_risk: 'high',
     legal_severity: 'high',
@@ -39,7 +40,8 @@ export const DEMO_FINDINGS: RiskFinding[] = [
     permit_fee: '~$600/year',
     effective_date: 'Before opening day',
     agency_department: 'Environmental Health Services Division',
-    agency_url: 'https://www.austintexas.gov/health',
+    agency_url:
+      'https://www.austintexas.gov/health/programs/fixed-food-establishments',
     confidence_level: 'high',
     jurisdiction_level: 'city',
   },
@@ -92,7 +94,8 @@ export const DEMO_FINDINGS: RiskFinding[] = [
       'A beer garden with outdoor seating requires CS (Commercial Services) or MU (Mixed Use) zoning. Verify the property zoning before signing a lease — incorrect zoning cannot be resolved after the fact.',
     recommended_action:
       'Use the Austin zoning lookup before committing to a location, and confirm outdoor-service is permitted at the address.',
-    source_url: 'https://www.austintexas.gov/health',
+    source_url:
+      'https://www.austintexas.gov/development-services/zoning-verification',
     money_risk: 'high',
     delay_risk: 'high',
     legal_severity: 'medium',
@@ -114,7 +117,8 @@ export const DEMO_FINDINGS: RiskFinding[] = [
     permit_fee: 'No fee (verification)',
     effective_date: 'Before signing lease',
     agency_department: 'Planning & Zoning',
-    agency_url: 'https://www.austintexas.gov/health',
+    agency_url:
+      'https://www.austintexas.gov/development-services/zoning-verification',
     confidence_level: 'high',
     jurisdiction_level: 'city',
   },
@@ -125,7 +129,8 @@ export const DEMO_FINDINGS: RiskFinding[] = [
       'Any interior build-out or renovation for the new restaurant requires a Commercial Building Permit from Austin Development Services. A fire marshal inspection is required before opening.',
     recommended_action:
       'Submit your building permit application early. Budget 4–8 weeks for approval and schedule the fire marshal inspection.',
-    source_url: 'https://www.austintexas.gov/health',
+    source_url:
+      'https://www.austintexas.gov/development-services/commercial-plan-review',
     money_risk: 'medium',
     delay_risk: 'high',
     legal_severity: 'medium',
@@ -151,7 +156,8 @@ export const DEMO_FINDINGS: RiskFinding[] = [
     permit_fee: 'Varies by project size',
     effective_date: '4–8 weeks before opening',
     agency_department: 'Building Plan Review',
-    agency_url: 'https://www.austintexas.gov/health',
+    agency_url:
+      'https://www.austintexas.gov/development-services/commercial-plan-review',
     confidence_level: 'medium',
     jurisdiction_level: 'city',
   },

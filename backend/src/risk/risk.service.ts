@@ -9,7 +9,7 @@ import OpenAI from 'openai';
 import { PrismaService } from '../database/prisma.service';
 import { RagService, RegulatoryChunk } from '../rag/rag.service';
 import { BusinessProfile } from '../profile/profile.service';
-import { OPENAI_CLIENT } from '../openai/openai.provider';
+import { OPENAI_CHAT_MODEL, OPENAI_CLIENT } from '../openai/openai.provider';
 import { DEMO_FINDINGS } from './demo-data';
 
 export interface RiskFinding {
@@ -57,6 +57,27 @@ export interface RiskAnalysisResult {
   disclaimer: string;
 }
 
+const NULL_STRING_FIELDS: ReadonlyArray<keyof RiskFinding> = [
+  'permit_fee',
+  'effective_date',
+  'agency_phone',
+  'agency_url',
+  'agency_department',
+  'who_to_contact',
+  'what_to_ask',
+  'impact_label',
+];
+
+function sanitizeFinding(f: RiskFinding): RiskFinding {
+  const out = { ...f };
+  for (const field of NULL_STRING_FIELDS) {
+    if ((out[field] as unknown) === 'null') {
+      delete out[field];
+    }
+  }
+  return out;
+}
+
 const RISK_ORDER: Record<'high' | 'medium' | 'low', number> = {
   high: 0,
   medium: 1,
@@ -88,11 +109,31 @@ export function calculateRiskScore(
 export class RiskService {
   private readonly logger = new Logger(RiskService.name);
 
+  // Idempotency cache: identical profiles return the first computed result
+  // verbatim. LLM generation is only near-deterministic (temperature 0 + seed
+  // still allow occasional risk_level drift), which would otherwise make the
+  // risk_score wobble across repeated identical requests. Caching guarantees a
+  // stable, reproducible answer for the same input — required for a trustworthy
+  // regulatory tool — and avoids redundant OpenAI calls during a demo.
+  private readonly analysisCache = new Map<string, RiskAnalysisResult>();
+
   constructor(
     private prisma: PrismaService,
     private ragService: RagService,
     @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
   ) {}
+
+  /** Canonical key for a profile — order-insensitive so equivalent inputs map together. */
+  private profileKey(profile: BusinessProfile): string {
+    const norm = (s: string) => s.trim().toLowerCase();
+    return JSON.stringify({
+      industry: norm(profile.industry),
+      location: norm(profile.location),
+      employees: profile.employees ?? null,
+      activities: [...profile.activities].map(norm).sort(),
+      expansion_locations: [...profile.expansion_locations].map(norm).sort(),
+    });
+  }
 
   async analyze(profile: BusinessProfile): Promise<RiskAnalysisResult> {
     // Live analysis needs the vector store. Without a DB there is nothing to
@@ -101,6 +142,13 @@ export class RiskService {
       throw new ServiceUnavailableException(
         'Live analysis requires the database and ingested sources. Start Postgres and run ingestion, or use GET /api/risk/demo for the validated demo.',
       );
+    }
+
+    // Return a prior identical analysis verbatim (deterministic per input).
+    const cacheKey = this.profileKey(profile);
+    const cached = this.analysisCache.get(cacheKey);
+    if (cached) {
+      return cached;
     }
 
     const chunks = await this.ragService.retrieve(profile);
@@ -162,7 +210,14 @@ export class RiskService {
       );
     }
 
-    return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
+    const result: RiskAnalysisResult = {
+      risk_score,
+      risk_level,
+      findings,
+      disclaimer: DISCLAIMER,
+    };
+    this.analysisCache.set(cacheKey, result);
+    return result;
   }
 
   async getDemo(): Promise<RiskAnalysisResult> {
@@ -244,18 +299,24 @@ export class RiskService {
       .map((c) => `SOURCE: ${c.source_url}\n${c.text}`)
       .join('\n\n---\n\n');
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a Texas regulatory compliance analyst.
+    const response = await this.openai.chat.completions.create(
+      {
+        model: OPENAI_CHAT_MODEL,
+        temperature: 0,
+        // Fixed seed + temperature 0 makes repeated identical requests
+        // near-deterministic (stable findings, scores, and label wording).
+        seed: 42,
+        messages: [
+          {
+            role: 'system',
+            content: `You are a Texas regulatory compliance analyst.
 Given a business profile and regulatory source text, identify compliance requirements.
 
 RULES:
 - Every finding MUST have a source_url copied exactly from the provided context
 - Do NOT invent findings not supported by the provided sources
 - Return ONLY valid JSON — no markdown, no explanation
+- For optional fields: omit the field entirely if the value is not found in the source — do NOT output the string "null"
 
 Return a JSON object with a "findings" array. Each finding must have ALL of these fields:
 {
@@ -276,30 +337,32 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
     "prerequisites": ["other permits/steps that must be completed before this one — empty array if none"],
     "is_hidden_requirement": true if this is easy to miss because it comes from a different agency or jurisdiction than the obvious one, otherwise false,
     "response_path": "one of: monitor | contact_agency | update_docs | change_plan | seek_clarification",
-    "permit_fee": "estimated cost if mentioned in source (e.g. '~$3,000/year'), otherwise null",
-    "effective_date": "when this requirement takes effect or deadline if mentioned, otherwise null",
+    "permit_fee": "(optional) estimated cost if explicitly mentioned in source, e.g. '~$3,000/year' — omit if not mentioned",
+    "effective_date": "(optional) deadline or effective date if explicitly mentioned in source — omit if not mentioned",
     "agency_department": "specific department or division within the agency",
-    "agency_phone": "agency phone number if available from source, otherwise null",
-    "agency_url": "official agency website URL if mentioned in source, otherwise null",
+    "agency_phone": "(optional) agency phone number if explicitly stated in source — omit if not available",
+    "agency_url": "(optional) official agency website URL if explicitly stated in source — omit if not mentioned",
     "who_to_contact": "specific agency, department, or office name",
     "what_to_ask": "exact question to ask when contacting that agency",
     "documents_needed": ["list of documents required for this compliance step"],
     "next_steps": ["ordered list of concrete next actions"]
   }]
 }`,
-        },
-        {
-          role: 'user',
-          content: `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}\n\nREGULATORY CONTEXT:\n${context}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-    }, { timeout: 60_000 });
+          },
+          {
+            role: 'user',
+            content: `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}\n\nREGULATORY CONTEXT:\n${context}`,
+          },
+        ],
+        response_format: { type: 'json_object' },
+      },
+      { timeout: 60_000 },
+    );
 
     const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
       findings?: RiskFinding[];
     };
-    const raw: RiskFinding[] = parsed.findings ?? [];
+    const raw: RiskFinding[] = (parsed.findings ?? []).map(sanitizeFinding);
 
     const verified = raw.filter(
       (f) =>

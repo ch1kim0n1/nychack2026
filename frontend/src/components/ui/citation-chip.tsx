@@ -35,7 +35,7 @@ export function CitationChip({ url, agency, onClick, className }: CitationChipPr
       title={url}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-sm',
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-sm min-w-0',
         'font-mono text-citation text-navy-600',
         'border border-[var(--cl-border)] bg-navy-50',
         'hover:underline hover:border-[var(--cl-border-strong)]',
@@ -43,8 +43,8 @@ export function CitationChip({ url, agency, onClick, className }: CitationChipPr
         className,
       )}
     >
-      {label}
-      <ExternalLink size={11} strokeWidth={1.5} className="opacity-60" />
+      <span className="truncate">{label}</span>
+      <ExternalLink size={11} strokeWidth={1.5} className="opacity-60 shrink-0" />
     </button>
   )
 }

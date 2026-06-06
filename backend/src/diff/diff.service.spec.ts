@@ -50,6 +50,8 @@ describe('DiffService', () => {
   });
 
   it('blocks deep path traversal before touching the filesystem', () => {
-    expect(() => service.getScenario('../../tsconfig.build')).toThrow(NotFoundException);
+    expect(() => service.getScenario('../../tsconfig.build')).toThrow(
+      NotFoundException,
+    );
   });
 });

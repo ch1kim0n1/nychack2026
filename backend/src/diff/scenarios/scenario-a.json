@@ -10,7 +10,7 @@
       "austin": "Austin Public Health Food Enterprise Permit required. Must pass pre-opening health inspection.",
       "status": "changed",
       "source_a": "https://dallascityhall.com/departments/codecompliance/Pages/default.aspx",
-      "source_b": "https://www.austintexas.gov/health"
+      "source_b": "https://www.austintexas.gov/health/programs/fixed-food-establishments"
     },
     {
       "category": "Alcohol Service (TABC License)",
@@ -26,7 +26,7 @@
       "austin": "Brick-and-mortar restaurant requires CS (Commercial Services) or MU (Mixed Use) zoning. Beer garden requires outdoor seating zoning approval.",
       "status": "changed",
       "source_a": "https://dallascityhall.com/departments/sustainabledevelopment/Pages/default.aspx",
-      "source_b": "https://www.austintexas.gov/health"
+      "source_b": "https://www.austintexas.gov/development-services/zoning-verification"
     },
     {
       "category": "Commercial Building Permit",
@@ -34,7 +34,7 @@
       "austin": "Commercial Building Permit required for any interior build-out or renovation. Fire marshal inspection required before opening.",
       "status": "new",
       "source_a": null,
-      "source_b": "https://www.austintexas.gov/health"
+      "source_b": "https://www.austintexas.gov/development-services/commercial-plan-review"
     },
     {
       "category": "Sales Tax Permit (Texas Comptroller)",

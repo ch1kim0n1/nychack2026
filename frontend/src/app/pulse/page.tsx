@@ -22,7 +22,7 @@ const STATIC_DIGEST: DigestItem[] = [
     level: 'medium',
     title: 'Austin updated outdoor-service hour rules',
     body: 'City of Austin extended permitted outdoor service hours on Friday/Saturday by 1 hour. Review your beer garden permit conditions.',
-    link: 'https://www.austintexas.gov/health',
+    link: 'https://www.austintexas.gov/development-services/zoning-verification',
     agency: 'City of Austin',
   },
   {

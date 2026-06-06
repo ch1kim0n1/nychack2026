@@ -29,7 +29,21 @@ def embed(text: str) -> list[float]:
 
 
 def fetch_text(url: str) -> str:
-    response = requests.get(url, timeout=30, headers={'User-Agent': 'CivicLens/1.0'})
+    headers = {'User-Agent': 'CivicLens/1.0'}
+    try:
+        response = requests.get(url, timeout=30, headers=headers)
+    except requests.exceptions.SSLError:
+        # Some authoritative sources (e.g. dallascityhall.com) serve an
+        # incomplete TLS chain — the leaf cert without its intermediate — which
+        # browsers paper over via AIA but Python's requests rejects. Retry once
+        # without chain verification so we can still ingest the page. Scoped to
+        # the SSL-error path only; all other failures still propagate. Mirrors
+        # the citation validator's handling of the same hosts.
+        import urllib3
+
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        print(f"    TLS chain incomplete for {url} — retrying without verification")
+        response = requests.get(url, timeout=30, headers=headers, verify=False)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'html.parser')
     for tag in soup(['script', 'style', 'nav', 'footer']):

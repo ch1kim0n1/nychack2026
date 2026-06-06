@@ -75,13 +75,25 @@ describe('ProfileService', () => {
 
   it('calls OpenAI with a 30-second timeout', async () => {
     mockCreate.mockResolvedValue({
-      choices: [{ message: { content: JSON.stringify({ industry: 'retail', location: 'Houston, TX', expansion_locations: [], activities: [], employees: null }) } }],
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              industry: 'retail',
+              location: 'Houston, TX',
+              expansion_locations: [],
+              activities: [],
+              employees: null,
+            }),
+          },
+        },
+      ],
     });
 
     await service.classify('A retail shop in Houston.');
 
     expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ model: 'gpt-4o' }),
+      expect.objectContaining({ model: 'gpt-4o-mini' }),
       expect.objectContaining({ timeout: 30_000 }),
     );
   });
@@ -91,9 +103,9 @@ describe('ProfileService', () => {
       choices: [{ message: { content: null } }],
     });
 
-    await expect(service.classify('I run a retail shop in Houston.')).rejects.toThrow(
-      InternalServerErrorException,
-    );
+    await expect(
+      service.classify('I run a retail shop in Houston.'),
+    ).rejects.toThrow(InternalServerErrorException);
   });
 
   it('throws a clear 500 when OpenAI returns invalid JSON', async () => {
@@ -101,9 +113,9 @@ describe('ProfileService', () => {
       choices: [{ message: { content: '{not json' } }],
     });
 
-    await expect(service.classify('I run a retail shop in Houston.')).rejects.toThrow(
-      InternalServerErrorException,
-    );
+    await expect(
+      service.classify('I run a retail shop in Houston.'),
+    ).rejects.toThrow(InternalServerErrorException);
   });
 
   it('defaults missing array fields to empty arrays', async () => {
@@ -132,8 +144,8 @@ describe('ProfileService', () => {
       choices: [{ message: { content: JSON.stringify({}) } }],
     });
 
-    await expect(service.classify('I run a retail shop in Houston.')).rejects.toThrow(
-      UnprocessableEntityException,
-    );
+    await expect(
+      service.classify('I run a retail shop in Houston.'),
+    ).rejects.toThrow(UnprocessableEntityException);
   });
 });

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { HealthController } from './health/health.controller';
 import { DatabaseModule } from './database/prisma.module';
 import { ProfileModule } from './profile/profile.module';
 import { RagModule } from './rag/rag.module';
@@ -20,6 +21,7 @@ import { MetricsModule } from './metrics/metrics.module';
     DraftModule,
     MetricsModule,
   ],
+  controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
