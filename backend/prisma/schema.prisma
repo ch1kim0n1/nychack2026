@@ -112,4 +112,8 @@ model RiskFinding {
   documents_needed   String[] @default([])
   next_steps         String[] @default([])
   created_at         DateTime @default(now())
+  // Manual validation
+  review_state    String    @default("auto_approved") // "pending" | "approved" | "rejected" | "auto_approved"
+  reviewer_note   String?
+  reviewed_at     DateTime?
 }
