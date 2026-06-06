@@ -244,14 +244,14 @@ function FindingRow({
   return (
     <div data-finding-row className="bg-surface border border-[var(--cl-border)] rounded shadow-1">
       <div
-        className="flex items-start justify-between gap-4 p-4 cursor-pointer hover:bg-navy-50 transition-colors duration-[120ms]"
+        className="flex flex-col gap-3 p-4 cursor-pointer hover:bg-navy-50 transition-colors duration-[120ms] sm:flex-row sm:items-start sm:justify-between sm:gap-4"
         onClick={onToggle}
       >
         <div className="flex items-start gap-3 min-w-0">
           <RiskBadge level={finding.risk_level} className="shrink-0 mt-0.5" />
           <div className="min-w-0">
-            <h3 className="text-h3 text-[var(--cl-text)] leading-snug">{finding.affected_area}</h3>
-            <p className="text-body text-[var(--cl-text-secondary)] mt-1 line-clamp-2">{finding.explanation}</p>
+            <h3 className="text-h3 text-[var(--cl-text)] leading-snug break-words">{finding.affected_area}</h3>
+            {!expanded && <p className="text-body text-[var(--cl-text-secondary)] mt-1 line-clamp-2">{finding.explanation}</p>}
             {(finding.impact_label || finding.is_hidden_requirement) && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {finding.impact_label && <ImpactLabel label={finding.impact_label} />}
@@ -265,13 +265,13 @@ function FindingRow({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span onClick={e => e.stopPropagation()}>
-            <CitationChip url={finding.source_url} onClick={onCitationClick} />
+        <div className="flex items-center justify-between gap-2 sm:justify-end sm:shrink-0">
+          <span onClick={e => e.stopPropagation()} className="min-w-0">
+            <CitationChip url={finding.source_url} onClick={onCitationClick} className="max-w-full" />
           </span>
           {expanded
-            ? <ChevronDown size={16} className="text-[var(--cl-text-muted)]" />
-            : <ChevronRight size={16} className="text-[var(--cl-text-muted)]" />}
+            ? <ChevronDown size={16} className="text-[var(--cl-text-muted)] shrink-0" />
+            : <ChevronRight size={16} className="text-[var(--cl-text-muted)] shrink-0" />}
         </div>
       </div>
 
