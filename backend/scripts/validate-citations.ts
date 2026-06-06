@@ -24,19 +24,53 @@ interface Result {
   note?: string
 }
 
-async function checkUrl(url: string): Promise<{ status: number | 'ERROR'; ok: boolean; note?: string }> {
+// TLS errors that indicate an incomplete cert chain served by the host
+// (e.g. a missing intermediate / self-signed-intermediate) rather than a
+// dead host or an invalid/expired/mismatched certificate. Some authoritative
+// government sites (e.g. dallascityhall.com) serve a leaf cert without the
+// intermediate, which Node rejects even though the page is live and trusted
+// by browsers that fetch the missing intermediate via AIA. We treat these as
+// recoverable and re-verify the HTTP response, but never blanket-disable TLS.
+const RECOVERABLE_TLS_ERRORS = new Set([
+  'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+  'UNABLE_TO_GET_ISSUER_CERT',
+  'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+])
+
+async function checkUrl(
+  url: string,
+  insecure = false,
+): Promise<{ status: number | 'ERROR'; ok: boolean; note?: string }> {
   return new Promise(resolve => {
-    const mod = url.startsWith('https') ? https : http
-    const req = mod.get(url, { headers: { 'User-Agent': 'CivicLens/citation-validator 1.0' } }, res => {
+    const isHttps = url.startsWith('https')
+    const mod = isHttps ? https : http
+    const options: https.RequestOptions = {
+      headers: { 'User-Agent': 'CivicLens/citation-validator 1.0' },
+    }
+    // Scoped, opt-in only: used on a single retry when the host returned a
+    // recoverable cert-chain error, so we can still confirm it responds < 400.
+    if (insecure && isHttps) options.rejectUnauthorized = false
+
+    const req = mod.get(url, options, res => {
       const status = res.statusCode ?? 0
       res.resume() // drain body
+      const tlsNote = insecure ? ' (host TLS chain incomplete; verified via response)' : ''
       if (status >= 300 && status < 400 && res.headers.location) {
-        resolve({ status, ok: true, note: `redirects → ${res.headers.location}` })
+        resolve({ status, ok: true, note: `redirects → ${res.headers.location}${tlsNote}` })
       } else {
-        resolve({ status, ok: status < 400 })
+        resolve({ status, ok: status < 400, note: tlsNote ? tlsNote.trim() : undefined })
       }
     })
-    req.on('error', err => resolve({ status: 'ERROR', ok: false, note: err.message }))
+    req.on('error', (err: NodeJS.ErrnoException) => {
+      const code = (err as { code?: string }).code ?? ''
+      // Retry exactly once for an incomplete-chain TLS error, still requiring
+      // a live HTTP response < 400. 404s / dead hosts stay broken.
+      if (!insecure && isHttps && RECOVERABLE_TLS_ERRORS.has(code)) {
+        resolve(checkUrl(url, true))
+      } else {
+        resolve({ status: 'ERROR', ok: false, note: err.message })
+      }
+    })
     req.setTimeout(10000, () => { req.destroy(); resolve({ status: 'ERROR', ok: false, note: 'timeout' }) })
   })
 }
