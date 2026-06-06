@@ -22,6 +22,11 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    env:
+      # prisma.config requires DATABASE_URL even for `prisma generate`, which
+      # does not open a connection. A throwaway value satisfies the config;
+      # unit tests mock PrismaService, so no real database is contacted.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -109,6 +114,10 @@ jobs:
       DATABASE_URL: postgresql://civiclens:civiclens@localhost:5432/civiclens?schema=public
       # Backend binds PORT (defaults to 3001); pin it so the wait-loop matches.
       PORT: 3001
+      # The OpenAI provider validates this key at startup, so the app cannot
+      # boot without it — even for the demo/diff routes that never call OpenAI.
+      # SKIP_LIVE=1 means this dummy key is never actually used for a request.
+      OPENAI_API_KEY: sk-ci-dummy-not-used
 
     steps:
       - name: Checkout
