@@ -39,6 +39,8 @@ export interface RiskFinding {
   what_to_ask?: string
   documents_needed?: string[]
   next_steps?: string[]
+  // Manual validation
+  review_state?: string // "pending" | "approved" | "rejected" | "auto_approved"
 }
 
 export interface DraftResult {
@@ -111,6 +113,24 @@ export interface PulseDigest {
   generated_at: string
   personalized: boolean
   business_label: string
+}
+
+export interface AdminFinding {
+  id: string
+  review_state: string
+  affected_area: string
+  risk_level: 'high' | 'medium' | 'low'
+  explanation: string
+  source_url: string
+  confidence_level?: string
+  created_at: string
+}
+
+export interface ReviewStats {
+  pending: number
+  approved: number
+  rejected: number
+  auto_approved: number
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -197,4 +217,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ profile }),
     }),
+
+  getAdminPendingFindings: () =>
+    apiFetch<AdminFinding[]>('/api/admin/findings/pending'),
+
+  reviewFinding: (id: string, state: 'approved' | 'rejected', note?: string) =>
+    apiFetch<AdminFinding>(`/api/admin/findings/${id}/review`, {
+      method: 'PATCH',
+      body: JSON.stringify({ state, note }),
+    }),
+
+  getAdminStats: () =>
+    apiFetch<ReviewStats>('/api/admin/stats'),
 }
