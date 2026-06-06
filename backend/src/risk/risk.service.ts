@@ -202,6 +202,7 @@ export class RiskService {
           what_to_ask: f.what_to_ask ?? null,
           documents_needed: f.documents_needed ?? [],
           next_steps: f.next_steps ?? [],
+          review_state: this.requiresReview(f.affected_area) ? 'pending' : 'auto_approved',
         })),
       });
     } catch (err) {
@@ -283,6 +284,10 @@ export class RiskService {
     const risk_level = this.overallLevel(findings);
 
     return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
+  }
+
+  private requiresReview(affected_area: string): boolean {
+    return /alcohol|tabc|zoning|health|fine|childcare/i.test(affected_area);
   }
 
   private overallLevel(findings: RiskFinding[]): 'high' | 'medium' | 'low' {
