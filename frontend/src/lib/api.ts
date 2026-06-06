@@ -82,6 +82,22 @@ export interface ScenarioDiff {
   differences: DiffItem[]
 }
 
+export interface RadarThreat {
+  source_id: string
+  title: string
+  agency: string
+  jurisdiction: string
+  source_url: string
+  last_checked_at: string | null
+  matched_tags: string[]
+}
+
+export interface RadarResponse {
+  threats: RadarThreat[]
+  generated_at: string
+  profile_summary: string
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers)
   if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
@@ -154,4 +170,10 @@ export const api = {
         body: JSON.stringify({ client_id: clientId }),
       }),
   },
+
+  radarThreats: (profile: BusinessProfile, days?: number) =>
+    apiFetch<RadarResponse>('/api/radar', {
+      method: 'POST',
+      body: JSON.stringify({ profile, days }),
+    }),
 }
