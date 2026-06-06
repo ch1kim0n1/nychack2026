@@ -7,10 +7,14 @@
 
 ## Backend — Railway
 
+> The backend now ships `backend/Dockerfile` + `backend/railway.json`. Railway
+> builds from the Dockerfile and uses healthcheck `/api/health`. The manual steps
+> below remain the reference if you configure the service by hand.
+
 ### 1. Create Railway project
 
 1. Go to railway.app → New Project → Deploy from GitHub repo → select `nychack2026`
-2. Railway will detect the Node.js project in `backend/`
+2. Railway will detect the Node.js project in `backend/` (or build from `backend/Dockerfile`)
 
 ### 2. Add PostgreSQL with pgvector
 
@@ -23,10 +27,14 @@
 
 ### 3. Set environment variables (Railway → Variables tab)
 
+> Source of truth for env vars: `backend/.env.example` (backend) and
+> `frontend/.env.example` (frontend). The tables below mirror those files.
+
 | Variable | Value |
 |----------|-------|
 | `DATABASE_URL` | Auto-set by Railway when you link the Postgres service |
 | `OPENAI_API_KEY` | Your OpenAI key |
+| `OPENAI_MODEL` | Optional. Default `gpt-4o-mini`; set `gpt-4o` for higher-quality findings |
 | `PORT` | `3001` |
 | `FRONTEND_URL` | Your Vercel URL (set after frontend deploy) |
 | `NODE_ENV` | `production` |
@@ -55,6 +63,10 @@ python ingest.py
 ```
 
 Set `DATABASE_URL` and `OPENAI_API_KEY` in your local env before running.
+
+The ingester tolerates incomplete TLS chains: on an `SSLError` it retries the
+fetch with a scoped `verify=False` so the `dallascityhall.com` Dallas sources
+ingest. All 9 sources should ingest (~34 chunks across Austin / Dallas / Texas).
 
 ---
 
@@ -93,6 +105,31 @@ open https://<VERCEL_URL>/home
 cd backend && npm run validate:citations
 ```
 
+### Deployed smoke test
+
+A dependency-free e2e smoke test drives the full path
+(demo → classify → live analyze → determinism → diff → draft). Point it at any
+host with `BASE_URL`:
+
+```bash
+cd backend
+BASE_URL=https://<RAILWAY_URL> npm run e2e:smoke
+# => PASS — 17 checks green
+```
+
+`SKIP_LIVE=1 npm run e2e:smoke` checks only the demo + diff routes (no DB or
+OpenAI required). Live `/api/risk/analyze` is deterministic per input — an
+in-memory idempotency cache (keyed by canonical profile) plus OpenAI
+`temperature:0` + `seed` means repeated identical requests return identical
+results, which the determinism check relies on.
+
+---
+
+## Continuous integration
+
+CI (`.github/workflows/ci.yml`) runs lint + test + build plus a `SKIP_LIVE` e2e
+smoke on every PR.
+
 ---
 
 ## Troubleshooting
@@ -118,6 +155,7 @@ loads it (`main.ts` imports `dotenv/config` at startup). The demo/static routes
 ## Pre-demo checklist
 
 - [ ] `npm run validate:citations` passes at 100%
+- [ ] `BASE_URL` `e2e:smoke` passes against the deployed backend
 - [ ] `/demo` route loads the dashboard with seeded Scenario A data
 - [ ] `/diff` shows the Dallas→Austin diff table with 5 rows
 - [ ] `/pulse` shows the Compliance Pulse email mock
