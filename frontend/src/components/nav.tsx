@@ -34,6 +34,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
     { label: 'Compare', href: '/diff' },
     { label: 'Scenarios', href: '/scenarios' },
     { label: 'Radar', href: '/radar' },
+    { label: 'Map', href: '/map' },
     { label: 'Checklist', href: '/checklist' },
     { label: 'Lease check', href: '/lease' },
     { label: 'Readiness', href: '/readiness' },
@@ -87,6 +88,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
             </Link>
             <Link href="/radar" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Radar
+            </Link>
+            <Link href="/map" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Map
             </Link>
             {loadingData ? (
               <>

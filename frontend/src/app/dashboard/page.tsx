@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { RiskBadge } from '@/components/ui/risk-badge'
@@ -18,7 +19,13 @@ import { ConfidenceBadge, JurisdictionBadge } from '@/components/ui/trust-badges
 import { StakeholderMap } from '@/components/stakeholder-map'
 import { RiskHeatmap } from '@/components/risk-heatmap'
 import { PermitTimeline } from '@/components/permit-timeline'
+import dynamic from 'next/dynamic'
 import { cn } from '@/lib/utils'
+
+const TexasMap = dynamic(
+  () => import('@/components/map/TexasMap').then(m => ({ default: m.TexasMap })),
+  { ssr: false, loading: () => <div className="h-64 w-full rounded" style={{ background: 'var(--cl-navy-900)' }} /> },
+)
 
 const IMPACT_LABEL_COLORS: Record<string, string> = {
   'Could delay opening': 'text-risk-high-fg bg-risk-high-bg border-risk-high-border',
@@ -284,6 +291,23 @@ export default function DashboardPage() {
                   <PermitTimeline findings={result.findings} />
                   <StakeholderMap findings={result.findings} />
                   <RiskHeatmap findings={result.findings} />
+                  <section className="rounded-lg border border-[var(--cl-border)] bg-surface px-5 py-5 shadow-1">
+                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <h2 className="text-h2 text-[var(--cl-text)]">Texas Compliance Map</h2>
+                        <p className="mt-1 text-body text-[var(--cl-text-secondary)]">
+                          Click a city to compare licensing requirements, restrictions, and documents.
+                        </p>
+                      </div>
+                      <Link
+                        href="/map"
+                        className="text-caption text-navy-600 hover:underline shrink-0"
+                      >
+                        View full map →
+                      </Link>
+                    </div>
+                    <TexasMap compact className="h-64 w-full" />
+                  </section>
                 </div>
               </>
             )}
