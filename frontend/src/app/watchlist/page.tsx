@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { api, type BusinessProfile, type SavedProfile } from '@/lib/api'
-import { Bookmark, Trash2 } from 'lucide-react'
+import { Bookmark, Trash2, Bell, Building2 } from 'lucide-react'
 
 function getOrCreateClientId(): string {
   let id = localStorage.getItem('cl-clientId')
@@ -21,7 +21,6 @@ export default function WatchlistPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // "Save this scan" form state
   const [scanProfile, setScanProfile] = useState<BusinessProfile | null>(null)
   const [label, setLabel] = useState('')
   const [saving, setSaving] = useState(false)
@@ -34,14 +33,13 @@ export default function WatchlistPage() {
     const id = getOrCreateClientId()
     setClientId(id)
 
-    // Check for a scan in sessionStorage
     const rawProfile = sessionStorage.getItem('cl-profile')
     const rawInput = sessionStorage.getItem('cl-input')
     if (rawProfile && rawInput) {
       try {
         setScanProfile(JSON.parse(rawProfile) as BusinessProfile)
       } catch {
-        // ignore malformed storage
+        // Ignore malformed storage.
       }
     }
 
@@ -82,7 +80,7 @@ export default function WatchlistPage() {
     setDeletingIds(new Set(deletingRef.current))
     try {
       await api.watchlist.remove(id, clientId)
-      setProfiles((prev) => prev.filter((p) => p.id !== id))
+      setProfiles((prev) => prev.filter((profile) => profile.id !== id))
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to delete profile')
     } finally {
@@ -96,127 +94,144 @@ export default function WatchlistPage() {
       <Nav variant="app" />
       <DisclaimerBanner />
 
-      <main className="flex-1 px-6 py-6 max-w-app mx-auto w-full">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-h1 text-[var(--cl-text)]">Watchlist</h1>
-          <p className="text-caption text-[var(--cl-text-muted)] mt-1">
-            Save business profiles and track them for regulatory changes.
-          </p>
+      <main className="flex-1 px-6 py-8 max-w-app mx-auto w-full">
+        <div className="mb-6 overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
+          <div className="grid lg:grid-cols-[280px_1fr]">
+            <div className="bg-navy-900 px-6 py-5 text-white">
+              <div className="mb-4 flex items-center gap-2 text-white/75">
+                <Bell size={18} strokeWidth={1.5} />
+                <span className="text-label uppercase tracking-[0.06em]">Watchlist</span>
+              </div>
+              <h1 className="text-h1 text-white">Track civic risk across saved profiles.</h1>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-body-lg text-[var(--cl-text)]">
+                Save business profiles and monitor them as local rules, permits, and agency sources change.
+              </p>
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="border-l-2 border-navy-600 pl-3">
+                  <p className="font-mono text-h2 text-[var(--cl-text)]">{profiles.length}</p>
+                  <p className="text-caption text-[var(--cl-text-muted)]">Saved profiles</p>
+                </div>
+                <div className="border-l-2 border-[var(--cl-border-strong)] pl-3">
+                  <p className="font-mono text-h2 text-[var(--cl-text)]">{scanProfile ? '1' : '0'}</p>
+                  <p className="text-caption text-[var(--cl-text-muted)]">Current scans ready to save</p>
+                </div>
+                <div className="border-l-2 border-risk-low-border pl-3">
+                  <p className="font-mono text-h2 text-[var(--cl-text)]">30d</p>
+                  <p className="text-caption text-[var(--cl-text-muted)]">Radar comparison window</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Save this scan panel */}
         {scanProfile && (
-          <div className="mb-6 bg-surface border border-[var(--cl-border)] rounded p-4 shadow-1">
-            <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-3">
-              Save this scan
-            </p>
-            <p className="text-body text-[var(--cl-text-secondary)] mb-3">
-              <span className="font-medium text-[var(--cl-text)]">{scanProfile.industry}</span>
-              {' · '}
-              {scanProfile.location}
-            </p>
-            <div className="flex gap-2">
+          <section className="mb-6 rounded-lg border border-[var(--cl-border)] bg-surface p-5 shadow-1">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-1">Save this scan</p>
+                <p className="text-body text-[var(--cl-text-secondary)]">
+                  <span className="font-medium text-[var(--cl-text)]">{scanProfile.industry}</span>
+                  {' · '}
+                  {scanProfile.location}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 type="text"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                placeholder="Label (e.g. My Austin Restaurant)"
+                placeholder="Label, for example My Austin Restaurant"
                 maxLength={200}
-                className="flex-1 bg-sunken border border-[var(--cl-border)] rounded text-body px-3 py-2 focus:outline-none focus:border-[var(--cl-border-strong)] text-[var(--cl-text)] placeholder:text-[var(--cl-text-muted)]"
+                className="flex-1 rounded border border-[var(--cl-border)] bg-sunken px-3 py-2 text-body text-[var(--cl-text)] placeholder:text-[var(--cl-text-muted)] focus:outline-none focus:border-[var(--cl-border-strong)]"
               />
               <button
                 onClick={handleSave}
                 disabled={saving || !label.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 rounded text-caption font-semibold bg-navy-600 text-white hover:bg-navy-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-1.5 rounded bg-navy-600 px-4 py-2 text-caption font-semibold text-white transition-colors hover:bg-navy-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Bookmark size={14} strokeWidth={1.5} />
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? 'Saving...' : 'Save'}
               </button>
             </div>
             {saveError && (
               <p className="text-caption text-risk-high-fg mt-2">{saveError}</p>
             )}
-          </div>
+          </section>
         )}
 
-        {/* Error state */}
         {error && (
-          <div className="mb-4 bg-risk-high-bg border border-risk-high-border rounded px-4 py-3 text-body text-risk-high-fg">
+          <div className="mb-4 rounded border border-risk-high-border bg-risk-high-bg px-4 py-3 text-body text-risk-high-fg">
             {error}
           </div>
         )}
 
-        {/* Loading state */}
-        {loading && (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-24 bg-surface border border-[var(--cl-border)] rounded animate-pulse"
-              />
-            ))}
+        <section className="overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
+          <div className="border-b border-[var(--cl-border-subtle)] px-5 py-4">
+            <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-1">Saved profiles</p>
+            <h2 className="text-h2 text-[var(--cl-text)]">Businesses under monitoring</h2>
           </div>
-        )}
 
-        {/* Profile list */}
-        {!loading && profiles.length > 0 && (
-          <div className="space-y-3">
-            {profiles.map((p) => (
-              <div
-                key={p.id}
-                className="bg-surface border border-[var(--cl-border)] rounded shadow-1 p-4"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-h3 text-[var(--cl-text)] mb-0.5">{p.label}</h2>
+          {loading && (
+            <div className="divide-y divide-[var(--cl-border-subtle)]">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-24 animate-pulse bg-surface" />
+              ))}
+            </div>
+          )}
+
+          {!loading && profiles.length > 0 && (
+            <div className="divide-y divide-[var(--cl-border-subtle)]">
+              {profiles.map((profile) => (
+                <div key={profile.id} className="grid gap-4 px-5 py-4 md:grid-cols-[1fr_auto] md:items-start">
+                  <div className="min-w-0">
+                    <div className="mb-1 flex items-center gap-2">
+                      <Building2 size={15} strokeWidth={1.5} className="text-navy-600" />
+                      <h3 className="text-h3 text-[var(--cl-text)]">{profile.label}</h3>
+                    </div>
                     <p className="text-caption text-[var(--cl-text-muted)] mb-2">
-                      {p.profile_json.industry} · {p.profile_json.location}
-                      {' · '}
-                      Saved {new Date(p.created_at).toLocaleDateString()}
+                      {profile.profile_json.industry} · {profile.profile_json.location} · Saved {new Date(profile.created_at).toLocaleDateString()}
                     </p>
-                    {p.profile_json.activities.length > 0 && (
+                    {profile.profile_json.activities.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {p.profile_json.activities.slice(0, 6).map((act) => (
-                          <span
-                            key={act}
-                            className="font-mono text-citation px-2 py-0.5 rounded-sm border border-[var(--cl-border)] text-[var(--cl-text-secondary)] bg-sunken"
-                          >
-                            {act}
+                        {profile.profile_json.activities.slice(0, 6).map((activity) => (
+                          <span key={activity} className="rounded-sm border border-[var(--cl-border)] bg-sunken px-2 py-0.5 font-mono text-citation text-[var(--cl-text-secondary)]">
+                            {activity}
                           </span>
                         ))}
-                        {p.profile_json.activities.length > 6 && (
+                        {profile.profile_json.activities.length > 6 && (
                           <span className="font-mono text-citation text-[var(--cl-text-muted)]">
-                            +{p.profile_json.activities.length - 6} more
+                            +{profile.profile_json.activities.length - 6} more
                           </span>
                         )}
                       </div>
                     )}
                   </div>
                   <button
-                    onClick={() => handleDelete(p.id)}
-                    disabled={deletingIds.has(p.id)}
-                    aria-label={`Delete ${p.label}`}
-                    className="shrink-0 p-1.5 rounded text-[var(--cl-text-muted)] hover:text-risk-high-fg hover:bg-risk-high-bg transition-colors disabled:opacity-40"
+                    onClick={() => handleDelete(profile.id)}
+                    disabled={deletingIds.has(profile.id)}
+                    aria-label={`Delete ${profile.label}`}
+                    className="shrink-0 rounded p-1.5 text-[var(--cl-text-muted)] transition-colors hover:bg-risk-high-bg hover:text-risk-high-fg disabled:opacity-40"
                   >
                     <Trash2 size={16} strokeWidth={1.5} />
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* Empty state */}
-        {!loading && profiles.length === 0 && !error && (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <Bookmark size={32} strokeWidth={1.5} className="text-[var(--cl-text-muted)]" />
-            <p className="text-h2 text-[var(--cl-text)]">No saved profiles yet</p>
-            <p className="text-body text-[var(--cl-text-muted)]">
-              Run a scan and save it here to track regulatory changes.
-            </p>
-          </div>
-        )}
+          {!loading && profiles.length === 0 && !error && (
+            <div className="flex flex-col items-center gap-3 px-5 py-16 text-center">
+              <Bookmark size={32} strokeWidth={1.5} className="text-[var(--cl-text-muted)]" />
+              <p className="text-h2 text-[var(--cl-text)]">No saved profiles yet</p>
+              <p className="text-body text-[var(--cl-text-muted)]">
+                Run a scan and save it here to track regulatory changes.
+              </p>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   )

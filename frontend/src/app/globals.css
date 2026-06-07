@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 /* ─────────────────────────────────────────
-   DESIGN TOKENS — CivicLens §2
+   DESIGN TOKENS, CivicLens §2
    All components reference vars, never raw hex.
 ───────────────────────────────────────── */
 
 :root {
-  /* Neutrals — light */
+  /* Neutrals, light */
   --cl-canvas:         #F6F8FA;
   --cl-surface:        #FFFFFF;
   --cl-sunken:         #F1F4F7;
@@ -27,7 +27,7 @@
   --cl-navy-800: #102B45;
   --cl-navy-900: #0B1F33;
 
-  /* Risk states — desaturated on purpose */
+  /* Risk states, desaturated on purpose */
   --cl-risk-high-fg:     #B23A3A;
   --cl-risk-high-bg:     #FBEDED;
   --cl-risk-high-border: #E8C5C5;
@@ -61,7 +61,7 @@
 }
 
 /* ─────────────────────────────────────────
-   DARK THEME — opt-in via data-theme="dark"
+   DARK THEME, opt-in via data-theme="dark"
 ───────────────────────────────────────── */
 
 [data-theme="dark"] {
@@ -114,13 +114,13 @@ body {
   font-family: var(--font-mono), monospace;
 }
 
-/* Focus ring — global, 2px navy-600 at 40% */
+/* Focus ring, global, 2px navy-600 at 40% */
 :focus-visible {
   outline: 2px solid color-mix(in srgb, var(--cl-navy-600) 40%, transparent);
   outline-offset: 2px;
 }
 
-/* Reduced motion — collapse everything to instant opacity */
+/* Reduced motion, collapse everything to instant opacity */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -129,7 +129,7 @@ body {
   }
 }
 
-/* Print — for diff viewer */
+/* Print, for diff viewer */
 @media print {
   .no-print { display: none !important; }
   .print-expand { display: block !important; }

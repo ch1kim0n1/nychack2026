@@ -202,7 +202,7 @@ export default function ScenariosPage() {
               <div className="flex items-center gap-2 mb-2">
                 <Zap size={14} strokeWidth={1.5} className="text-navy-600" />
                 <p className="text-caption font-semibold text-navy-700">
-                  Scenario match: {selectScenario(industry, activities, expandCity || null) ?? 'Custom — will run full analysis'}
+                  Scenario match: {selectScenario(industry, activities, expandCity || null) ?? 'Custom: will run full analysis'}
                 </p>
               </div>
               <p className="text-caption text-[var(--cl-text-secondary)]">

@@ -154,7 +154,7 @@ export default function ChecklistPage() {
                   {/* Status toggle */}
                   <button
                     onClick={() => cycleStatus(key, state.status)}
-                    title={`Status: ${cfg.label} — click to advance`}
+                    title={`Status: ${cfg.label}, click to advance`}
                     className={cn(
                       'inline-flex items-center gap-1 px-2 py-1 rounded-sm border text-caption font-mono shrink-0 transition-colors duration-[80ms] hover:opacity-80',
                       cfg.classes,

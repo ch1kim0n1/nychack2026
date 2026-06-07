@@ -6,7 +6,6 @@ import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { RiskBadge } from '@/components/ui/risk-badge'
 import { CitationChip } from '@/components/ui/citation-chip'
-import { SummaryCard } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DashboardSkeleton } from '@/components/ui/skeleton'
 import { api, type BusinessProfile, type RiskFinding, type RiskAnalysisResult, type DraftResult } from '@/lib/api'
@@ -135,7 +134,7 @@ export default function DashboardPage() {
       {degraded && (
         <div className="bg-risk-med-bg border-b border-risk-med-border px-6 py-2 flex items-center gap-2 text-caption text-risk-med-fg">
           <AlertTriangle size={13} strokeWidth={1.5} className="shrink-0" />
-          Live analysis unavailable — showing cached demo results.
+          Live analysis unavailable, showing cached demo results.
           <button className="ml-auto underline" onClick={() => router.push('/intake')}>Re-analyze</button>
         </div>
       )}
@@ -155,26 +154,46 @@ export default function DashboardPage() {
 
         {result && !loading && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <SummaryCard
-                label="Risk Score"
-                value={<><span ref={scoreRef}>0</span><span className="text-h3 text-[var(--cl-text-secondary)]"> / 100</span></>}
-                mono
-              />
-              <SummaryCard
-                label="Findings"
-                value={result.findings.length}
-                sub={result.findings.length > 0
-                  ? <span className="font-mono">{highCount}H · {medCount}M · {lowCount}L</span>
-                  : undefined}
-              />
-              <SummaryCard
-                label="Top Priority"
-                value={result.findings[0]?.affected_area ?? 'None'}
-                sub={result.findings[0] ? <RiskBadge level={result.findings[0].risk_level} /> : undefined}
-              />
+            <div className="mb-6 overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
+              <div className="grid lg:grid-cols-[260px_1fr]">
+                <div className="bg-navy-900 px-6 py-5 text-white">
+                  <p className="text-label uppercase tracking-[0.06em] text-white/55 mb-3">Risk command center</p>
+                  <div className="flex items-end gap-2">
+                    <span ref={scoreRef} className="font-mono text-[3.25rem] leading-none">0</span>
+                    <span className="pb-2 text-body text-white/65">/ 100</span>
+                  </div>
+                  <p className="mt-4 text-caption text-white/65">
+                    {result.findings.length} finding{result.findings.length === 1 ? '' : 's'} found across cited civic sources.
+                  </p>
+                </div>
+                <div className="px-6 py-5">
+                  <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">Top priority</p>
+                      <h1 className="text-h1 text-[var(--cl-text)]">
+                        {result.findings[0]?.affected_area ?? 'No priority finding'}
+                      </h1>
+                      <p className="mt-2 max-w-2xl text-body text-[var(--cl-text-secondary)]">
+                        {result.findings[0]?.recommended_action ?? 'CivicLens did not find any immediate action item for this profile.'}
+                      </p>
+                    </div>
+                    {result.findings[0] && <RiskBadge level={result.findings[0].risk_level} className="shrink-0" />}
+                  </div>
+                  <div className="mt-5 grid grid-cols-3 gap-0 overflow-hidden rounded border border-[var(--cl-border-subtle)]">
+                    {[
+                      ['High', highCount, 'text-risk-high-fg bg-risk-high-bg'],
+                      ['Medium', medCount, 'text-risk-med-fg bg-risk-med-bg'],
+                      ['Low', lowCount, 'text-risk-low-fg bg-risk-low-bg'],
+                    ].map(([label, value, classes]) => (
+                      <div key={label} className={`px-4 py-3 border-r last:border-r-0 border-[var(--cl-border-subtle)] ${classes}`}>
+                        <p className="text-label uppercase tracking-[0.06em] opacity-75">{label}</p>
+                        <p className="font-mono text-h2">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-
             {result.findings.length === 0 && (
               <div className="flex flex-col items-center gap-3 py-16 text-center">
                 <CheckCircle size={32} strokeWidth={1.5} className="text-risk-low-fg" />
@@ -190,24 +209,32 @@ export default function DashboardPage() {
 
             {result.findings.length > 0 && (
               <>
-              <div ref={findingsRef} className="flex flex-col gap-2">
-                {result.findings.map((finding, i) => (
-                  <FindingRow
-                    key={i}
-                    finding={finding}
-                    expanded={expanded.has(i)}
-                    onToggle={() => setExpanded(prev => {
-                      const next = new Set(prev)
-                      next.has(i) ? next.delete(i) : next.add(i)
-                      return next
-                    })}
-                    onCitationClick={() => setDrawerFinding(finding)}
-                  />
-                ))}
-              </div>
-              <PermitTimeline findings={result.findings} />
-              <StakeholderMap findings={result.findings} />
-              <RiskHeatmap findings={result.findings} />
+                <section className="overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
+                  <div className="border-b border-[var(--cl-border-subtle)] px-5 py-4">
+                    <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-1">Findings ledger</p>
+                    <h2 className="text-h2 text-[var(--cl-text)]">Requirements, source citations, and action steps</h2>
+                  </div>
+                  <div ref={findingsRef} className="divide-y divide-[var(--cl-border-subtle)]">
+                    {result.findings.map((finding, i) => (
+                      <FindingRow
+                        key={i}
+                        finding={finding}
+                        expanded={expanded.has(i)}
+                        onToggle={() => setExpanded(prev => {
+                          const next = new Set(prev)
+                          next.has(i) ? next.delete(i) : next.add(i)
+                          return next
+                        })}
+                        onCitationClick={() => setDrawerFinding(finding)}
+                      />
+                    ))}
+                  </div>
+                </section>
+                <div className="mt-8 space-y-8">
+                  <PermitTimeline findings={result.findings} />
+                  <StakeholderMap findings={result.findings} />
+                  <RiskHeatmap findings={result.findings} />
+                </div>
               </>
             )}
           </>
@@ -262,7 +289,7 @@ function FindingRow({
   onCitationClick: () => void
 }) {
   return (
-    <div data-finding-row className="bg-surface border border-[var(--cl-border)] rounded shadow-1">
+    <div data-finding-row className="bg-surface">
       <div
         className="flex flex-col gap-3 p-4 cursor-pointer hover:bg-navy-50 transition-colors duration-[120ms] sm:flex-row sm:items-start sm:justify-between sm:gap-4"
         onClick={onToggle}
@@ -297,7 +324,7 @@ function FindingRow({
       </div>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-[var(--cl-border-subtle)] pt-3 space-y-3">
+        <div className="px-4 pb-4 border-t border-[var(--cl-border-subtle)] pt-3 space-y-3 bg-canvas/50">
           <p className="text-body text-[var(--cl-text)]">{finding.explanation}</p>
           {finding.prerequisites && finding.prerequisites.length > 0 && (
             <div className="bg-risk-med-bg border border-risk-med-border rounded px-3 py-2">
@@ -563,7 +590,7 @@ function CitationDrawer({ finding, businessDescription, onClose }: {
             </div>
             {finding.confidence_level === 'low' && (
               <p className="text-caption text-risk-med-fg bg-risk-med-bg border border-risk-med-border rounded px-2 py-1 mb-2">
-                Low-confidence finding — verify directly with the agency before taking action.
+                Low-confidence finding, verify directly with the agency before taking action.
               </p>
             )}
             <div className="bg-sunken border border-[var(--cl-border)] rounded p-3 font-mono text-citation">
@@ -583,3 +610,5 @@ function CitationDrawer({ finding, businessDescription, onClose }: {
     </>
   )
 }
+
+

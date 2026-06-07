@@ -6,10 +6,8 @@ import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api, type BusinessProfile, type RadarThreat } from '@/lib/api'
-import { ExternalLink, Radio, AlertTriangle, Clock, ShieldCheck } from 'lucide-react'
+import { ExternalLink, Radio, AlertTriangle, Clock, ShieldCheck, Building2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-// -- Helpers ------------------------------------------------------------------
 
 function daysSince(iso: string | null): number | null {
   if (!iso) return null
@@ -25,13 +23,12 @@ function formatDate(iso: string | null): string {
   })
 }
 
-/** Recency chip: high urgency if checked within 7 days, medium if 8-14, low otherwise */
 function RecencyChip({ last_checked_at }: { last_checked_at: string | null }) {
   const days = daysSince(last_checked_at)
 
   if (days === null) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border font-mono text-citation text-risk-low-fg bg-risk-low-bg border-risk-low-border">
+      <span className="inline-flex items-center gap-1 rounded-sm border border-risk-low-border bg-risk-low-bg px-2 py-0.5 font-mono text-citation text-risk-low-fg">
         <Clock size={11} strokeWidth={1.5} />
         Unknown
       </span>
@@ -40,7 +37,7 @@ function RecencyChip({ last_checked_at }: { last_checked_at: string | null }) {
 
   if (days <= 7) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border font-mono text-citation text-risk-high-fg bg-risk-high-bg border-risk-high-border">
+      <span className="inline-flex items-center gap-1 rounded-sm border border-risk-high-border bg-risk-high-bg px-2 py-0.5 font-mono text-citation text-risk-high-fg">
         <AlertTriangle size={11} strokeWidth={1.5} />
         Updated {days === 0 ? 'today' : `${days}d ago`}
       </span>
@@ -49,7 +46,7 @@ function RecencyChip({ last_checked_at }: { last_checked_at: string | null }) {
 
   if (days <= 14) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border font-mono text-citation text-risk-med-fg bg-risk-med-bg border-risk-med-border">
+      <span className="inline-flex items-center gap-1 rounded-sm border border-risk-med-border bg-risk-med-bg px-2 py-0.5 font-mono text-citation text-risk-med-fg">
         <Clock size={11} strokeWidth={1.5} />
         Updated {days}d ago
       </span>
@@ -57,98 +54,62 @@ function RecencyChip({ last_checked_at }: { last_checked_at: string | null }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border font-mono text-citation text-risk-low-fg bg-risk-low-bg border-risk-low-border">
+    <span className="inline-flex items-center gap-1 rounded-sm border border-risk-low-border bg-risk-low-bg px-2 py-0.5 font-mono text-citation text-risk-low-fg">
       <Clock size={11} strokeWidth={1.5} />
       Updated {days}d ago
     </span>
   )
 }
 
-// -- Sub-components -----------------------------------------------------------
-
 function RadarSkeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="bg-surface border border-[var(--cl-border)] rounded p-4">
-          <div className="flex items-start justify-between mb-3">
-            <Skeleton className="h-5 w-64" />
-            <Skeleton className="h-5 w-28 rounded-sm" />
-          </div>
-          <Skeleton className="h-3 w-40 mb-2" />
-          <div className="flex gap-2 flex-wrap">
-            <Skeleton className="h-5 w-20 rounded-sm" />
-            <Skeleton className="h-5 w-24 rounded-sm" />
-            <Skeleton className="h-5 w-16 rounded-sm" />
-          </div>
+    <div className="rounded-lg border border-[var(--cl-border)] bg-surface p-5 shadow-1 animate-pulse">
+      <Skeleton className="mb-5 h-8 w-72" />
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="grid gap-3 border-t border-[var(--cl-border-subtle)] py-4 md:grid-cols-[1fr_160px_130px]">
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-5 w-24" />
         </div>
       ))}
     </div>
   )
 }
 
-function ThreatCard({ threat }: { threat: RadarThreat }) {
+function ThreatRow({ threat }: { threat: RadarThreat }) {
   const days = daysSince(threat.last_checked_at)
   const isHighUrgency = days !== null && days <= 7
 
   return (
-    <div
-      className={cn(
-        'bg-surface border rounded p-4 transition-colors',
-        isHighUrgency
-          ? 'border-risk-high-border'
-          : 'border-[var(--cl-border)]',
-      )}
-    >
-      {/* Header row */}
-      <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-        <h3 className="text-body font-semibold text-[var(--cl-text)] flex-1 min-w-0">
-          {threat.title}
-        </h3>
-        <RecencyChip last_checked_at={threat.last_checked_at} />
-      </div>
-
-      {/* Agency + jurisdiction */}
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <span className="text-caption text-[var(--cl-text-secondary)] font-mono">
-          {threat.agency}
-        </span>
-        <span className="text-caption text-[var(--cl-text-muted)]">·</span>
-        <span className="text-caption text-[var(--cl-text-muted)]">{threat.jurisdiction}</span>
-        <span className="text-caption text-[var(--cl-text-muted)]">·</span>
-        <span className="text-caption text-[var(--cl-text-muted)]">
-          Checked {formatDate(threat.last_checked_at)}
-        </span>
-      </div>
-
-      {/* Matched tags */}
-      {threat.matched_tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {threat.matched_tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-block px-2 py-0.5 rounded-sm border font-mono text-citation text-[var(--cl-text-secondary)] bg-sunken border-[var(--cl-border-subtle)]"
-            >
+    <div className={cn(
+      'grid gap-3 border-t border-[var(--cl-border-subtle)] px-4 py-4 md:grid-cols-[1fr_180px_132px] md:items-center',
+      isHighUrgency && 'bg-risk-high-bg/40',
+    )}>
+      <div className="min-w-0">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
+          <h3 className="text-body font-semibold text-[var(--cl-text)]">{threat.title}</h3>
+          {threat.matched_tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="rounded-sm border border-[var(--cl-border-subtle)] bg-sunken px-2 py-0.5 font-mono text-citation text-[var(--cl-text-secondary)]">
               {tag}
             </span>
           ))}
         </div>
-      )}
-
-      {/* Source link */}
+        <p className="text-caption text-[var(--cl-text-muted)]">
+          {threat.agency} · {threat.jurisdiction} · Checked {formatDate(threat.last_checked_at)}
+        </p>
+      </div>
+      <RecencyChip last_checked_at={threat.last_checked_at} />
       <a
         href={threat.source_url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-citation font-mono text-navy-600 hover:underline"
+        className="inline-flex items-center gap-1 font-mono text-citation text-navy-600 hover:underline md:justify-end"
       >
         View source <ExternalLink size={11} strokeWidth={1.5} />
       </a>
     </div>
   )
 }
-
-// -- Page ---------------------------------------------------------------------
 
 export default function RadarPage() {
   const [profile, setProfile] = useState<BusinessProfile | null>(null)
@@ -181,9 +142,7 @@ export default function RadarPage() {
         setProfileSummary(res.profile_summary)
       })
       .catch((err: unknown) => {
-        setError(
-          err instanceof Error ? err.message : 'Could not load radar data.',
-        )
+        setError(err instanceof Error ? err.message : 'Could not load radar data.')
       })
       .finally(() => {
         setLoading(false)
@@ -195,94 +154,88 @@ export default function RadarPage() {
       <Nav variant="app" />
       <DisclaimerBanner />
 
-      <main className="flex-1 px-4 py-8 max-w-[900px] mx-auto w-full">
-        {/* Page header */}
-        <div className="mb-6 flex items-center gap-3">
-          <Radio size={20} strokeWidth={1.5} className="text-navy-600 shrink-0" />
-          <div>
-            <h1 className="text-body-lg font-semibold text-[var(--cl-text)]">
-              Regulatory Threat Radar
-            </h1>
-            {profileSummary && (
-              <p className="text-caption text-[var(--cl-text-muted)] font-mono mt-0.5">
-                {profileSummary}
+      <main className="flex-1 px-6 py-8 max-w-app mx-auto w-full">
+        <div className="mb-6 overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
+          <div className="grid lg:grid-cols-[280px_1fr]">
+            <div className="bg-navy-900 px-6 py-5 text-white">
+              <div className="mb-4 flex items-center gap-2 text-white/75">
+                <Radio size={18} strokeWidth={1.5} />
+                <span className="text-label uppercase tracking-[0.06em]">Regulatory radar</span>
+              </div>
+              <p className="text-h1 text-white">Policy changes matched to your profile.</p>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-2">Monitoring scope</p>
+              <p className="text-body-lg text-[var(--cl-text)]">
+                {profileSummary || 'Run an intake scan to match local updates against your business context.'}
               </p>
-            )}
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="border-l-2 border-navy-600 pl-3">
+                  <p className="font-mono text-h2 text-[var(--cl-text)]">{threats?.length ?? 0}</p>
+                  <p className="text-caption text-[var(--cl-text-muted)]">Matched sources</p>
+                </div>
+                <div className="border-l-2 border-risk-high-border pl-3">
+                  <p className="font-mono text-h2 text-[var(--cl-text)]">{threats?.filter((threat) => (daysSince(threat.last_checked_at) ?? 99) <= 7).length ?? 0}</p>
+                  <p className="text-caption text-[var(--cl-text-muted)]">Updated this week</p>
+                </div>
+                <div className="border-l-2 border-[var(--cl-border-strong)] pl-3">
+                  <p className="font-mono text-h2 text-[var(--cl-text)]">30d</p>
+                  <p className="text-caption text-[var(--cl-text-muted)]">Monitoring window</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* No profile — prompt to run intake */}
         {!loading && !profile && (
-          <div className="bg-surface border border-[var(--cl-border)] rounded p-8 text-center">
-            <ShieldCheck
-              size={32}
-              strokeWidth={1.5}
-              className="mx-auto mb-3 text-[var(--cl-text-muted)]"
-            />
-            <p className="text-body font-semibold text-[var(--cl-text)] mb-2">
-              No business profile found
-            </p>
+          <div className="rounded-lg border border-[var(--cl-border)] bg-surface p-8 text-center shadow-1">
+            <Building2 size={32} strokeWidth={1.5} className="mx-auto mb-3 text-[var(--cl-text-muted)]" />
+            <p className="text-body font-semibold text-[var(--cl-text)] mb-2">No business profile found</p>
             <p className="text-caption text-[var(--cl-text-secondary)] mb-4">
-              Run an intake scan first so the radar can match regulatory updates to your
-              business.
+              Run an intake scan first so the radar can match regulatory updates to your business.
             </p>
-            <Link
-              href="/intake"
-              className="inline-block text-caption font-semibold px-4 py-2 rounded bg-navy-600 text-white hover:bg-navy-700 transition-colors"
-            >
+            <Link href="/intake" className="inline-block rounded bg-navy-600 px-4 py-2 text-caption font-semibold text-white transition-colors hover:bg-navy-700">
               Start intake scan
             </Link>
           </div>
         )}
 
-        {/* Loading skeleton */}
         {loading && <RadarSkeleton />}
 
-        {/* Error state */}
         {!loading && error && (
-          <div className="bg-surface border border-risk-high-border rounded p-4 text-caption text-risk-high-fg">
+          <div className="rounded border border-risk-high-border bg-surface p-4 text-caption text-risk-high-fg">
             {error}
           </div>
         )}
 
-        {/* Results */}
         {!loading && !error && threats !== null && (
-          <>
-            {/* Summary bar */}
-            <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <p className="text-caption text-[var(--cl-text-muted)] font-mono">
-                {threats.length === 0
-                  ? 'No matches in the last 30 days'
-                  : `${threats.length} source${threats.length === 1 ? '' : 's'} matched — last 30 days`}
-              </p>
+          <section className="overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
+            <div className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-1">Source activity</p>
+                <h2 className="text-h2 text-[var(--cl-text)]">
+                  {threats.length === 0 ? 'No matched updates in the last 30 days' : `${threats.length} matched source${threats.length === 1 ? '' : 's'}`}
+                </h2>
+              </div>
+              <ShieldCheck size={20} strokeWidth={1.5} className="text-risk-low-fg" />
             </div>
 
-            {/* Empty state */}
-            {threats.length === 0 && (
-              <div className="bg-surface border border-[var(--cl-border)] rounded p-8 text-center">
-                <ShieldCheck
-                  size={32}
-                  strokeWidth={1.5}
-                  className="mx-auto mb-3 text-risk-low-fg"
-                />
-                <p className="text-body font-semibold text-[var(--cl-text)] mb-1">
-                  All clear
-                </p>
+            {threats.length === 0 ? (
+              <div className="border-t border-[var(--cl-border-subtle)] px-5 py-10 text-center">
+                <ShieldCheck size={32} strokeWidth={1.5} className="mx-auto mb-3 text-risk-low-fg" />
+                <p className="text-body font-semibold text-[var(--cl-text)] mb-1">All clear</p>
                 <p className="text-caption text-[var(--cl-text-secondary)]">
                   No recent regulatory updates matched your profile in the last 30 days.
                 </p>
               </div>
-            )}
-
-            {/* Threat cards */}
-            {threats.length > 0 && (
-              <div className="space-y-3">
+            ) : (
+              <div>
                 {threats.map((threat) => (
-                  <ThreatCard key={threat.source_id} threat={threat} />
+                  <ThreatRow key={threat.source_id} threat={threat} />
                 ))}
               </div>
             )}
-          </>
+          </section>
         )}
       </main>
     </div>

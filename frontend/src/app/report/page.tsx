@@ -37,7 +37,7 @@ export default function ReportPage() {
       </div>
 
       <main className="flex-1 max-w-[840px] mx-auto w-full px-8 py-8">
-        {/* Print/download button — screen only */}
+        {/* Print/download button, screen only */}
         <div className="flex justify-end mb-6 no-print">
           <button
             onClick={() => window.print()}
@@ -115,7 +115,7 @@ export default function ReportPage() {
                   <span className="font-mono text-citation text-[var(--cl-text-muted)] mt-0.5">{i + 1}.</span>
                   <div>
                     <span className="font-semibold text-[var(--cl-text)]">{f.affected_area}</span>
-                    {' — '}
+                    {': '}
                     <span className="text-[var(--cl-text-secondary)]">{f.explanation}</span>
                     <span className="font-mono text-citation text-navy-600 block mt-0.5">
                       Source: {f.source_url}
@@ -165,7 +165,7 @@ function ReportFinding({ finding, index }: { finding: RiskFinding; index: number
           <p className="text-body text-[var(--cl-text)]">{finding.recommended_action}</p>
         </div>
 
-        {/* Playbook — condensed */}
+        {/* Playbook, condensed */}
         {(finding.who_to_contact || (finding.documents_needed && finding.documents_needed.length > 0)) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {finding.who_to_contact && (

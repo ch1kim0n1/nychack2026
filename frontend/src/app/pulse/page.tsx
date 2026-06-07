@@ -6,9 +6,6 @@ import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { type RiskAnalysisResult, type RiskFinding, type PulseDigest, api } from '@/lib/api'
 import { AlertTriangle, Clock, Info, ExternalLink } from 'lucide-react'
 
-// Compliance Pulse 2.0 — personalized weekly digest built from the user's own findings (8.5).
-// Falls back to a static demo digest when no analysis is in the session.
-
 interface DigestItem {
   level: 'high' | 'medium' | 'low'
   title: string
@@ -21,7 +18,7 @@ const STATIC_DIGEST: DigestItem[] = [
   {
     level: 'medium',
     title: 'Austin updated outdoor-service hour rules',
-    body: 'City of Austin extended permitted outdoor service hours on Friday/Saturday by 1 hour. Review your beer garden permit conditions.',
+    body: 'City of Austin extended permitted outdoor service hours on Friday and Saturday by 1 hour. Review your beer garden permit conditions.',
     link: 'https://www.austintexas.gov/development-services/zoning-verification',
     agency: 'City of Austin',
   },
@@ -35,26 +32,25 @@ const STATIC_DIGEST: DigestItem[] = [
 ]
 
 const LEVEL_CONFIG = {
-  high:   { icon: <AlertTriangle size={13} strokeWidth={1.5} />, label: 'HIGH', classes: 'text-risk-high-fg bg-risk-high-bg border-risk-high-border' },
-  medium: { icon: <Clock size={13} strokeWidth={1.5} />,        label: 'MED',  classes: 'text-risk-med-fg bg-risk-med-bg border-risk-med-border' },
-  low:    { icon: <Info size={13} strokeWidth={1.5} />,         label: 'LOW',  classes: 'text-risk-low-fg bg-risk-low-bg border-risk-low-border' },
+  high: { icon: <AlertTriangle size={13} strokeWidth={1.5} />, label: 'HIGH', classes: 'text-risk-high-fg bg-risk-high-bg border-risk-high-border' },
+  medium: { icon: <Clock size={13} strokeWidth={1.5} />, label: 'MED', classes: 'text-risk-med-fg bg-risk-med-bg border-risk-med-border' },
+  low: { icon: <Info size={13} strokeWidth={1.5} />, label: 'LOW', classes: 'text-risk-low-fg bg-risk-low-bg border-risk-low-border' },
 }
 
 function buildPersonalDigest(result: RiskAnalysisResult): DigestItem[] {
-  // Surface the top 3 actionable findings as "this week's" digest items
   return result.findings
-    .filter(f => f.urgency === 'immediate' || f.urgency === 'soon' || f.risk_level === 'high')
+    .filter((finding) => finding.urgency === 'immediate' || finding.urgency === 'soon' || finding.risk_level === 'high')
     .slice(0, 3)
-    .map((f: RiskFinding) => ({
-      level: f.risk_level,
-      title: f.effective_date
-        ? `${f.affected_area} — due ${f.effective_date}`
-        : `${f.affected_area} needs attention`,
-      body: f.impact_label
-        ? `${f.impact_label}. ${f.recommended_action}`
-        : f.recommended_action,
-      link: f.source_url,
-      agency: f.who_to_contact ?? 'Agency',
+    .map((finding: RiskFinding) => ({
+      level: finding.risk_level,
+      title: finding.effective_date
+        ? `${finding.affected_area}: due ${finding.effective_date}`
+        : `${finding.affected_area} needs attention`,
+      body: finding.impact_label
+        ? `${finding.impact_label}. ${finding.recommended_action}`
+        : finding.recommended_action,
+      link: finding.source_url,
+      agency: finding.who_to_contact ?? 'Agency',
     }))
 }
 
@@ -65,7 +61,6 @@ export default function PulsePage() {
   const [businessName, setBusinessName] = useState('your Austin restaurant')
 
   useEffect(() => {
-    // Step 1: Read sessionStorage for immediate display
     const json = sessionStorage.getItem('cl-risk-result')
     const input = sessionStorage.getItem('cl-input')
     const profileJson = sessionStorage.getItem('cl-profile')
@@ -78,11 +73,12 @@ export default function PulsePage() {
           setDigest(items)
           setPersonalized(true)
         }
-      } catch { /* keep static */ }
+      } catch {
+        // Keep static digest when stored data is malformed.
+      }
     }
-    if (input) setBusinessName(input.length > 40 ? input.slice(0, 40) + '…' : input)
+    if (input) setBusinessName(input.length > 40 ? `${input.slice(0, 40)}...` : input)
 
-    // Step 2: Best-effort API call — prefer over sessionStorage if personalized
     if (profileJson) {
       try {
         const profile = JSON.parse(profileJson) as Parameters<typeof api.getPulseDigest>[0]
@@ -95,14 +91,18 @@ export default function PulsePage() {
               if (apiDigest.business_label) {
                 setBusinessName(
                   apiDigest.business_label.length > 40
-                    ? apiDigest.business_label.slice(0, 40) + '…'
+                    ? `${apiDigest.business_label.slice(0, 40)}...`
                     : apiDigest.business_label,
                 )
               }
             }
           })
-          .catch(() => { /* keep sessionStorage/static digest on error */ })
-      } catch { /* keep existing digest if profile parse fails */ }
+          .catch(() => {
+            // Keep sessionStorage or static digest on error.
+          })
+      } catch {
+        // Keep existing digest if profile parse fails.
+      }
     }
   }, [])
 
@@ -111,19 +111,20 @@ export default function PulsePage() {
       <Nav variant="app" />
 
       <main className="flex-1 px-4 py-8">
-        <div className="max-w-[640px] mx-auto mb-6">
-          <p className="text-caption text-[var(--cl-text-muted)] border border-[var(--cl-border-subtle)] bg-sunken rounded px-3 py-2 font-mono">
+        <div className="max-w-[760px] mx-auto mb-6">
+          <p className="text-caption text-[var(--cl-text-muted)] border border-[var(--cl-border-subtle)] bg-surface rounded px-3 py-2 font-mono">
             {apiPersonalized
-              ? 'LIVE — Personalized from your scan.'
+              ? 'LIVE: Personalized from your scan.'
               : personalized
-                ? 'PREVIEW — Personalized from your scan. This is what lands in your inbox every Monday.'
-                : 'PREVIEW — This is what lands in your inbox every Monday.'}
+                ? 'PREVIEW: Personalized from your scan. This is what lands in your inbox every Monday.'
+                : 'PREVIEW: This is what lands in your inbox every Monday.'}
           </p>
         </div>
 
-        <div className="max-w-[640px] mx-auto bg-surface border border-[var(--cl-border)] rounded shadow-2 overflow-hidden">
-          <div className="bg-navy-900 px-6 py-4">
-            <p className="font-semibold text-white text-body-lg">CivicLens</p>
+        <div className="max-w-[760px] mx-auto bg-surface border border-[var(--cl-border)] rounded-lg shadow-2 overflow-hidden">
+          <div className="bg-navy-900 px-6 py-5">
+            <p className="font-semibold text-white text-body-lg">CivicLens Pulse</p>
+            <p className="mt-1 text-caption text-white/60">Weekly civic intelligence for {businessName}</p>
           </div>
 
           <div className="px-6 py-3 bg-sunken border-b border-[var(--cl-border-subtle)] text-caption text-[var(--cl-text-muted)] font-mono">
@@ -138,11 +139,11 @@ export default function PulsePage() {
               {personalized ? ' affect your compliance plan' : ' affect your Austin restaurant profile'}.
             </p>
 
-            <div className="space-y-4">
+            <div className="overflow-hidden rounded border border-[var(--cl-border-subtle)]">
               {digest.map((item, i) => {
                 const cfg = LEVEL_CONFIG[item.level]
                 return (
-                  <div key={i} className="border border-[var(--cl-border)] rounded p-4 flex items-start gap-3">
+                  <div key={i} className="flex items-start gap-3 border-b border-[var(--cl-border-subtle)] p-4 last:border-b-0">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border font-mono text-citation shrink-0 mt-0.5 ${cfg.classes}`}>
                       {cfg.icon}
                       {cfg.label}
@@ -156,7 +157,7 @@ export default function PulsePage() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-citation font-mono text-navy-600 hover:underline"
                       >
-                        View source — {item.agency} <ExternalLink size={11} strokeWidth={1.5} />
+                        View source: {item.agency} <ExternalLink size={11} strokeWidth={1.5} />
                       </a>
                     </div>
                   </div>
@@ -171,7 +172,7 @@ export default function PulsePage() {
           </div>
         </div>
 
-        <DisclaimerBanner className="max-w-[640px] mx-auto mt-4 rounded border border-[var(--cl-border-subtle)]" />
+        <DisclaimerBanner className="max-w-[760px] mx-auto mt-4 rounded border border-[var(--cl-border-subtle)]" />
       </main>
     </div>
   )

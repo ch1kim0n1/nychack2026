@@ -138,7 +138,7 @@ export default function DiffPage() {
                 if (row.source_b) notes.push(<p key={`${i}-b`}>[{i + 1}b] {row.source_b}</p>)
                 return notes
               })}
-              <p className="mt-3">Informational guidance, not legal advice. — CivicLens</p>
+              <p className="mt-3">CivicLens. Informational guidance, not legal advice.</p>
             </div>
           </>
         )}
