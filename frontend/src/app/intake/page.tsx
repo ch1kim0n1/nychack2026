@@ -7,7 +7,7 @@ import { IntakeTextarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { api, type BusinessProfile } from '@/lib/api'
-import { CheckCircle, Edit2, HelpCircle, ChevronRight } from 'lucide-react'
+import { CheckCircle, Edit2, HelpCircle, ChevronRight, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const EXAMPLE_SCENARIOS = [
@@ -108,13 +108,14 @@ export default function IntakePage() {
   const [followupQueue, setFollowupQueue] = useState<FollowUpQuestion[]>([])
   const [currentFollowup, setCurrentFollowup] = useState(0)
 
-  async function handleAnalyze() {
-    if (!text || text.length < 15) return
+  async function handleAnalyze(overrideText?: string) {
+    const inputText = overrideText ?? text
+    if (!inputText || inputText.length < 15) return
     setStage('classifying')
     setAnalyzing(true)
     setError('')
     try {
-      const result = await api.classifyProfile(text)
+      const result = await api.classifyProfile(inputText)
       setProfile(result)
 
       // Determine which follow-up questions apply (9.7 Business Change Detector)
@@ -152,6 +153,12 @@ export default function IntakePage() {
     sessionStorage.setItem('cl-profile', JSON.stringify(profile))
     sessionStorage.setItem('cl-input', text)
     router.push('/dashboard')
+  }
+
+  function handleDemoPreload() {
+    const demoText = EXAMPLE_SCENARIOS[0].text
+    setText(demoText)
+    void handleAnalyze(demoText)
   }
 
   function handleEdit() {
@@ -211,6 +218,18 @@ export default function IntakePage() {
                   {s.label}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={handleDemoPreload}
+                className={cn(
+                  'inline-flex items-center gap-1 px-3 py-1 rounded-sm border text-caption',
+                  'border-navy-600 bg-navy-50 text-navy-600 hover:bg-navy-100',
+                  'transition-colors duration-[80ms]',
+                )}
+              >
+                <Zap size={12} strokeWidth={1.5} />
+                Demo: fill & analyze
+              </button>
             </div>
           </div>
         )}

@@ -12,7 +12,7 @@ import { api, type BusinessProfile, type RiskFinding, type RiskAnalysisResult, t
 import { staggerRows } from '@/lib/gsap'
 import {
   ChevronDown, ChevronRight, ExternalLink, X, CheckCircle, AlertTriangle,
-  Mail, Phone, Home, Copy, Check, Sparkles, Lock,
+  Mail, Phone, Home, Copy, Check, Sparkles, Lock, Bookmark, BookmarkCheck, FileDown,
 } from 'lucide-react'
 import { ConfidenceBadge, JurisdictionBadge } from '@/components/ui/trust-badges'
 import { StakeholderMap } from '@/components/stakeholder-map'
@@ -28,6 +28,15 @@ const IMPACT_LABEL_COLORS: Record<string, string> = {
   'Informational': 'text-risk-low-fg bg-risk-low-bg border-risk-low-border',
 }
 
+function getClientId(): string {
+  let id = localStorage.getItem('cl-client-id')
+  if (!id) {
+    id = Math.random().toString(36).slice(2) + Date.now().toString(36)
+    localStorage.setItem('cl-client-id', id)
+  }
+  return id
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [result, setResult] = useState<RiskAnalysisResult | null>(null)
@@ -37,6 +46,8 @@ export default function DashboardPage() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set())
   const [drawerFinding, setDrawerFinding] = useState<RiskFinding | null>(null)
   const [profileInput, setProfileInput] = useState<string | undefined>(undefined)
+  const [savedToWatchlist, setSavedToWatchlist] = useState(false)
+  const [savingToWatchlist, setSavingToWatchlist] = useState(false)
   const scoreRef = useRef<HTMLSpanElement>(null)
   const findingsRef = useRef<HTMLDivElement>(null)
   const hasAnimated = useRef(false)
@@ -47,9 +58,10 @@ export default function DashboardPage() {
     async function load() {
       try {
         const profileJson = sessionStorage.getItem('cl-profile')
+        const forceDemo = new URLSearchParams(window.location.search).get('demo') === 'true'
         let data: RiskAnalysisResult
 
-        if (profileJson) {
+        if (!forceDemo && profileJson) {
           const profile: BusinessProfile = JSON.parse(profileJson)
           try {
             data = await api.analyzeRisk(profile, controller.signal)
@@ -116,6 +128,22 @@ export default function DashboardPage() {
   useEffect(() => {
     setProfileInput(sessionStorage.getItem('cl-input') ?? undefined)
   }, [])
+
+  async function handleSaveToWatchlist() {
+    const profileJson = sessionStorage.getItem('cl-profile')
+    if (!profileJson) return
+    setSavingToWatchlist(true)
+    try {
+      const profile: BusinessProfile = JSON.parse(profileJson)
+      const label = profileInput ? profileInput.slice(0, 60) : 'Saved scan'
+      await api.watchlist.save({ client_id: getClientId(), label, profile })
+      setSavedToWatchlist(true)
+    } catch {
+      // silently fail — watchlist is non-critical
+    } finally {
+      setSavingToWatchlist(false)
+    }
+  }
 
   const highCount = result?.findings.filter(f => f.risk_level === 'high').length ?? 0
   const medCount  = result?.findings.filter(f => f.risk_level === 'medium').length ?? 0
@@ -190,6 +218,28 @@ export default function DashboardPage() {
                         <p className="font-mono text-h2">{value}</p>
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-4 flex gap-2 flex-wrap">
+                    <button
+                      onClick={handleSaveToWatchlist}
+                      disabled={savingToWatchlist || savedToWatchlist || !profileInput}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-caption border transition-colors duration-[80ms]',
+                        savedToWatchlist
+                          ? 'text-risk-low-fg bg-risk-low-bg border-risk-low-border'
+                          : 'text-[var(--cl-text-secondary)] bg-surface border-[var(--cl-border)] hover:bg-navy-50 disabled:opacity-40 disabled:cursor-not-allowed',
+                      )}
+                    >
+                      {savedToWatchlist ? <BookmarkCheck size={13} strokeWidth={1.5} /> : <Bookmark size={13} strokeWidth={1.5} />}
+                      {savedToWatchlist ? 'Saved to Watchlist' : savingToWatchlist ? 'Saving…' : 'Save to Watchlist'}
+                    </button>
+                    <button
+                      onClick={() => router.push('/report')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-caption border border-[var(--cl-border)] bg-surface text-[var(--cl-text-secondary)] hover:bg-navy-50 transition-colors duration-[80ms]"
+                    >
+                      <FileDown size={13} strokeWidth={1.5} />
+                      Export PDF
+                    </button>
                   </div>
                 </div>
               </div>

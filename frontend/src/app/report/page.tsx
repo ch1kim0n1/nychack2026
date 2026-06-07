@@ -5,19 +5,25 @@ import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { RiskBadge } from '@/components/ui/risk-badge'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
-import { type RiskAnalysisResult, type RiskFinding } from '@/lib/api'
-import { Printer, ExternalLink, FileText } from 'lucide-react'
+import { api, type RiskAnalysisResult, type RiskFinding } from '@/lib/api'
+import { Printer, ExternalLink, FileText, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function ReportPage() {
   const router = useRouter()
   const [result, setResult] = useState<RiskAnalysisResult | null>(null)
   const [input, setInput] = useState('')
+  const [isDemo, setIsDemo] = useState(false)
   const [reportDate] = useState(() => new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))
 
   useEffect(() => {
     const json = sessionStorage.getItem('cl-risk-result')
-    if (!json) { router.push('/intake'); return }
+    if (!json) {
+      api.getDemoRisk()
+        .then(data => { setResult(data); setIsDemo(true) })
+        .catch(() => router.push('/intake'))
+      return
+    }
     setResult(JSON.parse(json))
     setInput(sessionStorage.getItem('cl-input') ?? '')
   }, [router])
@@ -34,6 +40,13 @@ export default function ReportPage() {
       <div className="no-print">
         <Nav variant="app" />
         <DisclaimerBanner />
+        {isDemo && (
+          <div className="bg-risk-med-bg border-b border-risk-med-border px-6 py-2 flex items-center gap-2 text-caption text-risk-med-fg">
+            <AlertTriangle size={13} strokeWidth={1.5} className="shrink-0" />
+            Showing demo data.
+            <button onClick={() => router.push('/intake')} className="underline ml-1">Run a real scan</button> to see your report.
+          </div>
+        )}
       </div>
 
       <main className="flex-1 max-w-[840px] mx-auto w-full px-8 py-8">

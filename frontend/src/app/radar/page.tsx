@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { Skeleton } from '@/components/ui/skeleton'
-import { api, type BusinessProfile, type RadarThreat } from '@/lib/api'
-import { ExternalLink, Radio, AlertTriangle, Clock, ShieldCheck, Building2 } from 'lucide-react'
+import { api, type BusinessProfile, type RadarThreat, type RadarResponse } from '@/lib/api'
+import { ExternalLink, Radio, AlertTriangle, Clock, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 function daysSince(iso: string | null): number | null {
@@ -111,33 +111,31 @@ function ThreatRow({ threat }: { threat: RadarThreat }) {
   )
 }
 
+const DEMO_PROFILE: BusinessProfile = {
+  industry: 'food_service',
+  location: 'Austin, TX',
+  expansion_locations: ['Dallas, TX'],
+  activities: ['alcohol_planned', 'outdoor_seating'],
+  employees: 3,
+}
+
 export default function RadarPage() {
   const [profile, setProfile] = useState<BusinessProfile | null>(null)
   const [threats, setThreats] = useState<RadarThreat[] | null>(null)
   const [profileSummary, setProfileSummary] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isDemo, setIsDemo] = useState(false)
 
   useEffect(() => {
     const json = sessionStorage.getItem('cl-profile')
-    if (!json) {
-      setLoading(false)
-      return
-    }
-
-    let parsed: BusinessProfile
-    try {
-      parsed = JSON.parse(json) as BusinessProfile
-    } catch {
-      setLoading(false)
-      return
-    }
-
-    setProfile(parsed)
+    const profileToUse: BusinessProfile = json ? (JSON.parse(json) as BusinessProfile) : DEMO_PROFILE
+    if (!json) setIsDemo(true)
+    setProfile(profileToUse)
 
     void api
-      .radarThreats(parsed, 30)
-      .then((res) => {
+      .radarThreats(profileToUse, 30)
+      .then((res: RadarResponse) => {
         setThreats(res.threats)
         setProfileSummary(res.profile_summary)
       })
@@ -153,6 +151,13 @@ export default function RadarPage() {
     <div className="min-h-screen flex flex-col bg-canvas">
       <Nav variant="app" />
       <DisclaimerBanner />
+      {isDemo && (
+        <div className="bg-risk-med-bg border-b border-risk-med-border px-6 py-2 flex items-center gap-2 text-caption text-risk-med-fg">
+          <AlertTriangle size={13} strokeWidth={1.5} className="shrink-0" />
+          Showing demo profile (Austin food truck + Dallas expansion).
+          <Link href="/intake" className="underline ml-1">Run a real scan</Link> to match your profile.
+        </div>
+      )}
 
       <main className="flex-1 px-6 py-8 max-w-app mx-auto w-full">
         <div className="mb-6 overflow-hidden rounded-lg border border-[var(--cl-border)] bg-surface shadow-1">
@@ -186,19 +191,6 @@ export default function RadarPage() {
             </div>
           </div>
         </div>
-
-        {!loading && !profile && (
-          <div className="rounded-lg border border-[var(--cl-border)] bg-surface p-8 text-center shadow-1">
-            <Building2 size={32} strokeWidth={1.5} className="mx-auto mb-3 text-[var(--cl-text-muted)]" />
-            <p className="text-body font-semibold text-[var(--cl-text)] mb-2">No business profile found</p>
-            <p className="text-caption text-[var(--cl-text-secondary)] mb-4">
-              Run an intake scan first so the radar can match regulatory updates to your business.
-            </p>
-            <Link href="/intake" className="inline-block rounded bg-navy-600 px-4 py-2 text-caption font-semibold text-white transition-colors hover:bg-navy-700">
-              Start intake scan
-            </Link>
-          </div>
-        )}
 
         {loading && <RadarSkeleton />}
 

@@ -7,7 +7,7 @@ import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { RiskBadge } from '@/components/ui/risk-badge'
 import { CitationChip } from '@/components/ui/citation-chip'
 import { Button } from '@/components/ui/button'
-import { type RiskAnalysisResult, type RiskFinding } from '@/lib/api'
+import { api, type RiskAnalysisResult, type RiskFinding } from '@/lib/api'
 import { KeyRound, AlertTriangle, Printer, ListChecks } from 'lucide-react'
 
 // Before-You-Sign-Lease Checklist (8.8): surfaces the requirements an owner MUST verify
@@ -24,10 +24,16 @@ function isLeaseCritical(f: RiskFinding): boolean {
 export default function LeasePage() {
   const router = useRouter()
   const [result, setResult] = useState<RiskAnalysisResult | null>(null)
+  const [isDemo, setIsDemo] = useState(false)
 
   useEffect(() => {
     const json = sessionStorage.getItem('cl-risk-result')
-    if (!json) { router.push('/intake'); return }
+    if (!json) {
+      api.getDemoRisk()
+        .then(data => { setResult(data); setIsDemo(true) })
+        .catch(() => router.push('/intake'))
+      return
+    }
     setResult(JSON.parse(json))
   }, [router])
 
@@ -40,6 +46,13 @@ export default function LeasePage() {
     <div className="min-h-screen flex flex-col bg-canvas">
       <Nav variant="app" onCompare={() => router.push('/diff')} />
       <DisclaimerBanner />
+      {isDemo && (
+        <div className="bg-risk-med-bg border-b border-risk-med-border px-6 py-2 flex items-center gap-2 text-caption text-risk-med-fg">
+          <AlertTriangle size={13} strokeWidth={1.5} className="shrink-0" />
+          Showing demo data.
+          <button onClick={() => router.push('/intake')} className="underline ml-1">Run a real scan</button> to see your results.
+        </div>
+      )}
 
       <main className="flex-1 px-6 py-6 max-w-[840px] mx-auto w-full">
         {/* Header */}
