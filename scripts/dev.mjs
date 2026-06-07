@@ -27,7 +27,7 @@ const rootDir = resolve(__dirname, '..');
 const backendDir = resolve(rootDir, 'backend');
 
 const DB_HOST = '127.0.0.1';
-const DB_PORT = 5432;
+const DB_PORT = 5433;
 const DB_WAIT_TIMEOUT_MS = 30_000;
 const DB_POLL_INTERVAL_MS = 1_000;
 const DB_CONNECT_TIMEOUT_MS = 2_000;

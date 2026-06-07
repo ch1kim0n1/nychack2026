@@ -7,7 +7,7 @@ import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { RiskBadge } from '@/components/ui/risk-badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { type RiskFinding, type RiskAnalysisResult } from '@/lib/api'
+import { api, type RiskFinding, type RiskAnalysisResult } from '@/lib/api'
 import {
   Circle, Clock, Send, CheckCircle2, XCircle, AlertTriangle,
   ChevronDown, ChevronRight, FileText, Calendar, ExternalLink, Printer,
@@ -35,26 +35,34 @@ function taskKey(finding: RiskFinding) {
   return `cl-task-${finding.affected_area.replace(/\s+/g, '-').toLowerCase()}`
 }
 
+function loadTasks(findings: RiskFinding[]): Record<string, TaskState> {
+  const stored: Record<string, TaskState> = {}
+  findings.forEach(f => {
+    const key = taskKey(f)
+    const raw = localStorage.getItem(key)
+    stored[key] = raw ? JSON.parse(raw) : { status: 'not_started' }
+  })
+  return stored
+}
+
 export default function ChecklistPage() {
   const router = useRouter()
   const [result, setResult] = useState<RiskAnalysisResult | null>(null)
   const [tasks, setTasks] = useState<Record<string, TaskState>>({})
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [isDemo, setIsDemo] = useState(false)
 
-  // Load analysis result + task states from storage
   useEffect(() => {
     const json = sessionStorage.getItem('cl-risk-result')
-    if (!json) { router.push('/intake'); return }
-    setResult(JSON.parse(json))
-
-    // Load persisted task states from localStorage
-    const stored: Record<string, TaskState> = {}
-    JSON.parse(sessionStorage.getItem('cl-risk-result') || '{}').findings?.forEach((f: RiskFinding) => {
-      const key = taskKey(f)
-      const raw = localStorage.getItem(key)
-      stored[key] = raw ? JSON.parse(raw) : { status: 'not_started' }
-    })
-    setTasks(stored)
+    if (!json) {
+      api.getDemoRisk()
+        .then(data => { setResult(data); setTasks(loadTasks(data.findings)); setIsDemo(true) })
+        .catch(() => router.push('/intake'))
+      return
+    }
+    const r: RiskAnalysisResult = JSON.parse(json)
+    setResult(r)
+    setTasks(loadTasks(r.findings))
   }, [router])
 
   function updateTask(key: string, patch: Partial<TaskState>) {
@@ -99,6 +107,13 @@ export default function ChecklistPage() {
     <div className="min-h-screen flex flex-col bg-canvas">
       <Nav variant="app" onCompare={() => router.push('/diff')} />
       <DisclaimerBanner />
+      {isDemo && (
+        <div className="bg-risk-med-bg border-b border-risk-med-border px-6 py-2 flex items-center gap-2 text-caption text-risk-med-fg">
+          <AlertTriangle size={13} strokeWidth={1.5} className="shrink-0" />
+          Showing demo data.
+          <button onClick={() => router.push('/intake')} className="underline ml-1">Run a real scan</button> to see your results.
+        </div>
+      )}
 
       <main className="flex-1 px-6 py-6 max-w-app mx-auto w-full">
         {/* Header */}
