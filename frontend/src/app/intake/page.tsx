@@ -38,7 +38,7 @@ const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   {
     id: 'outdoor_seating',
     trigger: p => p.activities.includes('alcohol_planned') && !p.activities.includes('outdoor_seating'),
-    question: 'You mentioned alcohol service — will there be outdoor seating (e.g. a beer garden or patio)?',
+    question: 'You mentioned alcohol service. Will there be outdoor seating (e.g. a beer garden or patio)?',
     options: [
       { label: 'Yes, outdoor seating planned', value: 'yes', detail: 'Adds zoning + outdoor service permit requirements' },
       { label: 'No, indoors only', value: 'no' },
@@ -232,7 +232,7 @@ export default function IntakePage() {
             {/* Progress */}
             <div className="flex items-center gap-2 mb-4 text-caption text-[var(--cl-text-muted)]">
               <HelpCircle size={13} strokeWidth={1.5} />
-              <span>Follow-up {currentFollowup + 1} of {followupQueue.length} — helps us be more accurate</span>
+              <span>Follow-up {currentFollowup + 1} of {followupQueue.length}: helps us be more accurate</span>
               <span className="ml-auto font-mono">{Math.round(((currentFollowup) / followupQueue.length) * 100)}%</span>
             </div>
             <div className="h-1 bg-sunken rounded-full mb-5 overflow-hidden">
@@ -308,7 +308,7 @@ export default function IntakePage() {
               <div className="flex gap-3">
                 <Button onClick={handleConfirm} size="md">
                   <CheckCircle size={15} strokeWidth={1.5} />
-                  Looks right — analyze
+                  Looks right: analyze
                 </Button>
                 <Button variant="ghost" onClick={handleEdit} size="md">Edit</Button>
               </div>

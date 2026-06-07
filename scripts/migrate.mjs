@@ -11,23 +11,31 @@ import { dirname, resolve } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const backendDir = resolve(__dirname, '..', 'backend');
 
-console.log('[migrate] Applying Prisma migrations (prisma migrate deploy)...');
+function runPrismaStep(label, args) {
+  console.log(`[migrate] ${label}...`);
+  // shell:true lets `npx` resolve correctly on Windows (npx.cmd) and *nix.
+  const result = spawnSync('npx', ['prisma', ...args], {
+    cwd: backendDir,
+    stdio: 'inherit',
+    shell: true,
+  });
 
-// shell:true lets `npx` resolve correctly on Windows (npx.cmd) and *nix.
-const result = spawnSync('npx', ['prisma', 'migrate', 'deploy'], {
-  cwd: backendDir,
-  stdio: 'inherit',
-  shell: true,
-});
-
-if (result.status !== 0) {
-  console.error(
-    `[migrate] FAILED: prisma migrate deploy exited with code ${result.status}.`,
-  );
-  console.error(
-    '[migrate] Is the database up? Try: npm run db:up  (and check backend/.env DATABASE_URL).',
-  );
-  process.exit(result.status ?? 1);
+  if (result.status !== 0) {
+    console.error(
+      `[migrate] FAILED: prisma ${args.join(' ')} exited with code ${result.status}.`,
+    );
+    console.error(
+      '[migrate] Is the database up? Try: npm run db:up  (and check backend/.env DATABASE_URL).',
+    );
+    process.exit(result.status ?? 1);
+  }
 }
 
-console.log('[migrate] Migrations applied.');
+runPrismaStep('Applying Prisma migrations (prisma migrate deploy)', [
+  'migrate',
+  'deploy',
+]);
+
+runPrismaStep('Generating Prisma client', ['generate']);
+
+console.log('[migrate] Migrations applied and Prisma client generated.');

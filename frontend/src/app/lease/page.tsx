@@ -11,7 +11,7 @@ import { type RiskAnalysisResult, type RiskFinding } from '@/lib/api'
 import { KeyRound, AlertTriangle, Printer, ListChecks } from 'lucide-react'
 
 // Before-You-Sign-Lease Checklist (8.8): surfaces the requirements an owner MUST verify
-// against a specific property before committing to a lease — the most expensive mistakes.
+// against a specific property before committing to a lease, the most expensive mistakes.
 
 const LEASE_KEYWORDS = /zoning|occupancy|signage|parking|outdoor|patio|build-?out|renovation|fire marshal|certificate of occupancy|land use|setback|grease|ventilation/i
 
@@ -51,7 +51,7 @@ export default function LeasePage() {
             <div>
               <h1 className="text-h1 text-[var(--cl-text)]">Before You Sign a Lease</h1>
               <p className="text-caption text-[var(--cl-text-muted)]">
-                Verify these against the specific property — these mistakes can&apos;t be fixed after signing.
+                Verify these against the specific property. These mistakes can&apos;t be fixed after signing.
               </p>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function LeasePage() {
           <AlertTriangle size={16} strokeWidth={1.5} className="text-risk-high-fg shrink-0 mt-0.5" />
           <p className="text-body text-risk-high-fg">
             Zoning and occupancy problems are the #1 cause of failed openings. Confirm every item below
-            with the property address <strong>before</strong> you sign — a wrong-zoned location cannot be undone.
+            with the property address <strong>before</strong> you sign. A wrong-zoned location cannot be undone.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export default function LeasePage() {
             <ListChecks size={32} strokeWidth={1.5} className="text-risk-low-fg" />
             <p className="text-h3 text-[var(--cl-text)]">No lease-critical items flagged for this profile.</p>
             <p className="text-body text-[var(--cl-text-secondary)] max-w-sm">
-              Still review the full findings — some requirements may apply after you open.
+              Still review the full findings. Some requirements may apply after you open.
             </p>
             <Button variant="secondary" onClick={() => router.push('/dashboard')}>View all findings</Button>
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-// GSAP configuration — governed per spec §4
+// GSAP configuration, governed per spec §4
 // Hard caps: one hero entrance per page, ≤200ms for everything else,
 // stagger clamped to each:0.04 / amount:0.4, no infinite motion,
 // prefers-reduced-motion collapses to instant opacity.
@@ -62,7 +62,7 @@ export function staggerRows(rows: NodeListOf<Element> | Element[]) {
 
 /** One-time ScrollTrigger reveal (fade + rise 12px, once).
  *  Reduced-motion safe: never hides content if motion is off or ScrollTrigger
- *  can't fire — content must never get stuck at opacity 0. */
+ *  can't fire, content must never get stuck at opacity 0. */
 export function scrollReveal(el: HTMLElement) {
   initGsap()
 

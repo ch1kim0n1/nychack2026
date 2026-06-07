@@ -138,7 +138,7 @@ export default function PricingPage() {
         {/* One-time report strip */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-navy-50 border border-[var(--cl-border)] rounded p-5 mb-12">
           <div>
-            <p className="text-h3 text-[var(--cl-text)]">{ONE_TIME.name} — <span className="font-mono">{ONE_TIME.price}</span></p>
+            <p className="text-h3 text-[var(--cl-text)]">{ONE_TIME.name}: <span className="font-mono">{ONE_TIME.price}</span></p>
             <p className="text-caption text-[var(--cl-text-secondary)]">{ONE_TIME.tagline}</p>
           </div>
           <Link href="/scenarios">

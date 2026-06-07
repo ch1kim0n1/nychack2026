@@ -51,11 +51,11 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          CivicLens — Internal Admin Review
+          CivicLens: Internal Admin Review
         </h1>
         <p className="text-sm text-gray-500 mb-6">
           High-risk category findings requiring approval before public display.
-          Internal use only — not linked from the main nav.
+          Internal use only. Not linked from the main nav.
         </p>
 
         {/* Stats Banner */}

@@ -27,14 +27,14 @@ export interface RiskFinding {
   // Trust & citation
   confidence_level?: 'high' | 'medium' | 'low'
   jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency'
-  // Phase 1 — impact dimensions
+  // Phase 1, impact dimensions
   money_risk?: 'high' | 'medium' | 'low'
   delay_risk?: 'high' | 'medium' | 'low'
   legal_severity?: 'high' | 'medium' | 'low'
   urgency?: 'immediate' | 'soon' | 'ongoing'
   impact_score?: number
   impact_label?: string
-  // Phase 1 — action playbook
+  // Phase 1, action playbook
   who_to_contact?: string
   what_to_ask?: string
   documents_needed?: string[]

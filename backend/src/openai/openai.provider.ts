@@ -5,7 +5,7 @@ export const OPENAI_CLIENT = 'OPENAI_CLIENT';
 export const OPENAI_CHAT_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 const NOT_CONFIGURED_MESSAGE =
-  'OpenAI is not configured — set OPENAI_API_KEY for live analysis; use the demo endpoints otherwise';
+  'OpenAI is not configured. Set OPENAI_API_KEY for live analysis; use the demo endpoints otherwise';
 
 /**
  * Builds a stand-in that satisfies the `OpenAI` injection type but throws a
@@ -24,7 +24,15 @@ function createUnconfiguredClient(): OpenAI {
     get: (_target, prop): unknown => {
       // Let promise-unwrapping / type guards behave normally instead of
       // throwing (e.g. `await client` or feature detection).
-      if (prop === 'then' || typeof prop === 'symbol') {
+      if (
+        prop === 'then' ||
+        prop === 'onModuleInit' ||
+        prop === 'onApplicationBootstrap' ||
+        prop === 'onModuleDestroy' ||
+        prop === 'beforeApplicationShutdown' ||
+        prop === 'onApplicationShutdown' ||
+        typeof prop === 'symbol'
+      ) {
         return undefined;
       }
       // Any further property navigation returns the same throwing proxy,

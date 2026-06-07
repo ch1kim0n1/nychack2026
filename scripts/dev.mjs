@@ -7,8 +7,7 @@
 //                     (or ~30s timeout). Uses only node's built-in `net`.
 //   3. migrate    -> apply Prisma migrations (prisma migrate deploy).
 //   4. servers    -> run backend `start:dev` (api) + frontend `dev` (web)
-//                     together via `concurrently`, killing both if either
-//                     fails.
+//                     together, killing both if either fails.
 //
 // Ingestion is intentionally NOT run here (it costs OpenAI + network):
 // use `npm run ingest` separately.
@@ -17,7 +16,7 @@
 // npm / docker / npx resolve on Windows (.cmd shims) and *nix alike.
 // ASCII-only output (Windows cp1252-safe; no unicode arrows/emoji).
 
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -97,6 +96,60 @@ async function waitForDb() {
   process.exit(1);
 }
 
+function killProcessTree(child) {
+  if (!child || !child.pid || child.killed) return;
+  if (process.platform === 'win32') {
+    spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f'], {
+      stdio: 'ignore',
+      shell: false,
+    });
+    return;
+  }
+  child.kill('SIGTERM');
+}
+
+function runServer(label, command, args) {
+  console.log(`[dev] Launching ${label}: ${command} ${args.join(' ')}`);
+  return spawn(command, args, {
+    cwd: rootDir,
+    stdio: 'inherit',
+    shell: true,
+  });
+}
+
+function runServers() {
+  return new Promise((resolveExitCode) => {
+    const children = [
+      runServer('api', 'npm', ['--prefix', 'backend', 'run', 'start:dev']),
+      runServer('web', 'npm', ['--prefix', 'frontend', 'run', 'dev']),
+    ];
+    let shuttingDown = false;
+
+    const stopAll = (exitCode) => {
+      if (shuttingDown) return;
+      shuttingDown = true;
+      for (const child of children) killProcessTree(child);
+      resolveExitCode(exitCode);
+    };
+
+    for (const child of children) {
+      child.on('error', (err) => {
+        console.error(`[dev] FAILED to launch server: ${err.message}`);
+        stopAll(1);
+      });
+      child.on('exit', (code, signal) => {
+        if (shuttingDown) return;
+        const exitCode = code ?? (signal ? 130 : 1);
+        console.error(`[dev] Server exited with ${signal ? `signal ${signal}` : `code ${exitCode}`}.`);
+        stopAll(exitCode);
+      });
+    }
+
+    process.once('SIGINT', () => stopAll(0));
+    process.once('SIGTERM', () => stopAll(0));
+  });
+}
+
 // --- sequence ------------------------------------------------------------
 
 async function main() {
@@ -113,33 +166,13 @@ async function main() {
   // 3. Apply migrations.
   runStep('Applying migrations', 'node', ['scripts/migrate.mjs']);
 
-  // 4. Run both servers together. concurrently is a root devDependency.
-  //    --kill-others-on-fail: if api or web dies, tear the other down too.
+  // 4. Run both servers together. If api or web dies, tear the other down too.
   console.log('[dev] Starting servers: api (:3001) + web (:3000). Ctrl+C to stop.');
-  const servers = spawnSync(
-    'npx',
-    [
-      'concurrently',
-      '--kill-others-on-fail',
-      '--names',
-      'api,web',
-      '--prefix-colors',
-      'cyan,magenta',
-      'npm --prefix backend run start:dev',
-      'npm --prefix frontend run dev',
-    ],
-    {
-      cwd: rootDir,
-      stdio: 'inherit',
-      shell: true,
-    },
-  );
+  const serverExitCode = await runServers();
 
-  // concurrently exits non-zero on Ctrl+C / a failing child; surface it but
-  // do not treat a manual interrupt as a scary error.
-  if (servers.status && servers.status !== 0) {
-    console.error(`[dev] Servers exited with code ${servers.status}.`);
-    process.exit(servers.status);
+  if (serverExitCode !== 0) {
+    console.error(`[dev] Servers exited with code ${serverExitCode}.`);
+    process.exit(serverExitCode);
   }
 }
 
