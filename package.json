@@ -2,6 +2,9 @@
   "name": "civiclens",
   "private": true,
   "description": "CivicLens monorepo root - local dev orchestration (backend + frontend + Postgres).",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "db:up": "docker compose -f backend/docker-compose.yml up -d db",
@@ -12,6 +15,6 @@
     "stop": "npm run db:down"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^10.0.3"
   }
 }

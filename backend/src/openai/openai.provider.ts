@@ -35,6 +35,17 @@ function createUnconfiguredClient(): OpenAI {
       ) {
         return undefined;
       }
+      // Nest probes providers for lifecycle hooks during bootstrap. Returning
+      // undefined keeps the unconfigured stand-in from being called as a hook.
+      if (
+        prop === 'onModuleInit' ||
+        prop === 'onModuleDestroy' ||
+        prop === 'onApplicationBootstrap' ||
+        prop === 'beforeApplicationShutdown' ||
+        prop === 'onApplicationShutdown'
+      ) {
+        return undefined;
+      }
       // Any further property navigation returns the same throwing proxy,
       // so `client.chat.completions.create(...)` reaches a callable that throws.
       return new Proxy(throwUnavailable, handler);
