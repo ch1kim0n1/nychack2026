@@ -27,18 +27,20 @@ export interface RiskFinding {
   // Trust & citation
   confidence_level?: 'high' | 'medium' | 'low'
   jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency'
-  // Phase 1 — impact dimensions
+  // Phase 1, impact dimensions
   money_risk?: 'high' | 'medium' | 'low'
   delay_risk?: 'high' | 'medium' | 'low'
   legal_severity?: 'high' | 'medium' | 'low'
   urgency?: 'immediate' | 'soon' | 'ongoing'
   impact_score?: number
   impact_label?: string
-  // Phase 1 — action playbook
+  // Phase 1, action playbook
   who_to_contact?: string
   what_to_ask?: string
   documents_needed?: string[]
   next_steps?: string[]
+  // Manual validation
+  review_state?: string // "pending" | "approved" | "rejected" | "auto_approved"
 }
 
 export interface DraftResult {
@@ -56,6 +58,15 @@ export interface RiskAnalysisResult {
   disclaimer: string
 }
 
+export interface SavedProfile {
+  id: string
+  client_id: string
+  label: string
+  profile_json: BusinessProfile
+  created_at: string
+  updated_at: string
+}
+
 export interface DiffItem {
   category: string
   dallas: string | null
@@ -71,6 +82,55 @@ export interface ScenarioDiff {
   city_a: string
   city_b: string
   differences: DiffItem[]
+}
+
+export interface RadarThreat {
+  source_id: string
+  title: string
+  agency: string
+  jurisdiction: string
+  source_url: string
+  last_checked_at: string | null
+  matched_tags: string[]
+}
+
+export interface RadarResponse {
+  threats: RadarThreat[]
+  generated_at: string
+  profile_summary: string
+}
+
+export interface DigestItem {
+  level: 'high' | 'medium' | 'low'
+  title: string
+  body: string
+  link: string
+  agency: string
+}
+
+export interface PulseDigest {
+  items: DigestItem[]
+  generated_at: string
+  personalized: boolean
+  business_label: string
+}
+
+export interface AdminFinding {
+  id: string
+  review_state: string
+  affected_area: string
+  risk_level: 'high' | 'medium' | 'low'
+  explanation: string
+  source_url: string
+  confidence_level?: string
+  created_at: string
+}
+
+export interface ReviewStats {
+  pending: number
+  approved: number
+  rejected: number
+  auto_approved: number
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -128,4 +188,45 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(params),
     }),
+
+  watchlist: {
+    list: (clientId: string) =>
+      apiFetch<SavedProfile[]>(`/api/watchlist?client_id=${encodeURIComponent(clientId)}`),
+
+    save: (params: { client_id: string; label: string; profile: BusinessProfile }) =>
+      apiFetch<SavedProfile>('/api/watchlist', {
+        method: 'POST',
+        body: JSON.stringify(params),
+      }),
+
+    remove: (id: string, clientId: string) =>
+      apiFetch<void>(`/api/watchlist/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ client_id: clientId }),
+      }),
+  },
+
+  radarThreats: (profile: BusinessProfile, days?: number) =>
+    apiFetch<RadarResponse>('/api/radar', {
+      method: 'POST',
+      body: JSON.stringify({ profile, days }),
+    }),
+
+  getPulseDigest: (profile: BusinessProfile) =>
+    apiFetch<PulseDigest>('/api/pulse', {
+      method: 'POST',
+      body: JSON.stringify({ profile }),
+    }),
+
+  getAdminPendingFindings: () =>
+    apiFetch<AdminFinding[]>('/api/admin/findings/pending'),
+
+  reviewFinding: (id: string, state: 'approved' | 'rejected', note?: string) =>
+    apiFetch<AdminFinding>(`/api/admin/findings/${id}/review`, {
+      method: 'PATCH',
+      body: JSON.stringify({ state, note }),
+    }),
+
+  getAdminStats: () =>
+    apiFetch<ReviewStats>('/api/admin/stats'),
 }

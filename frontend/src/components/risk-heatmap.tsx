@@ -4,22 +4,10 @@ import { type RiskFinding } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 const JURISDICTIONS = ['City', 'County', 'State', 'Federal', 'Agency', 'Unknown']
-const ACTIVITIES_LABELS: Record<string, string> = {
-  food_preparation:  'Food prep',
-  alcohol_planned:   'Alcohol',
-  outdoor_seating:   'Outdoor seating',
-  food_service:      'Food service',
-  hiring_employees:  'Hiring',
-  delivery:          'Delivery',
-  nail_services:     'Nail services',
-  cosmetology:       'Cosmetology',
-  construction_work: 'Construction',
-  retail_sales:      'Retail',
-}
 
 function heatColor(level?: string | null) {
   if (!level) return 'bg-sunken text-[var(--cl-text-muted)]'
-  if (level === 'high')   return 'bg-risk-high-bg text-risk-high-fg border border-risk-high-border font-semibold'
+  if (level === 'high') return 'bg-risk-high-bg text-risk-high-fg border border-risk-high-border font-semibold'
   if (level === 'medium') return 'bg-risk-med-bg text-risk-med-fg border border-risk-med-border'
   return 'bg-risk-low-bg text-risk-low-fg border border-risk-low-border'
 }
@@ -27,59 +15,58 @@ function heatColor(level?: string | null) {
 export function RiskHeatmap({ findings }: { findings: RiskFinding[] }) {
   if (findings.length === 0) return null
 
-  // Build a jurisdiction × area grid
-  const areas = [...new Set(findings.map(f => f.affected_area))]
+  const areas = [...new Set(findings.map((finding) => finding.affected_area))]
   const juriMap: Record<string, Record<string, string>> = {}
 
-  for (const f of findings) {
-    const j = f.jurisdiction_level
-      ? f.jurisdiction_level.charAt(0).toUpperCase() + f.jurisdiction_level.slice(1)
+  for (const finding of findings) {
+    const jurisdiction = finding.jurisdiction_level
+      ? finding.jurisdiction_level.charAt(0).toUpperCase() + finding.jurisdiction_level.slice(1)
       : 'Unknown'
-    if (!juriMap[j]) juriMap[j] = {}
-    if (!juriMap[j][f.affected_area] || f.risk_level === 'high') {
-      juriMap[j][f.affected_area] = f.risk_level
+    if (!juriMap[jurisdiction]) juriMap[jurisdiction] = {}
+    if (!juriMap[jurisdiction][finding.affected_area] || finding.risk_level === 'high') {
+      juriMap[jurisdiction][finding.affected_area] = finding.risk_level
     }
   }
 
-  const usedJurisdictions = JURISDICTIONS.filter(j => juriMap[j])
-  if (usedJurisdictions.length < 2) return null // Not enough data for a meaningful grid
+  const usedJurisdictions = JURISDICTIONS.filter((jurisdiction) => juriMap[jurisdiction])
+  if (usedJurisdictions.length < 2) return null
 
   return (
-    <div className="mt-8">
+    <section className="rounded-lg border border-[var(--cl-border)] bg-surface px-5 py-5 shadow-1">
       <h2 className="text-h2 text-[var(--cl-text)] mb-2">Risk Heatmap</h2>
       <p className="text-body text-[var(--cl-text-secondary)] mb-4">
         Where compliance risk concentrates, by jurisdiction and requirement.
       </p>
-      <div className="overflow-x-auto">
-        <table className="w-full text-caption border-collapse">
+      <div className="overflow-x-auto rounded border border-[var(--cl-border-subtle)]">
+        <table className="w-full border-collapse text-caption">
           <thead>
             <tr>
-              <th className="text-left px-3 py-2 bg-navy-800 text-white text-label uppercase tracking-[0.06em] w-40 rounded-tl">
+              <th className="w-40 bg-navy-800 px-3 py-2 text-left text-label uppercase tracking-[0.06em] text-white">
                 Jurisdiction
               </th>
-              {areas.map(a => (
-                <th key={a} className="px-3 py-2 bg-navy-800 text-white text-label uppercase tracking-[0.06em] text-center last:rounded-tr">
-                  {a.length > 20 ? a.slice(0, 18) + '…' : a}
+              {areas.map((area) => (
+                <th key={area} className="bg-navy-800 px-3 py-2 text-center text-label uppercase tracking-[0.06em] text-white">
+                  {area.length > 20 ? `${area.slice(0, 18)}...` : area}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {usedJurisdictions.map((j, i) => (
-              <tr key={j} className={i % 2 === 1 ? 'bg-canvas' : ''}>
-                <td className="px-3 py-2 font-semibold text-[var(--cl-text)] border-t border-[var(--cl-border-subtle)]">
-                  {j}
+            {usedJurisdictions.map((jurisdiction, i) => (
+              <tr key={jurisdiction} className={i % 2 === 1 ? 'bg-canvas' : ''}>
+                <td className="border-t border-[var(--cl-border-subtle)] px-3 py-2 font-semibold text-[var(--cl-text)]">
+                  {jurisdiction}
                 </td>
-                {areas.map(area => {
-                  const level = juriMap[j]?.[area]
+                {areas.map((area) => {
+                  const level = juriMap[jurisdiction]?.[area]
                   return (
-                    <td key={area} className="px-2 py-2 text-center border-t border-[var(--cl-border-subtle)]">
+                    <td key={area} className="border-t border-[var(--cl-border-subtle)] px-2 py-2 text-center">
                       {level ? (
-                        <span className={cn('inline-block px-2 py-0.5 rounded-sm text-citation font-mono', heatColor(level))}>
+                        <span className={cn('inline-block rounded-sm px-2 py-0.5 text-citation font-mono', heatColor(level))}>
                           {level.toUpperCase()}
                         </span>
                       ) : (
-                        <span className="text-[var(--cl-text-muted)]">—</span>
+                        <span className="text-[var(--cl-text-muted)]">None</span>
                       )}
                     </td>
                   )
@@ -89,6 +76,6 @@ export function RiskHeatmap({ findings }: { findings: RiskFinding[] }) {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   )
 }

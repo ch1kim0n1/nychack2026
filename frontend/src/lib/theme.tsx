@@ -15,7 +15,7 @@ const ThemeContext = createContext<ThemeContextValue>({
 })
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Light is always the default — gov users must see the light UI first (§3)
+  // Light is always the default, gov users must see the light UI first (§3)
   const [theme, setTheme] = useState<Theme>('light')
 
   useEffect(() => {

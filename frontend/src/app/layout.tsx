@@ -17,7 +17,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'CivicLens — Regulatory Intelligence for Texas Business',
+  title: 'CivicLens: Regulatory Intelligence for Texas Business',
   description:
     'Know every rule that applies to your business. Before it costs you.',
 }

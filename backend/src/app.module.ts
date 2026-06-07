@@ -9,6 +9,11 @@ import { RiskModule } from './risk/risk.module';
 import { DiffModule } from './diff/diff.module';
 import { DraftModule } from './draft/draft.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { SourceDiffModule } from './source-diff/source-diff.module';
+import { WatchlistModule } from './watchlist/watchlist.module';
+import { RadarModule } from './radar/radar.module';
+import { PulseModule } from './pulse/pulse.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -20,6 +25,11 @@ import { MetricsModule } from './metrics/metrics.module';
     DiffModule,
     DraftModule,
     MetricsModule,
+    SourceDiffModule,
+    WatchlistModule,
+    RadarModule,
+    PulseModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

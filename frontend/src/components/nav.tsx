@@ -15,7 +15,7 @@ interface NavProps {
 }
 
 // Routes whose pages depend on the loaded analysis result and bounce to
-// /intake when it isn't ready yet — disabled while the dashboard is loading.
+// /intake when it isn't ready yet, disabled while the dashboard is loading.
 const DATA_DEPENDENT_ROUTES = new Set(['/checklist', '/lease', '/readiness', '/report'])
 
 export function Nav({ variant = 'marketing', businessSummary, onCompare, loadingData = false }: NavProps) {
@@ -33,10 +33,12 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
   const appRoutes: { label: string; href: string }[] = [
     { label: 'Compare', href: '/diff' },
     { label: 'Scenarios', href: '/scenarios' },
+    { label: 'Radar', href: '/radar' },
     { label: 'Checklist', href: '/checklist' },
     { label: 'Lease check', href: '/lease' },
     { label: 'Readiness', href: '/readiness' },
     { label: 'Report', href: '/report' },
+    { label: 'Watchlist', href: '/watchlist' },
   ]
 
   return (
@@ -51,7 +53,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
         CivicLens
       </Link>
 
-      {/* Center — business summary chip (app mode) */}
+      {/* Center, business summary chip (app mode) */}
       {isApp && businessSummary && (
         <span className="font-mono text-caption text-[var(--cl-text-muted)] bg-navy-800 border border-[var(--cl-border)] rounded-sm px-3 py-1 hidden md:inline">
           {businessSummary}
@@ -83,6 +85,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
             <Link href="/scenarios" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
               Scenarios
             </Link>
+            <Link href="/radar" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Radar
+            </Link>
             {loadingData ? (
               <>
                 <span className="text-caption text-[var(--cl-text-muted)] opacity-40 hidden md:inline">Checklist</span>
@@ -106,6 +111,9 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
                 </Link>
               </>
             )}
+            <Link href="/watchlist" className="text-caption text-[var(--cl-text-muted)] hover:text-white transition-colors hidden md:inline">
+              Watchlist
+            </Link>
           </>
         )}
         <Link
@@ -128,7 +136,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
           {theme === 'light' ? <Moon size={16} strokeWidth={1.5} /> : <Sun size={16} strokeWidth={1.5} />}
         </button>
 
-        {/* Mobile hamburger — app routes only, shown below md where links are hidden */}
+        {/* Mobile hamburger, app routes only, shown below md where links are hidden */}
         {isApp && (
           <button
             onClick={() => setMenuOpen(o => !o)}
@@ -142,7 +150,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
         )}
       </div>
 
-      {/* Mobile drawer — exposes all major app routes below the md breakpoint */}
+      {/* Mobile drawer, exposes all major app routes below the md breakpoint */}
       {isApp && menuOpen && (
         <div className="md:hidden fixed inset-0 z-50">
           {/* Backdrop */}
@@ -184,7 +192,7 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
                 )
               }
               // Routes that read the analysis result redirect to /intake if it's
-              // not ready — disable them while dashboard data is loading (#30).
+              // not ready, disable them while dashboard data is loading (#30).
               if (loadingData && DATA_DEPENDENT_ROUTES.has(route.href)) {
                 return (
                   <span

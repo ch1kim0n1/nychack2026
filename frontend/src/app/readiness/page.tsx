@@ -126,7 +126,7 @@ export default function ReadinessPage() {
                 </div>
               ))}
               {findings.length - doneCount === 0 && (
-                <p className="text-body text-[var(--cl-text-muted)] italic">Nothing remaining — all approved.</p>
+                <p className="text-body text-[var(--cl-text-muted)] italic">Nothing remaining. All approved.</p>
               )}
             </div>
           </div>
