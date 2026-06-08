@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { calculateRiskScore, RiskFinding, RiskService } from './risk.service';
 import { PrismaService } from '../database/prisma.service';
 import { RagService } from '../rag/rag.service';
-import { InternalServerErrorException } from '@nestjs/common';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { OPENAI_CLIENT } from '../openai/openai.provider';
 
 const mockChatCreate = jest.fn();
@@ -164,7 +164,7 @@ describe('RiskService', () => {
     expect(result.findings[0].affected_area).toBe('Valid Finding');
   });
 
-  it('throws InternalServerErrorException when all findings lack citations', async () => {
+  it('throws ServiceUnavailableException when live synthesis cannot produce cited findings', async () => {
     mockChatCreate.mockResolvedValue({
       choices: [
         {
@@ -193,7 +193,7 @@ describe('RiskService', () => {
         activities: [],
         employees: null,
       }),
-    ).rejects.toThrow(InternalServerErrorException);
+    ).rejects.toThrow(ServiceUnavailableException);
   });
 
   it('returns findings sorted high → medium → low', async () => {
