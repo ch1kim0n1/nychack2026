@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils'
 
 interface NavProps {
   variant?: 'marketing' | 'app'
-  businessSummary?: string
   onCompare?: () => void
   loadingData?: boolean
 }
@@ -18,7 +17,7 @@ interface NavProps {
 // /intake when it isn't ready yet, disabled while the dashboard is loading.
 const DATA_DEPENDENT_ROUTES = new Set(['/checklist', '/lease', '/readiness', '/report'])
 
-export function Nav({ variant = 'marketing', businessSummary, onCompare, loadingData = false }: NavProps) {
+export function Nav({ variant = 'marketing', onCompare, loadingData = false }: NavProps) {
   const { theme, toggle } = useTheme()
   const isApp = variant === 'app'
   const pathname = usePathname()
@@ -53,13 +52,6 @@ export function Nav({ variant = 'marketing', businessSummary, onCompare, loading
       <Link href="/home" className="font-semibold text-body-lg tracking-tight text-white hover:opacity-80 transition-opacity">
         CivicLens
       </Link>
-
-      {/* Center, business summary chip (app mode) */}
-      {isApp && businessSummary && (
-        <span className="font-mono text-caption text-[var(--cl-text-muted)] bg-navy-800 border border-[var(--cl-border)] rounded-sm px-3 py-1 hidden md:inline">
-          {businessSummary}
-        </span>
-      )}
 
       {/* Right actions */}
       <div className="flex items-center gap-4">

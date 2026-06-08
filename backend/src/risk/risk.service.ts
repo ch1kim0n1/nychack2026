@@ -151,8 +151,21 @@ export class RiskService {
       return cached;
     }
 
-    const chunks = await this.ragService.retrieve(profile);
-    const findings = await this.synthesize(profile, chunks);
+    let findings: RiskFinding[];
+    try {
+      const chunks = await this.ragService.retrieve(profile);
+      findings = await this.synthesize(profile, chunks);
+    } catch (err) {
+      if (err instanceof ServiceUnavailableException) {
+        throw err;
+      }
+      this.logger.warn(
+        `Live risk analysis unavailable: ${(err as Error).message}`,
+      );
+      throw new ServiceUnavailableException(
+        'Live risk analysis is unavailable. Use the demo endpoint for cached results.',
+      );
+    }
 
     findings.sort(
       (a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level],
