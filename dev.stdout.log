@@ -1,0 +1,95 @@
+
+> dev
+> node scripts/dev.mjs
+
+[dev] Starting Postgres (docker compose up -d db)...
+[dev] Waiting for Postgres on 127.0.0.1:5433 (timeout 30s)...
+[dev] Postgres is accepting connections.
+[dev] Applying migrations...
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "civiclens", schema "public" at "localhost:5433"
+
+10 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+[dev] Starting servers: api (:3001) + web (:3000). Ctrl+C to stop.
+[api] 
+[api] > backend@0.0.1 start:dev
+[api] > node -e "require('fs').rmSync('tsconfig.build.tsbuildinfo',{force:true})" && nest start --watch
+[api] 
+[web] 
+[web] > civiclens-frontend@0.1.0 dev
+[web] > next dev --port 3000
+[web] 
+[web]   ▲ Next.js 14.2.3
+[web]   - Local:        http://localhost:3000
+[web]   - Environments: .env.local
+[web] 
+[web]  ✓ Starting...
+[api] [2J[3J[H[[90m6:36:03 PM[0m] Starting compilation in watch mode...
+[api] 
+[web]  ✓ Ready in 5.6s
+[api] [[90m6:36:17 PM[0m] Found 0 errors. Watching for file changes.
+[api] 
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDatabaseModule dependencies initialized[39m[38;5;3m +31ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOpenAIModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mThrottlerModule dependencies initialized[39m[38;5;3m +16ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRagModule dependencies initialized[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiffModule dependencies initialized[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mProfileModule dependencies initialized[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDraftModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMetricsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSourceDiffModule dependencies initialized[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mWatchlistModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRadarModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPulseModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAdminModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRiskModule dependencies initialized[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/api/health}:[39m[38;5;3m +22ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/health, GET} route[39m[38;5;3m +7ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mProfileController {/api/profile}:[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/profile/classify, POST} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mRiskController {/api/risk}:[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/risk/analyze, POST} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/risk/demo, GET} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mDiffController {/api/diff}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/diff/:scenario, GET} route[39m[38;5;3m +4ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mDraftController {/api/draft}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/draft, POST} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mMetricsController {/api/metrics}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/metrics/citation-coverage, GET} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/metrics/rag-stats, GET} route[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSourceDiffController {/api/source-diff}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/source-diff, GET} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/source-diff/:sourceId, GET} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mWatchlistController {/api/watchlist}:[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/watchlist, POST} route[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/watchlist, GET} route[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/watchlist/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mRadarController {/api/radar}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/radar, POST} route[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPulseController {/api/pulse}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/pulse, POST} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAdminController {/api/admin}:[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/admin/findings/pending, GET} route[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/admin/findings/:id/review, PATCH} route[39m[38;5;3m +1ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/admin/stats, GET} route[39m[38;5;3m +0ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +57ms[39m
+[api] [32m[Nest] 22796  - [39m06/07/2026, 6:36:20 PM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mCivicLens API listening on port 3001 (prefix /api)[39m
+[web]  ○ Compiling / ...
+[web]  ✓ Compiled / in 5.3s (489 modules)
+[web]  GET / 307 in 5673ms
+[web]  ○ Compiling /home ...
+[web]  ✓ Compiled /home in 1199ms (587 modules)
+[web]  GET /home 200 in 1461ms
+[web]  GET / 307 in 65ms
+[web]  GET /home 200 in 43ms
+[web]  GET / 307 in 165ms
+[web]  GET /home 200 in 116ms
+[web] [?25h
+[web] npm --prefix frontend run dev exited with code 0
+--> Sending SIGTERM to other processes..
+[api] npm --prefix backend run start:dev exited with code 1
