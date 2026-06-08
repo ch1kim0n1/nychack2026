@@ -109,7 +109,7 @@ export default function IntakePage() {
   const [currentFollowup, setCurrentFollowup] = useState(0)
 
   async function handleAnalyze(overrideText?: string) {
-    const inputText = overrideText ?? text
+    const inputText = typeof overrideText === 'string' ? overrideText : text
     if (!inputText || inputText.length < 15) return
     setStage('classifying')
     setAnalyzing(true)
@@ -185,7 +185,7 @@ export default function IntakePage() {
               placeholder={'I own a food truck in Dallas with 3 employees. I want to open a\nbrick-and-mortar restaurant in Austin and add alcohol service.'}
               value={text}
               onChange={e => setText(e.target.value)}
-              onAnalyze={handleAnalyze}
+              onAnalyze={() => void handleAnalyze()}
               analyzing={analyzing}
             />
             {stage === 'error' && (

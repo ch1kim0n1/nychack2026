@@ -74,16 +74,9 @@ export default function DashboardPage() {
             data = await api.analyzeRisk(profile, controller.signal)
           } catch (err) {
             if ((err as Error).name === 'AbortError') return
-            const msg = err instanceof Error ? err.message : ''
-            const is503 = msg.startsWith('API 503')
-            const isNetwork = !msg.startsWith('API ')
-            if (is503 || isNetwork) {
-              data = await api.getDemoRisk(controller.signal)
-              if (controller.signal.aborted) return
-              setDegraded(true)
-            } else {
-              throw err
-            }
+            data = await api.getDemoRisk(controller.signal)
+            if (controller.signal.aborted) return
+            setDegraded(true)
           }
         } else {
           data = await api.getDemoRisk(controller.signal)
@@ -160,7 +153,6 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-canvas">
       <Nav
         variant="app"
-        businessSummary={profileInput ? profileInput.slice(0, 60) + (profileInput.length > 60 ? '…' : '') : undefined}
         onCompare={() => router.push('/diff')}
         loadingData={loading}
       />
@@ -175,6 +167,13 @@ export default function DashboardPage() {
       )}
 
       <main className="flex-1 px-6 py-6 max-w-app mx-auto w-full">
+        {profileInput && (
+          <div className="mb-4 border-l-2 border-navy-600 pl-3">
+            <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)]">Current scan</p>
+            <p className="mt-1 max-w-3xl text-body text-[var(--cl-text-secondary)]">{profileInput}</p>
+          </div>
+        )}
+
         {loading && <DashboardSkeleton />}
 
         {error && !loading && (

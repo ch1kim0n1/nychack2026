@@ -200,13 +200,6 @@ async function main() {
     const code = failed?.exitCode ?? 1;
     console.error(`[dev] Servers exited with code ${code}.`);
     process.exit(code);
-  // 4. Run both servers together. If api or web dies, tear the other down too.
-  console.log('[dev] Starting servers: api (:3001) + web (:3000). Ctrl+C to stop.');
-  const serverExitCode = await runServers();
-
-  if (serverExitCode !== 0) {
-    console.error(`[dev] Servers exited with code ${serverExitCode}.`);
-    process.exit(serverExitCode);
   }
 }
 
