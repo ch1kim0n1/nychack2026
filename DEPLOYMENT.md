@@ -38,6 +38,7 @@
 | `PORT` | `3001` |
 | `FRONTEND_URL` | Your Vercel URL (set after frontend deploy) |
 | `NODE_ENV` | `production` |
+| `ADMIN_API_KEY` | A long random secret (e.g. `openssl rand -hex 32`). Required for all `/api/admin/*` endpoints — the admin review queue will reject every request without it. |
 
 ### 4. Configure build + start commands
 
@@ -161,4 +162,6 @@ loads it (`main.ts` imports `dotenv/config` at startup). The demo/static routes
 - [ ] `/pulse` shows the Compliance Pulse email mock
 - [ ] Theme toggle works (light default, dark optional)
 - [ ] All disclaimer banners visible
+- [ ] `ADMIN_API_KEY` is set in Railway and matches the value used by `/admin` operator
+- [ ] `/api/admin/queue` returns HTTP 200 (not 401 / 500)
 - [ ] Demo dry-run 15+ times before presenting

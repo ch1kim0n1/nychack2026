@@ -14,6 +14,7 @@ import { WatchlistModule } from './watchlist/watchlist.module';
 import { RadarModule } from './radar/radar.module';
 import { PulseModule } from './pulse/pulse.module';
 import { AdminModule } from './admin/admin.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AdminModule } from './admin/admin.module';
     RadarModule,
     PulseModule,
     AdminModule,
+    ContactModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
