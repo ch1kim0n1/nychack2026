@@ -259,7 +259,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="mt-auto bg-navy-900 text-[var(--cl-text-muted)] px-8 py-6 text-caption">
+      <footer className="bg-navy-900 text-[var(--cl-text-muted)] px-8 py-6 text-caption">
         <div className="max-w-marketing mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span className="font-semibold text-white">CivicLens</span>
           <span>Informational guidance, not legal advice.</span>

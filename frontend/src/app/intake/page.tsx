@@ -94,6 +94,7 @@ type Stage = 'intake' | 'classifying' | 'review' | 'followup' | 'confirming' | '
 export default function IntakePage() {
   const router = useRouter()
   const [text, setText] = useState('')
+  const [validationMessage, setValidationMessage] = useState('')
 
   // Apply prefill from scenario builder if present
   useEffect(() => {
@@ -110,13 +111,18 @@ export default function IntakePage() {
 
   async function handleAnalyze(overrideText?: string) {
     const inputText = typeof overrideText === 'string' ? overrideText : text
-    if (!inputText || inputText.length < 15) {
-      setError('Please describe your business to get started (at least 15 characters).')
+    if (!inputText.trim()) {
+      setValidationMessage('Please describe your business to get started.')
+      return
+    }
+    if (inputText.trim().length < 15) {
+      setValidationMessage('Add a little more detail so we can analyze the right rules.')
       return
     }
     setStage('classifying')
     setAnalyzing(true)
     setError('')
+    setValidationMessage('')
     try {
       const result = await api.classifyProfile(inputText)
       setProfile(result)
@@ -161,6 +167,7 @@ export default function IntakePage() {
   function handleDemoPreload() {
     const demoText = EXAMPLE_SCENARIOS[0].text
     setText(demoText)
+    setValidationMessage('')
     void handleAnalyze(demoText)
   }
 
@@ -169,6 +176,7 @@ export default function IntakePage() {
     setProfile(null)
     setFollowupQueue([])
     setCurrentFollowup(0)
+    setValidationMessage('')
   }
 
   return (
@@ -187,10 +195,23 @@ export default function IntakePage() {
             <IntakeTextarea
               placeholder={'I own a food truck in Dallas with 3 employees. I want to open a\nbrick-and-mortar restaurant in Austin and add alcohol service.'}
               value={text}
-              onChange={e => setText(e.target.value)}
+              onChange={e => {
+                const nextValue = e.target.value
+                setText(nextValue)
+                if (validationMessage && nextValue.trim().length >= 15) {
+                  setValidationMessage('')
+                }
+              }}
               onAnalyze={() => void handleAnalyze()}
               analyzing={analyzing}
+              invalid={Boolean(validationMessage)}
             />
+            <p className={cn(
+              'text-caption',
+              validationMessage ? 'text-risk-high-fg' : 'text-[var(--cl-text-muted)]',
+            )}>
+              {validationMessage || 'Add a sentence or two about your business, location, and planned changes.'}
+            </p>
             {stage === 'error' && (
               <div className="text-caption text-risk-high-fg bg-risk-high-bg border border-risk-high-border rounded px-3 py-2 space-y-2">
                 <p>{error}</p>
