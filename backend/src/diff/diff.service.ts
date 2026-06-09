@@ -42,7 +42,9 @@ export class DiffService {
     for (const scenarioId of VALID_SCENARIOS) {
       const filePath = path.join(SCENARIOS_DIR, `${scenarioId}.json`);
       if (fs.existsSync(filePath)) {
-        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as ScenarioDiff;
+        const data = JSON.parse(
+          fs.readFileSync(filePath, 'utf-8'),
+        ) as ScenarioDiff;
         list.push({
           id: scenarioId,
           title: data.title,
