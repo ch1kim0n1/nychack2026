@@ -86,7 +86,11 @@ describe('RagService', () => {
       employees: null,
     });
 
-    const [sql, , pgArray] = prisma.$queryRawUnsafe.mock.calls[0];
+    const [sql, , pgArray] = prisma.$queryRawUnsafe.mock.calls[0] as [
+      string,
+      string,
+      string,
+    ];
     expect(sql).toContain('WHERE rc.jurisdiction_tags &&');
     expect(pgArray).toContain('Austin, TX');
     expect(pgArray).toContain('Dallas, TX');
@@ -107,7 +111,11 @@ describe('RagService', () => {
       employees: null,
     });
 
-    const [, , pgArray] = prisma.$queryRawUnsafe.mock.calls[0];
+    const [, , pgArray] = prisma.$queryRawUnsafe.mock.calls[0] as [
+      string,
+      string,
+      string,
+    ];
     expect(pgArray).toContain('Houston, TX');
     expect(pgArray).toContain('Texas');
     expect(pgArray).toContain('Federal');

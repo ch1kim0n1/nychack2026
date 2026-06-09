@@ -32,12 +32,13 @@ before signing a lease, focused on whether the property allows this business act
 Each question should be specific, not vague. Format as a numbered list.`,
     };
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a plain-English business writing assistant helping a Texas small business owner
+    const response = await this.openai.chat.completions.create(
+      {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a plain-English business writing assistant helping a Texas small business owner
 communicate with government agencies, landlords, or licensing offices about a specific compliance requirement.
 
 RULES:
@@ -52,10 +53,10 @@ Return:
   "body": "the drafted content",
   "agency_name": "the name of the agency or contact being addressed"
 }`,
-        },
-        {
-          role: 'user',
-          content: `COMPLIANCE FINDING:
+          },
+          {
+            role: 'user',
+            content: `COMPLIANCE FINDING:
 Area: ${dto.affected_area}
 Explanation: ${dto.explanation}
 Recommended action: ${dto.recommended_action}
@@ -68,10 +69,12 @@ BUSINESS DESCRIPTION: ${dto.business_description}
 CHANNEL: ${channel}
 
 ${channelInstructions[channel]}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-    }, { timeout: 30_000 });
+          },
+        ],
+        response_format: { type: 'json_object' },
+      },
+      { timeout: 30_000 },
+    );
 
     const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
       subject?: string;

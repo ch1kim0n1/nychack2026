@@ -30,7 +30,7 @@ export class RagService {
   }
 
   async retrieve(profile: BusinessProfile): Promise<RegulatoryChunk[]> {
-    // No DB → no vector store to search. Return empty so callers can degrade
+    // No DB means no vector store to search. Return empty so callers can degrade
     // cleanly instead of throwing a raw connection error.
     if (!this.prisma.dbAvailable) return [];
 
@@ -51,7 +51,7 @@ export class RagService {
       'Federal',
       'State',
     ];
-    const pgArray = `{${locations.map(l => `"${l.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
+    const pgArray = `{${locations.map((l) => `"${l.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
 
     const chunks = await this.prisma.$queryRawUnsafe<RegulatoryChunk[]>(
       `SELECT rc.id, rc.text, rc.source_id, rs.source_url,
@@ -65,7 +65,7 @@ export class RagService {
       pgArray,
     );
 
-    // Audit log — traceability (13.9). Best-effort; never blocks retrieval.
+    // Audit log for traceability (13.9). Best-effort; never blocks retrieval.
     void this.prisma.ragQueryLog
       ?.create({
         data: {

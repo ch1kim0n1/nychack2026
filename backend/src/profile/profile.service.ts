@@ -20,12 +20,13 @@ export class ProfileService {
   constructor(@Inject(OPENAI_CLIENT) private readonly openai: OpenAI) {}
 
   async classify(input: string): Promise<BusinessProfile> {
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a business classification assistant for Texas regulatory compliance.
+    const response = await this.openai.chat.completions.create(
+      {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a business classification assistant for Texas regulatory compliance.
 Extract structured information from the user's description. Return ONLY valid JSON — no markdown, no explanation.
 Return exactly this shape:
 {
@@ -35,11 +36,13 @@ Return exactly this shape:
   "activities": ["food_preparation", "alcohol_planned", "outdoor_seating", "nail_services", etc],
   "employees": number or null
 }`,
-        },
-        { role: 'user', content: input },
-      ],
-      response_format: { type: 'json_object' },
-    }, { timeout: 30_000 });
+          },
+          { role: 'user', content: input },
+        ],
+        response_format: { type: 'json_object' },
+      },
+      { timeout: 30_000 },
+    );
 
     const content = response.choices[0]?.message.content;
     if (!content) {

@@ -36,14 +36,14 @@ export interface RiskFinding {
   // Trust & citation
   confidence_level?: 'high' | 'medium' | 'low';
   jurisdiction_level?: 'city' | 'county' | 'state' | 'federal' | 'agency';
-  // Phase 1 — impact dimensions
+  // Phase 1 impact dimensions
   money_risk?: 'high' | 'medium' | 'low';
   delay_risk?: 'high' | 'medium' | 'low';
   legal_severity?: 'high' | 'medium' | 'low';
   urgency?: 'immediate' | 'soon' | 'ongoing';
   impact_score?: number;
   impact_label?: string;
-  // Phase 1 — action playbook
+  // Phase 1 action playbook
   who_to_contact?: string;
   what_to_ask?: string;
   documents_needed?: string[];
@@ -166,7 +166,7 @@ export class RiskService {
   }
 
   async getDemo(): Promise<RiskAnalysisResult> {
-    // Static fallback: DB unavailable or unseeded → serve bundled demo findings.
+    // Static fallback: DB unavailable or unseeded means serve bundled demo findings.
     // Demo never depends on Postgres or OpenAI (backlog 16.10).
     let rows: Awaited<ReturnType<PrismaService['riskFinding']['findMany']>> =
       [];
@@ -244,18 +244,19 @@ export class RiskService {
       .map((c) => `SOURCE: ${c.source_url}\n${c.text}`)
       .join('\n\n---\n\n');
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a Texas regulatory compliance analyst.
+    const response = await this.openai.chat.completions.create(
+      {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a Texas regulatory compliance analyst.
 Given a business profile and regulatory source text, identify compliance requirements.
 
 RULES:
 - Every finding MUST have a source_url copied exactly from the provided context
 - Do NOT invent findings not supported by the provided sources
-- Return ONLY valid JSON — no markdown, no explanation
+- Return ONLY valid JSON; no markdown, no explanation
 
 Return a JSON object with a "findings" array. Each finding must have ALL of these fields:
 {
@@ -271,9 +272,9 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
     "urgency": "immediate|soon|ongoing",
     "impact_score": 0-100,
     "impact_label": "one of: Could delay opening | Could trigger fine | Must verify before lease | Renewal risk | Informational",
-    "confidence_level": "high|medium|low — high=official source with clear requirement, medium=general guidance, low=inferred or ambiguous",
+    "confidence_level": "high|medium|low; high=official source with clear requirement, medium=general guidance, low=inferred or ambiguous",
     "jurisdiction_level": "city|county|state|federal|agency",
-    "prerequisites": ["other permits/steps that must be completed before this one — empty array if none"],
+    "prerequisites": ["other permits/steps that must be completed before this one; empty array if none"],
     "is_hidden_requirement": true if this is easy to miss because it comes from a different agency or jurisdiction than the obvious one, otherwise false,
     "response_path": "one of: monitor | contact_agency | update_docs | change_plan | seek_clarification",
     "permit_fee": "estimated cost if mentioned in source (e.g. '~$3,000/year'), otherwise null",
@@ -287,14 +288,16 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
     "next_steps": ["ordered list of concrete next actions"]
   }]
 }`,
-        },
-        {
-          role: 'user',
-          content: `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}\n\nREGULATORY CONTEXT:\n${context}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-    }, { timeout: 60_000 });
+          },
+          {
+            role: 'user',
+            content: `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}\n\nREGULATORY CONTEXT:\n${context}`,
+          },
+        ],
+        response_format: { type: 'json_object' },
+      },
+      { timeout: 60_000 },
+    );
 
     const parsed = JSON.parse(response.choices[0].message.content ?? '{}') as {
       findings?: RiskFinding[];
@@ -308,7 +311,7 @@ Return a JSON object with a "findings" array. Each finding must have ALL of thes
 
     if (verified.length === 0) {
       throw new InternalServerErrorException(
-        'No findings could be verified — all lacked valid citations.',
+        'No findings could be verified; all lacked valid citations.',
       );
     }
 

@@ -160,7 +160,7 @@ describe('RiskService', () => {
     ).rejects.toThrow(InternalServerErrorException);
   });
 
-  it('returns findings sorted high → medium → low', async () => {
+  it('returns findings sorted high to medium to low', async () => {
     mockChatCreate.mockResolvedValue({
       choices: [
         {
@@ -261,10 +261,32 @@ describe('RiskService', () => {
 
   it('calls OpenAI synthesize with a 60-second timeout', async () => {
     mockChatCreate.mockResolvedValue({
-      choices: [{ message: { content: JSON.stringify({ findings: [{ risk_level: 'high', affected_area: 'Permit', explanation: '', recommended_action: '', source_url: 'https://example.com' }] }) } }],
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              findings: [
+                {
+                  risk_level: 'high',
+                  affected_area: 'Permit',
+                  explanation: '',
+                  recommended_action: '',
+                  source_url: 'https://example.com',
+                },
+              ],
+            }),
+          },
+        },
+      ],
     });
 
-    await service.analyze({ industry: 'food_service', location: 'Austin, TX', expansion_locations: [], activities: [], employees: null });
+    await service.analyze({
+      industry: 'food_service',
+      location: 'Austin, TX',
+      expansion_locations: [],
+      activities: [],
+      employees: null,
+    });
 
     expect(mockChatCreate).toHaveBeenCalledWith(
       expect.objectContaining({ model: 'gpt-4o' }),
@@ -291,12 +313,16 @@ describe('RiskService', () => {
     const low = { risk_level: 'low' as const };
 
     expect(calculateRiskScore([high, high, high])).toBeLessThan(
-      calculateRiskScore(Array(10).fill(high)),
+      calculateRiskScore(Array.from({ length: 10 }, () => high)),
     );
     expect(calculateRiskScore([high, high, high])).toBe(60);
-    expect(calculateRiskScore(Array(10).fill(high))).toBe(100);
-    expect(calculateRiskScore(Array(7).fill(medium))).toBe(70);
-    expect(calculateRiskScore(Array(30).fill(low))).toBe(100);
+    expect(calculateRiskScore(Array.from({ length: 10 }, () => high))).toBe(
+      100,
+    );
+    expect(calculateRiskScore(Array.from({ length: 7 }, () => medium))).toBe(
+      70,
+    );
+    expect(calculateRiskScore(Array.from({ length: 30 }, () => low))).toBe(100);
     expect(calculateRiskScore([high, medium, low])).toBe(33);
   });
 });

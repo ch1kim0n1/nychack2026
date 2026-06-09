@@ -33,7 +33,17 @@ describe('DraftService', () => {
 
   it('generates an email draft with subject and body', async () => {
     mockCreate.mockResolvedValue({
-      choices: [{ message: { content: JSON.stringify({ subject: 'TABC Permit Inquiry', body: 'Dear TABC,\n\nI am writing...', agency_name: 'TABC' }) } }],
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              subject: 'TABC Permit Inquiry',
+              body: 'Dear TABC,\n\nI am writing...',
+              agency_name: 'TABC',
+            }),
+          },
+        },
+      ],
     });
 
     const result = await service.generate({ ...baseDto, channel: 'email' });
@@ -47,10 +57,22 @@ describe('DraftService', () => {
 
   it('generates a call script draft', async () => {
     mockCreate.mockResolvedValue({
-      choices: [{ message: { content: JSON.stringify({ body: '[OPENING] Hi, my name is...', agency_name: 'TABC' }) } }],
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              body: '[OPENING] Hi, my name is...',
+              agency_name: 'TABC',
+            }),
+          },
+        },
+      ],
     });
 
-    const result = await service.generate({ ...baseDto, channel: 'call_script' });
+    const result = await service.generate({
+      ...baseDto,
+      channel: 'call_script',
+    });
 
     expect(result.channel).toBe('call_script');
     expect(result.body).toContain('OPENING');
@@ -58,7 +80,16 @@ describe('DraftService', () => {
 
   it('calls OpenAI with a 30-second timeout', async () => {
     mockCreate.mockResolvedValue({
-      choices: [{ message: { content: JSON.stringify({ body: 'Draft body', agency_name: 'TABC' }) } }],
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              body: 'Draft body',
+              agency_name: 'TABC',
+            }),
+          },
+        },
+      ],
     });
 
     await service.generate({ ...baseDto, channel: 'email' });
