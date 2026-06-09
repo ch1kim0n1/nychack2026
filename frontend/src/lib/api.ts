@@ -222,15 +222,25 @@ export const api = {
       body: JSON.stringify({ profile }),
     }),
 
-  getAdminPendingFindings: () =>
-    apiFetch<AdminFinding[]>('/api/admin/findings/pending'),
+  getAdminPendingFindings: (adminApiKey: string) =>
+    apiFetch<AdminFinding[]>('/api/admin/findings/pending', {
+      headers: { 'x-admin-api-key': adminApiKey },
+    }),
 
-  reviewFinding: (id: string, state: 'approved' | 'rejected', note?: string) =>
+  reviewFinding: (
+    id: string,
+    state: 'approved' | 'rejected',
+    note: string | undefined,
+    adminApiKey: string,
+  ) =>
     apiFetch<AdminFinding>(`/api/admin/findings/${id}/review`, {
       method: 'PATCH',
+      headers: { 'x-admin-api-key': adminApiKey },
       body: JSON.stringify({ state, note }),
     }),
 
-  getAdminStats: () =>
-    apiFetch<ReviewStats>('/api/admin/stats'),
+  getAdminStats: (adminApiKey: string) =>
+    apiFetch<ReviewStats>('/api/admin/stats', {
+      headers: { 'x-admin-api-key': adminApiKey },
+    }),
 }

@@ -212,7 +212,10 @@ export default function IntakePage() {
             <p className={cn(
               'text-caption',
               validationMessage ? 'text-risk-high-fg' : 'text-[var(--cl-text-muted)]',
-            )}>
+            )}
+              aria-live="polite"
+              role={validationMessage ? 'alert' : undefined}
+            >
               {validationMessage || 'Add a sentence or two about your business, location, and planned changes.'}
             </p>
             {stage === 'error' && (
