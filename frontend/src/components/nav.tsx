@@ -50,7 +50,7 @@ export function Nav({ variant = 'marketing', onCompare, loadingData = false }: N
         </span>
         <span className="flex flex-col leading-none">
           <span className="text-body-lg font-semibold tracking-tight">CivicLens</span>
-          <span className="text-[11px] uppercase tracking-[0.22em] text-white/45">
+          <span className="text-[12px] uppercase tracking-[0.22em] text-white/65">
             {isApp ? 'Command deck' : 'Texas civic ops'}
           </span>
         </span>
