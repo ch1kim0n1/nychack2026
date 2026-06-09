@@ -7,12 +7,39 @@ import { Nav } from '@/components/nav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setSubmitted(true)
+    setSubmitting(true)
+    setError(null)
+
+    const form = event.currentTarget
+    const data = {
+      name: (form.elements.namedItem('name') as HTMLInputElement).value,
+      email: (form.elements.namedItem('email') as HTMLInputElement).value,
+      locations: (form.elements.namedItem('locations') as HTMLInputElement).value || undefined,
+      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value || undefined,
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error('Server error')
+      setSubmitted(true)
+    } catch {
+      setError('Something went wrong — please try again or email us directly.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -98,8 +125,11 @@ export default function ContactPage() {
                     placeholder="Franchise locations, city-by-city permitting, weekly policy monitoring..."
                   />
                 </div>
-                <Button type="submit" size="md" className="w-full">
-                  Request follow-up <Mail size={15} />
+                {error && (
+                  <p className="text-sm text-risk-high-fg">{error}</p>
+                )}
+                <Button type="submit" size="md" className="w-full" disabled={submitting}>
+                  {submitting ? 'Sending…' : <><span>Request follow-up</span> <Mail size={15} /></>}
                 </Button>
               </form>
             )}

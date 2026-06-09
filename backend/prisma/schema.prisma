@@ -77,6 +77,15 @@ model SavedProfile {
   updated_at   DateTime @updatedAt
 }
 
+model ContactLead {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  locations  String?
+  message    String?
+  created_at DateTime @default(now())
+}
+
 model RiskFinding {
   id                 String   @id @default(uuid())
   business_id        String
