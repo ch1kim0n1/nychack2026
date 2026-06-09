@@ -1,5 +1,3 @@
-import type { BusinessProfile } from '@/lib/api'
-
 export interface AustinDemoBusiness {
   id: string
   name: string

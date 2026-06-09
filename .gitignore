@@ -9,3 +9,6 @@
 # Root tooling deps (concurrently, etc.)
 /node_modules/
 .gstack/
+
+# build/run logs
+*.log
