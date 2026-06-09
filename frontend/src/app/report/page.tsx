@@ -28,6 +28,10 @@ export default function ReportPage() {
     setInput(sessionStorage.getItem('cl-input') ?? '')
   }, [router])
 
+  useEffect(() => {
+    document.title = 'CivicLens Compliance Risk Report'
+  }, [])
+
   if (!result) return null
 
   const highCount  = result.findings.filter(f => f.risk_level === 'high').length
@@ -51,14 +55,18 @@ export default function ReportPage() {
 
       <main className="flex-1 max-w-[840px] mx-auto w-full px-8 py-8">
         {/* Print/download button, screen only */}
-        <div className="flex justify-end mb-6 no-print">
+        <div className="flex flex-col items-end gap-2 mb-6 no-print">
           <button
             onClick={() => window.print()}
+            aria-describedby="print-pdf-help"
             className="flex items-center gap-2 bg-navy-600 text-white rounded px-4 py-2 text-body font-semibold hover:bg-navy-700 transition-colors"
           >
             <Printer size={15} strokeWidth={1.5} />
             Print / Save PDF
           </button>
+          <p id="print-pdf-help" className="max-w-sm text-right text-caption text-[var(--cl-text-muted)]">
+            Opens your browser print dialog. Select Save as PDF to download the report.
+          </p>
         </div>
 
         {/* ── Report document ── */}

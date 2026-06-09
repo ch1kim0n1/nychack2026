@@ -239,13 +239,19 @@ export default function DashboardPage() {
                       {savedToWatchlist ? <BookmarkCheck size={13} strokeWidth={1.5} /> : <Bookmark size={13} strokeWidth={1.5} />}
                       {savedToWatchlist ? 'Saved to Watchlist' : savingToWatchlist ? 'Saving…' : 'Save to Watchlist'}
                     </button>
-                    <button
-                      onClick={() => router.push('/report')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-caption border border-[var(--cl-border)] bg-surface text-[var(--cl-text-secondary)] hover:bg-navy-50 transition-colors duration-[80ms]"
-                    >
-                      <FileDown size={13} strokeWidth={1.5} />
-                      Export PDF
-                    </button>
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => router.push('/report')}
+                        aria-describedby="export-pdf-help"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-caption border border-[var(--cl-border)] bg-surface text-[var(--cl-text-secondary)] hover:bg-navy-50 transition-colors duration-[80ms]"
+                      >
+                        <FileDown size={13} strokeWidth={1.5} />
+                        Export PDF
+                      </button>
+                      <span id="export-pdf-help" className="text-citation text-[var(--cl-text-muted)]">
+                        Opens report page; choose Save as PDF in the print dialog.
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
