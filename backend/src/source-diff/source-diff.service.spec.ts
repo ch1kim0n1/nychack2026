@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { SourceDiffService } from './source-diff.service';
 import { PrismaService } from '../database/prisma.service';
 
@@ -7,12 +8,14 @@ describe('SourceDiffService', () => {
   let prisma: {
     dbAvailable: boolean;
     sourceChangeLog: { findMany: jest.Mock };
+    regulatorySource: { findUnique: jest.Mock };
   };
 
   beforeEach(async () => {
     prisma = {
       dbAvailable: true,
       sourceChangeLog: { findMany: jest.fn().mockResolvedValue([]) },
+      regulatorySource: { findUnique: jest.fn().mockResolvedValue({ id: 'src1' }) },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -100,6 +103,13 @@ describe('SourceDiffService', () => {
       prisma.sourceChangeLog.findMany.mockRejectedValue(new Error('DB error'));
       const result = await service.getChangesForSource('src1');
       expect(result).toEqual([]);
+    });
+
+    it('throws NotFoundException for unknown source_id', async () => {
+      prisma.regulatorySource.findUnique.mockResolvedValue(null);
+      await expect(service.getChangesForSource('unknown')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

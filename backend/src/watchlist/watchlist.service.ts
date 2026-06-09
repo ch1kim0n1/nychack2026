@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -15,6 +16,18 @@ export interface SavedProfile {
   updated_at: Date;
 }
 
+function profilesEqual(a: BusinessProfile, b: BusinessProfile): boolean {
+  return (
+    a.industry === b.industry &&
+    a.location === b.location &&
+    a.employees === b.employees &&
+    a.activities.length === b.activities.length &&
+    a.activities.every((v, i) => v === b.activities[i]) &&
+    a.expansion_locations.length === b.expansion_locations.length &&
+    a.expansion_locations.every((v, i) => v === b.expansion_locations[i])
+  );
+}
+
 @Injectable()
 export class WatchlistService {
   constructor(private readonly prisma: PrismaService) {}
@@ -24,6 +37,18 @@ export class WatchlistService {
     label: string;
     profile: BusinessProfile;
   }): Promise<SavedProfile> {
+    const existing = await this.prisma.savedProfile.findMany({
+      where: { client_id: dto.client_id },
+    });
+    const duplicate = existing.find((r) =>
+      profilesEqual(r.profile_json as unknown as BusinessProfile, dto.profile),
+    );
+    if (duplicate) {
+      throw new ConflictException(
+        'This profile is already saved to your watchlist.',
+      );
+    }
+
     const record = await this.prisma.savedProfile.create({
       data: {
         client_id: dto.client_id,

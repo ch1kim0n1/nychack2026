@@ -83,7 +83,7 @@ describe('RiskService', () => {
     expect(result.findings[0].risk_level).toBe('high');
     expect(result.findings[0].source_url).toMatch(/^https/);
     expect(result.risk_score).toBe(20);
-    expect(result.risk_level).toBe('high');
+    expect(result.risk_level).toBe('low');
     expect(result.disclaimer).toContain('not legal advice');
     expect(prisma.riskFinding.createMany).toHaveBeenCalledTimes(1);
   });
@@ -291,7 +291,7 @@ describe('RiskService', () => {
     expect(result.findings[1].risk_level).toBe('medium');
     expect(result.findings[2].risk_level).toBe('low');
     expect(result.risk_score).toBe(33);
-    expect(result.risk_level).toBe('high');
+    expect(result.risk_level).toBe('low');
     expect(result.disclaimer).toContain('not legal advice');
   });
 

@@ -217,6 +217,6 @@ export class RadarService {
     if (profile.activities.length > 0) {
       parts.push(profile.activities.slice(0, 3).join(', '));
     }
-    return parts.join(' · ');
+    return parts.join(' | ');
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 
 export interface SourceChangeLogEntry {
@@ -36,6 +36,12 @@ export class SourceDiffService {
 
   async getChangesForSource(sourceId: string): Promise<SourceChangeLogEntry[]> {
     if (!this.prisma.dbAvailable) return [];
+    const source = await this.prisma.regulatorySource
+      .findUnique({ where: { id: sourceId } })
+      .catch(() => null);
+    if (!source) {
+      throw new NotFoundException(`Source '${sourceId}' not found.`);
+    }
     return this.prisma.sourceChangeLog
       .findMany({
         where: { source_id: sourceId },

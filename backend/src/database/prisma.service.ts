@@ -27,6 +27,12 @@ export class PrismaService
   private retryTimer?: ReturnType<typeof setInterval>;
 
   async onModuleInit() {
+    // In test mode, skip DB connection entirely - tests mock Prisma.
+    if (process.env.NODE_ENV === 'test') {
+      this.dbAvailable = false;
+      return;
+    }
+
     // Non-fatal: app must boot even when no DB is reachable (demo runs on static fallbacks).
     const connected = await this.tryConnect();
     if (!connected) {

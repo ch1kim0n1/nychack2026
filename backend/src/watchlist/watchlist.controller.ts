@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -25,6 +26,9 @@ export class WatchlistController {
 
   @Get()
   list(@Query('client_id') clientId: string): Promise<SavedProfile[]> {
+    if (!clientId || clientId.trim().length === 0) {
+      throw new BadRequestException('client_id query parameter is required');
+    }
     return this.watchlistService.list(clientId);
   }
 

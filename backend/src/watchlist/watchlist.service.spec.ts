@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { WatchlistService } from './watchlist.service';
 import { PrismaService } from '../database/prisma.service';
 
@@ -36,7 +36,7 @@ describe('WatchlistService', () => {
     prisma = {
       savedProfile: {
         create: jest.fn().mockResolvedValue(sampleRecord),
-        findMany: jest.fn().mockResolvedValue([sampleRecord]),
+        findMany: jest.fn().mockResolvedValue([]),
         findUnique: jest.fn().mockResolvedValue(sampleRecord),
         delete: jest.fn().mockResolvedValue(sampleRecord),
       },
@@ -71,10 +71,24 @@ describe('WatchlistService', () => {
       expect(result.label).toBe('My Austin Restaurant');
       expect(result.profile_json).toEqual(sampleProfile);
     });
+
+    it('throws ConflictException when profile is already saved', async () => {
+      prisma.savedProfile.findMany.mockResolvedValue([sampleRecord]);
+
+      await expect(
+        service.save({
+          client_id: 'client-abc',
+          label: 'Duplicate',
+          profile: sampleProfile,
+        }),
+      ).rejects.toThrow(ConflictException);
+      expect(prisma.savedProfile.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('list', () => {
     it('returns profiles filtered by client_id ordered desc', async () => {
+      prisma.savedProfile.findMany.mockResolvedValue([sampleRecord]);
       const results = await service.list('client-abc');
 
       expect(prisma.savedProfile.findMany).toHaveBeenCalledWith({

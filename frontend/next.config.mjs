@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['maplibre-gl'],
   async rewrites() {
     return [
       {

@@ -7,10 +7,10 @@ import { api, type BusinessProfile, type SavedProfile } from '@/lib/api'
 import { Bookmark, Trash2, Bell, Building2 } from 'lucide-react'
 
 function getOrCreateClientId(): string {
-  let id = localStorage.getItem('cl-clientId')
+  let id = localStorage.getItem('cl-client-id')
   if (!id) {
     id = crypto.randomUUID()
-    localStorage.setItem('cl-clientId', id)
+    localStorage.setItem('cl-client-id', id)
   }
   return id
 }
