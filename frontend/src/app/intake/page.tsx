@@ -91,6 +91,8 @@ const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
 
 type Stage = 'intake' | 'classifying' | 'review' | 'followup' | 'confirming' | 'error'
 
+const MIN_PROFILE_INPUT_LENGTH = 10
+
 export default function IntakePage() {
   const router = useRouter()
   const [text, setText] = useState('')
@@ -111,12 +113,13 @@ export default function IntakePage() {
 
   async function handleAnalyze(overrideText?: string) {
     const inputText = typeof overrideText === 'string' ? overrideText : text
-    if (!inputText.trim()) {
+    const trimmedInput = inputText.trim()
+    if (!trimmedInput) {
       setValidationMessage('Please describe your business to get started.')
       return
     }
-    if (inputText.trim().length < 15) {
-      setValidationMessage('Add a little more detail so we can analyze the right rules.')
+    if (trimmedInput.length < MIN_PROFILE_INPUT_LENGTH) {
+      setValidationMessage(`Enter at least ${MIN_PROFILE_INPUT_LENGTH} characters so we can analyze the right rules.`)
       return
     }
     setStage('classifying')
@@ -124,7 +127,7 @@ export default function IntakePage() {
     setError('')
     setValidationMessage('')
     try {
-      const result = await api.classifyProfile(inputText)
+      const result = await api.classifyProfile(trimmedInput)
       setProfile(result)
 
       // Determine which follow-up questions apply (9.7 Business Change Detector)
@@ -198,7 +201,7 @@ export default function IntakePage() {
               onChange={e => {
                 const nextValue = e.target.value
                 setText(nextValue)
-                if (validationMessage && nextValue.trim().length >= 15) {
+                if (validationMessage && nextValue.trim().length >= MIN_PROFILE_INPUT_LENGTH) {
                   setValidationMessage('')
                 }
               }}
