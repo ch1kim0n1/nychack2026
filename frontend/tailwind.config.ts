@@ -54,7 +54,7 @@ const config: Config = {
         3: 'var(--cl-elev-3)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
       },
       fontSize: {

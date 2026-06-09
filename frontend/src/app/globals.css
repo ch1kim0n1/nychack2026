@@ -2,96 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─────────────────────────────────────────
-   DESIGN TOKENS, CivicLens §2
-   All components reference vars, never raw hex.
-───────────────────────────────────────── */
+/* Design tokens. Components reference vars, never raw hex. */
 
 :root {
-  /* Neutrals, light */
-  --cl-canvas:         #F6F8FA;
-  --cl-surface:        #FFFFFF;
-  --cl-sunken:         #F1F4F7;
-  --cl-border-subtle:  #E4E9EF;
-  --cl-border:         #D3DAE3;
-  --cl-border-strong:  #B6C0CC;
-  --cl-text:           #11202E;
-  --cl-text-secondary: #4A5B6B;
-  --cl-text-muted:     #76828F;
+  --cl-canvas: #f4efe7;
+  --cl-surface: #fffdf9;
+  --cl-sunken: #efe6da;
+  --cl-border-subtle: #e7ddd0;
+  --cl-border: #d7c9b8;
+  --cl-border-strong: #bba58d;
+  --cl-text: #162235;
+  --cl-text-secondary: #4a5868;
+  --cl-text-muted: #76818f;
 
-  /* Navy ramp */
-  --cl-navy-50:  #EEF3F8;
-  --cl-navy-100: #D7E3F0;
-  --cl-navy-600: #1F4D7A;
-  --cl-navy-700: #163A5E;
-  --cl-navy-800: #102B45;
-  --cl-navy-900: #0B1F33;
+  --cl-navy-50: #e6f1f0;
+  --cl-navy-100: #cfe0e5;
+  --cl-navy-600: #23627a;
+  --cl-navy-700: #194a60;
+  --cl-navy-800: #133549;
+  --cl-navy-900: #0d1f31;
 
-  /* Risk states, desaturated on purpose */
-  --cl-risk-high-fg:     #B23A3A;
-  --cl-risk-high-bg:     #FBEDED;
-  --cl-risk-high-border: #E8C5C5;
-  --cl-risk-med-fg:      #9A6B16;
-  --cl-risk-med-bg:      #FBF3E3;
-  --cl-risk-med-border:  #ECDBB4;
-  --cl-risk-low-fg:      #3F7A5A;
-  --cl-risk-low-bg:      #EAF3EE;
-  --cl-risk-low-border:  #C4DECE;
+  --cl-risk-high-fg: #a74340;
+  --cl-risk-high-bg: #f9e8e2;
+  --cl-risk-high-border: #e8c0ba;
+  --cl-risk-med-fg: #946524;
+  --cl-risk-med-bg: #f8f0dd;
+  --cl-risk-med-border: #e7d2a4;
+  --cl-risk-low-fg: #3d7760;
+  --cl-risk-low-bg: #e6f0e9;
+  --cl-risk-low-border: #bed5c6;
 
-  /* Radius */
   --cl-radius-sm: 4px;
-  --cl-radius:    6px;
-  --cl-radius-lg: 8px;
+  --cl-radius: 8px;
+  --cl-radius-lg: 18px;
 
-  /* Elevation */
-  --cl-elev-1: 0 1px 2px rgba(16,32,48,.06);
-  --cl-elev-2: 0 4px 12px rgba(16,32,48,.10);
-  --cl-elev-3: 0 12px 32px rgba(16,32,48,.16);
+  --cl-elev-1: 0 10px 28px rgba(14, 31, 49, 0.08);
+  --cl-elev-2: 0 18px 42px rgba(14, 31, 49, 0.12);
+  --cl-elev-3: 0 28px 64px rgba(14, 31, 49, 0.18);
 
-  /* Motion */
-  --cl-dur-instant:  80ms;
-  --cl-dur-fast:     140ms;
-  --cl-dur-base:     200ms;
-  --cl-dur-slow:     320ms;
+  --cl-dur-instant: 80ms;
+  --cl-dur-fast: 140ms;
+  --cl-dur-base: 200ms;
+  --cl-dur-slow: 320ms;
   --cl-dur-entrance: 480ms;
-  --cl-dur-count:    700ms;
-  --cl-ease-standard: cubic-bezier(.4,0,.2,1);
-  --cl-ease-in:       cubic-bezier(.4,0,1,1);
-  --cl-ease-out:      cubic-bezier(0,0,.2,1);
+  --cl-dur-count: 700ms;
+  --cl-ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --cl-ease-in: cubic-bezier(.4, 0, 1, 1);
+  --cl-ease-out: cubic-bezier(0, 0, .2, 1);
 }
-
-/* ─────────────────────────────────────────
-   DARK THEME, opt-in via data-theme="dark"
-───────────────────────────────────────── */
 
 [data-theme="dark"] {
-  --cl-canvas:         #0B1320;
-  --cl-surface:        #111B2B;
-  --cl-sunken:         #0E1726;
-  --cl-border-subtle:  #1E2D42;
-  --cl-border:         #28384E;
-  --cl-border-strong:  #374E68;
-  --cl-text:           #E6ECF2;
-  --cl-text-secondary: #9DAEC0;
-  --cl-text-muted:     #637A91;
+  --cl-canvas: #0b1320;
+  --cl-surface: #132033;
+  --cl-sunken: #0e1828;
+  --cl-border-subtle: #1c3047;
+  --cl-border: #28405b;
+  --cl-border-strong: #3a5b7a;
+  --cl-text: #e7edf3;
+  --cl-text-secondary: #a2b0bf;
+  --cl-text-muted: #718397;
 
-  --cl-navy-600: #4E86C2;
-  --cl-navy-700: #3D6FA0;
+  --cl-navy-50: #10293b;
+  --cl-navy-100: #163245;
+  --cl-navy-600: #5d9bb8;
+  --cl-navy-700: #4a7c96;
+  --cl-navy-800: #224156;
+  --cl-navy-900: #091522;
 
-  --cl-risk-high-fg:     #E07A7A;
-  --cl-risk-high-bg:     #2A1718;
-  --cl-risk-high-border: #5C2828;
-  --cl-risk-med-fg:      #D9A84A;
-  --cl-risk-med-bg:      #2A2113;
-  --cl-risk-med-border:  #5C4518;
-  --cl-risk-low-fg:      #6FB58E;
-  --cl-risk-low-bg:      #122318;
-  --cl-risk-low-border:  #1E4A2E;
+  --cl-risk-high-fg: #e5948e;
+  --cl-risk-high-bg: #2a1717;
+  --cl-risk-high-border: #633030;
+  --cl-risk-med-fg: #dcb16a;
+  --cl-risk-med-bg: #2b2314;
+  --cl-risk-med-border: #655023;
+  --cl-risk-low-fg: #7ab596;
+  --cl-risk-low-bg: #13261a;
+  --cl-risk-low-border: #255137;
 }
-
-/* ─────────────────────────────────────────
-   BASE
-───────────────────────────────────────── */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -107,20 +94,64 @@ body {
   color: var(--cl-text);
   font-size: 0.9375rem;
   line-height: 1.4375rem;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background-image:
+    radial-gradient(circle at top left, rgba(35, 98, 122, 0.14), transparent 28%),
+    radial-gradient(circle at top right, rgba(204, 160, 81, 0.12), transparent 24%);
+  background-attachment: fixed;
 }
 
-/* Monospace data elements */
 .font-mono {
   font-family: var(--font-mono), monospace;
 }
 
-/* Focus ring, global, 2px navy-600 at 40% */
+.cl-shell-grid {
+  position: relative;
+}
+
+.cl-shell-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(13, 31, 49, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 31, 49, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.76), transparent);
+  pointer-events: none;
+}
+
+.cl-hero-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 239, 0.9)),
+    var(--cl-surface);
+  border: 1px solid color-mix(in srgb, var(--cl-border) 82%, white);
+  box-shadow: var(--cl-elev-3);
+  backdrop-filter: blur(18px);
+}
+
+.cl-glow-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.cl-glow-card::after {
+  content: '';
+  position: absolute;
+  right: -18%;
+  bottom: -36%;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(35, 98, 122, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
 :focus-visible {
   outline: 2px solid color-mix(in srgb, var(--cl-navy-600) 40%, transparent);
   outline-offset: 2px;
 }
 
-/* Reduced motion, collapse everything to instant opacity */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -129,9 +160,17 @@ body {
   }
 }
 
-/* Print, for diff viewer */
 @media print {
-  .no-print { display: none !important; }
-  .print-expand { display: block !important; }
-  body { background: white; color: black; }
+  .no-print {
+    display: none !important;
+  }
+
+  .print-expand {
+    display: block !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
 }
