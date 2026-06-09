@@ -98,7 +98,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col bg-canvas text-[var(--cl-text)]">
+    <div className="bg-canvas text-[var(--cl-text)]">
       <Nav variant="marketing" />
 
       <section className="relative overflow-hidden border-b border-[var(--cl-border-subtle)] bg-surface">
@@ -259,7 +259,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="mt-auto bg-navy-900 text-[var(--cl-text-muted)] px-8 py-6 text-caption">
+      <footer className="bg-navy-900 text-[var(--cl-text-muted)] px-8 py-6 text-caption">
         <div className="max-w-marketing mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span className="font-semibold text-white">CivicLens</span>
           <span>Informational guidance, not legal advice.</span>
