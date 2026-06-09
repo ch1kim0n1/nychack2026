@@ -172,7 +172,7 @@ export class RiskService {
     );
 
     const risk_score = calculateRiskScore(findings);
-    const risk_level = this.overallLevel(findings);
+    const risk_level = this.overallLevel(risk_score);
 
     // Persistence is secondary to the computed result: never let a write
     // failure drop a successful analysis. Save best-effort.
@@ -254,7 +254,7 @@ export class RiskService {
       const risk_score = calculateRiskScore(findings);
       return {
         risk_score,
-        risk_level: this.overallLevel(findings),
+        risk_level: this.overallLevel(risk_score),
         findings,
         disclaimer: DISCLAIMER,
       };
@@ -296,7 +296,7 @@ export class RiskService {
       .sort((a, b) => RISK_ORDER[a.risk_level] - RISK_ORDER[b.risk_level]);
 
     const risk_score = calculateRiskScore(findings);
-    const risk_level = this.overallLevel(findings);
+    const risk_level = this.overallLevel(risk_score);
 
     return { risk_score, risk_level, findings, disclaimer: DISCLAIMER };
   }
@@ -305,9 +305,9 @@ export class RiskService {
     return /alcohol|tabc|zoning|health|fine|childcare/i.test(affected_area);
   }
 
-  private overallLevel(findings: RiskFinding[]): 'high' | 'medium' | 'low' {
-    if (findings.some((f) => f.risk_level === 'high')) return 'high';
-    if (findings.some((f) => f.risk_level === 'medium')) return 'medium';
+  private overallLevel(riskScore: number): 'high' | 'medium' | 'low' {
+    if (riskScore >= 70) return 'high';
+    if (riskScore >= 40) return 'medium';
     return 'low';
   }
 

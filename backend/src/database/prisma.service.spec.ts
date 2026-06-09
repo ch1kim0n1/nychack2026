@@ -4,9 +4,11 @@ describe('PrismaService', () => {
   let service: PrismaService;
   let connectMock: jest.Mock;
   let disconnectMock: jest.Mock;
+  const originalNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
     jest.useFakeTimers();
+    process.env.NODE_ENV = 'development';
     service = new PrismaService();
     connectMock = jest.fn();
     disconnectMock = jest.fn().mockResolvedValue(undefined);
@@ -17,6 +19,7 @@ describe('PrismaService', () => {
   });
 
   afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
     jest.clearAllTimers();
     jest.useRealTimers();
   });
@@ -80,5 +83,14 @@ describe('PrismaService', () => {
     await jest.advanceTimersByTimeAsync(15000);
     expect(connectMock.mock.calls.length).toBe(callsAfterDestroy);
     expect(disconnectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips connection in test mode', async () => {
+    process.env.NODE_ENV = 'test';
+    const testService = new PrismaService();
+
+    await testService.onModuleInit();
+
+    expect(testService.dbAvailable).toBe(false);
   });
 });

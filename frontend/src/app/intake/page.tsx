@@ -276,10 +276,10 @@ export default function IntakePage() {
             <div className="flex items-center gap-2 mb-4 text-caption text-[var(--cl-text-muted)]">
               <HelpCircle size={13} strokeWidth={1.5} />
               <span>Follow-up {currentFollowup + 1} of {followupQueue.length}: helps us be more accurate</span>
-              <span className="ml-auto font-mono">{Math.round(((currentFollowup) / followupQueue.length) * 100)}%</span>
+              <span className="ml-auto font-mono">{Math.round(((currentFollowup + 1) / followupQueue.length) * 100)}%</span>
             </div>
             <div className="h-1 bg-sunken rounded-full mb-5 overflow-hidden">
-              <div className="h-full bg-navy-600 rounded-full transition-all" style={{ width: `${(currentFollowup / followupQueue.length) * 100}%` }} />
+              <div className="h-full bg-navy-600 rounded-full transition-all" style={{ width: `${((currentFollowup + 1) / followupQueue.length) * 100}%` }} />
             </div>
 
             <div className="bg-surface border border-[var(--cl-border)] rounded p-5 shadow-1">

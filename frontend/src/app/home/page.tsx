@@ -98,7 +98,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="bg-canvas text-[var(--cl-text)]">
+    <div className="min-h-full flex flex-col bg-canvas text-[var(--cl-text)]">
       <Nav variant="marketing" />
 
       <section className="relative overflow-hidden border-b border-[var(--cl-border-subtle)] bg-surface">

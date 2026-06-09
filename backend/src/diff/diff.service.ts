@@ -19,6 +19,15 @@ export interface ScenarioDiff {
   differences: DiffItem[];
 }
 
+export interface ScenarioMeta {
+  id: string;
+  title: string;
+  city_a: string;
+  city_b: string;
+}
+
+const SCENARIOS_DIR = path.join(__dirname, 'scenarios');
+
 const VALID_SCENARIOS = new Set([
   'scenario-a',
   'scenario-b',
@@ -28,12 +37,29 @@ const VALID_SCENARIOS = new Set([
 
 @Injectable()
 export class DiffService {
+  getScenarioList(): ScenarioMeta[] {
+    const list: ScenarioMeta[] = [];
+    for (const scenarioId of VALID_SCENARIOS) {
+      const filePath = path.join(SCENARIOS_DIR, `${scenarioId}.json`);
+      if (fs.existsSync(filePath)) {
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as ScenarioDiff;
+        list.push({
+          id: scenarioId,
+          title: data.title,
+          city_a: data.city_a,
+          city_b: data.city_b,
+        });
+      }
+    }
+    return list;
+  }
+
   getScenario(scenarioId: string): ScenarioDiff {
     if (!VALID_SCENARIOS.has(scenarioId)) {
       throw new NotFoundException(`Scenario '${scenarioId}' not found.`);
     }
 
-    const filePath = path.join(__dirname, 'scenarios', `${scenarioId}.json`);
+    const filePath = path.join(SCENARIOS_DIR, `${scenarioId}.json`);
 
     if (!fs.existsSync(filePath)) {
       throw new NotFoundException(`Scenario '${scenarioId}' not found.`);

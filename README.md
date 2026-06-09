@@ -15,12 +15,12 @@ npm run dev          # brings up DB, waits for Postgres, runs migrations, starts
 ```
 
 Open http://localhost:3000 (frontend). The API runs on http://localhost:3001
-and Postgres on :5432.
+and Postgres on :5433.
 
 `npm run dev` runs everything together:
 
 1. starts the Postgres (pgvector) container,
-2. waits until Postgres accepts TCP connections on `localhost:5432`,
+2. waits until Postgres accepts TCP connections on `localhost:5433`,
 3. applies Prisma migrations (`prisma migrate deploy`),
 4. runs the backend (`api`, watch mode) and frontend (`web`) concurrently;
    if either crashes, both are stopped.
