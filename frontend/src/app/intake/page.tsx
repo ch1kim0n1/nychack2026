@@ -236,7 +236,7 @@ export default function IntakePage() {
           <div className="relative">
             <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--cl-border)] bg-white/80 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-navy-700 shadow-1">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--cl-border)] bg-white/80 px-3 py-1 text-[12px] uppercase tracking-[0.18em] text-navy-700 shadow-1">
                   <Sparkles size={12} strokeWidth={1.5} />
                   Demo intake
                 </div>

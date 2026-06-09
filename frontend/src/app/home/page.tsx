@@ -106,7 +106,7 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-marketing px-6 pb-14 pt-14 sm:px-8 lg:pb-20 lg:pt-20">
           <div ref={heroRef} className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14">
             <div>
-              <div data-hero className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--cl-border)] bg-white/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-navy-700 shadow-1">
+              <div data-hero className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--cl-border)] bg-white/70 px-3 py-1 text-[12px] uppercase tracking-[0.18em] text-navy-700 shadow-1">
                 <Sparkles size={12} strokeWidth={1.5} />
                 Civic intelligence for local operators
               </div>
@@ -276,7 +276,7 @@ export default function LandingPage() {
                 <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-navy-50 text-navy-700">
                   {feature.icon}
                 </div>
-                <h3 className="mt-4 text-body font-semibold text-[var(--cl-text)]">{feature.title}</h3>
+                <h3 className="mt-4 text-h3 text-[var(--cl-text)]">{feature.title}</h3>
                 <p className="mt-2 text-caption text-[var(--cl-text-secondary)]">{feature.body}</p>
               </div>
             ))}
