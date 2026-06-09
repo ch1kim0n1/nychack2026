@@ -107,7 +107,7 @@ export default function LandingPage() {
           <div ref={heroRef} className="grid lg:grid-cols-[1.02fr_0.98fr] gap-10 lg:gap-12 items-center">
             <div>
               <p data-hero className="text-label uppercase tracking-[0.06em] text-navy-600 mb-4">
-                Civic intelligence for local business
+                Texas compliance intelligence for small business
               </p>
               <h1 data-hero className="text-[2.65rem] leading-[2.9rem] sm:text-[3.35rem] sm:leading-[3.55rem] font-semibold tracking-normal text-[var(--cl-text)] mb-5">
                 Know the rules, risks, and policy changes that affect your business.
@@ -214,7 +214,7 @@ export default function LandingPage() {
         <div ref={howRef} className="grid lg:grid-cols-[0.82fr_1.18fr] gap-10 lg:gap-14 items-start">
           <div>
             <p className="text-label uppercase tracking-[0.06em] text-navy-600 mb-3">From rule search to operating plan</p>
-            <h2 className="text-h1 text-[var(--cl-text)] mb-4">A cleaner way to understand local compliance.</h2>
+            <h2 className="text-h1 text-[var(--cl-text)] mb-4">Local compliance findings with public sources attached.</h2>
             <p className="text-body-lg text-[var(--cl-text-secondary)]">
               The product is built around the way local rules actually work: overlapping jurisdictions, agency guidance, permit dependencies, effective dates, and practical business impact.
             </p>
@@ -238,7 +238,7 @@ export default function LandingPage() {
         <div ref={proofRef} className="max-w-marketing mx-auto grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
           <div>
             <p className="text-label uppercase tracking-[0.06em] text-navy-600 mb-3">Built for real civic risk</p>
-            <h2 className="text-h1 text-[var(--cl-text)] mb-4">Not another generic checklist.</h2>
+            <h2 className="text-h1 text-[var(--cl-text)] mb-4">Cited playbooks for Texas operators.</h2>
             <p className="text-body-lg text-[var(--cl-text-secondary)]">
               CivicLens connects the source, the jurisdiction, the business activity, and the next action so owners can decide what to verify before it becomes expensive.
             </p>

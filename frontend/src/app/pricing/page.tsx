@@ -61,7 +61,7 @@ const TIERS: Tier[] = [
       'Priority support',
     ],
     cta: 'Contact sales',
-    ctaHref: 'mailto:sales@civiclens.app',
+    ctaHref: '/contact',
   },
 ]
 
