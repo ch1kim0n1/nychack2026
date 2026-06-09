@@ -110,7 +110,7 @@ export default function LandingPage() {
                 <Sparkles size={12} strokeWidth={1.5} />
                 Civic intelligence for local operators
               </div>
-              <h1 data-hero className="max-w-[11ch] text-[3.25rem] font-semibold leading-[0.96] tracking-[-0.05em] text-[var(--cl-text)] sm:text-[4.4rem]">
+              <h1 data-hero className="max-w-[11ch] text-[3.25rem] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--cl-text)] sm:text-[4.4rem]">
                 Know the civic moves before they become expensive.
               </h1>
               <p data-hero className="mt-6 max-w-xl text-body-lg text-[var(--cl-text-secondary)]">
@@ -233,7 +233,7 @@ export default function LandingPage() {
         <div ref={workflowRef} className="grid items-start gap-10 lg:grid-cols-[0.84fr_1.16fr] lg:gap-14">
           <div>
             <p className="text-label text-navy-600">From rule search to operating plan</p>
-            <h2 className="mt-3 max-w-[12ch] text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.04em] text-[var(--cl-text)]">
+            <h2 className="mt-3 max-w-[12ch] text-[2.6rem] font-bold leading-[1.02] tracking-[-0.04em] text-[var(--cl-text)]">
               A cleaner workflow for local compliance.
             </h2>
             <p className="mt-4 max-w-lg text-body-lg text-[var(--cl-text-secondary)]">
@@ -263,7 +263,7 @@ export default function LandingPage() {
         <div ref={featureRef} className="mx-auto grid max-w-marketing gap-10 lg:grid-cols-[0.82fr_1.18fr]">
           <div>
             <p className="text-label text-navy-600">Built for real civic risk</p>
-            <h2 className="mt-3 max-w-[11ch] text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.04em] text-[var(--cl-text)]">
+            <h2 className="mt-3 max-w-[11ch] text-[2.6rem] font-bold leading-[1.02] tracking-[-0.04em] text-[var(--cl-text)]">
               Not another generic checklist.
             </h2>
             <p className="mt-4 max-w-lg text-body-lg text-[var(--cl-text-secondary)]">

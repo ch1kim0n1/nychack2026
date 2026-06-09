@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import {
   CheckCircle,
@@ -21,6 +22,18 @@ import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { api, type BusinessProfile } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { AUSTIN_DEMO_BUSINESSES, type AustinDemoBusiness } from '@/data/austin-demo-businesses'
+
+const AustinBusinessPickerMap = dynamic(
+  () => import('@/components/map/AustinBusinessPickerMap').then(module => ({ default: module.AustinBusinessPickerMap })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[360px] w-full items-center justify-center bg-[var(--cl-sunken)] text-caption text-[var(--cl-text-muted)]">
+        Loading Austin business map...
+      </div>
+    ),
+  },
+)
 
 const EXAMPLE_SCENARIOS = [
   {
@@ -48,7 +61,7 @@ interface FollowUpQuestion {
 const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   {
     id: 'outdoor_seating',
-    trigger: p => p.activities.includes('alcohol_planned') && !p.activities.includes('outdoor_seating'),
+    trigger: profile => profile.activities.includes('alcohol_planned') && !profile.activities.includes('outdoor_seating'),
     question: 'You mentioned alcohol service. Will there be outdoor seating, such as a patio or beer garden?',
     options: [
       { label: 'Yes, outdoor seating is planned', value: 'yes', detail: 'Adds zoning and outdoor service requirements.' },
@@ -61,7 +74,7 @@ const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   },
   {
     id: 'tabc_existing',
-    trigger: p => p.activities.includes('alcohol_planned') && p.expansion_locations.length > 0,
+    trigger: profile => profile.activities.includes('alcohol_planned') && profile.expansion_locations.length > 0,
     question: 'Do you already hold a TABC license at your current location?',
     options: [
       { label: 'Yes, there is an existing TABC license', value: 'yes', detail: 'Changes transfer versus new application logic.' },
@@ -74,7 +87,7 @@ const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   },
   {
     id: 'employees_hiring',
-    trigger: p => (p.employees ?? 0) < 5 && p.expansion_locations.length > 0,
+    trigger: profile => (profile.employees ?? 0) < 5 && profile.expansion_locations.length > 0,
     question: 'Will you hire employees for the new location?',
     options: [
       { label: 'Yes, staff will be hired', value: 'yes', detail: 'May trigger employer registration and withholding steps.' },
@@ -87,8 +100,8 @@ const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   },
   {
     id: 'food_delivery',
-    trigger: p => p.industry === 'food_service' && !p.activities.includes('delivery'),
-    question: 'Will the new location offer delivery through apps or your own drivers?',
+    trigger: profile => profile.industry === 'food_service' && !profile.activities.includes('delivery'),
+    question: 'Will the business offer delivery through apps or its own drivers?',
     options: [
       { label: 'Yes, delivery is planned', value: 'yes', detail: 'Can add local permitting or operational conditions.' },
       { label: 'No, dine-in or carry-out only', value: 'no' },
@@ -101,9 +114,9 @@ const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
 ]
 
 const RAIL_STEPS = [
-  { title: 'Describe the business', body: 'Use plain English when you know the profile you want to analyze.' },
-  { title: 'Or pick from Austin map', body: 'Demo scope includes established Austin businesses on an embedded Google Map.' },
-  { title: 'Land in one dashboard', body: 'Both branches route into the same cited compliance view.' },
+  { title: 'Describe the business', body: 'Use plain English when you already know the target profile.' },
+  { title: 'Or pick from map', body: 'Click a real Austin establishment on the interactive map in demo scope.' },
+  { title: 'Run AI intake', body: 'The selected place details become the AI input before the dashboard loads.' },
 ]
 
 type Stage = 'intake' | 'classifying' | 'review' | 'followup' | 'error'
@@ -120,6 +133,7 @@ export default function IntakePage() {
   const [currentFollowup, setCurrentFollowup] = useState(0)
   const [mode, setMode] = useState<IntakeMode>('describe')
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null)
+  const [selectedBusinessSummary, setSelectedBusinessSummary] = useState('')
 
   const selectedBusiness = AUSTIN_DEMO_BUSINESSES.find(business => business.id === selectedBusinessId) ?? null
 
@@ -130,6 +144,20 @@ export default function IntakePage() {
       sessionStorage.removeItem('cl-prefill')
     }
   }, [])
+
+  function resetAnalysisState() {
+    setStage('intake')
+    setProfile(null)
+    setFollowupQueue([])
+    setCurrentFollowup(0)
+    setError('')
+    setAnalyzing(false)
+  }
+
+  function switchMode(nextMode: IntakeMode) {
+    setMode(nextMode)
+    resetAnalysisState()
+  }
 
   async function handleAnalyze(overrideText?: string) {
     const inputText = typeof overrideText === 'string' ? overrideText : text
@@ -162,14 +190,6 @@ export default function IntakePage() {
     }
   }
 
-  function resetDescribeFlow() {
-    setStage('intake')
-    setProfile(null)
-    setFollowupQueue([])
-    setCurrentFollowup(0)
-    setError('')
-  }
-
   function handleFollowupAnswer(answer: string) {
     if (!profile) return
     const question = followupQueue[currentFollowup]
@@ -186,15 +206,15 @@ export default function IntakePage() {
   function handleConfirm() {
     if (!profile) return
     sessionStorage.setItem('cl-profile', JSON.stringify(profile))
-    sessionStorage.setItem('cl-input', text)
+    sessionStorage.setItem('cl-input', mode === 'map' ? selectedBusinessSummary : text)
     router.push('/dashboard')
   }
 
   function handleUseMapBusiness() {
     if (!selectedBusiness) return
-    sessionStorage.setItem('cl-profile', JSON.stringify(selectedBusiness.profile))
-    sessionStorage.setItem('cl-input', selectedBusiness.scanSummary)
-    router.push('/dashboard')
+    setSelectedBusinessSummary(selectedBusiness.scanSummary)
+    setText(selectedBusiness.scanSummary)
+    void handleAnalyze(selectedBusiness.generatedInput)
   }
 
   function handleDemoPreload() {
@@ -220,18 +240,18 @@ export default function IntakePage() {
                   <Sparkles size={12} strokeWidth={1.5} />
                   Demo intake
                 </div>
-                <h1 className="mt-4 max-w-[12ch] text-[3rem] font-semibold leading-[0.98] tracking-[-0.05em] text-[var(--cl-text)] sm:text-[3.5rem]">
+                <h1 className="mt-4 max-w-[12ch] text-[3rem] font-bold leading-[0.98] tracking-[-0.05em] text-[var(--cl-text)] sm:text-[3.5rem]">
                   Start from a description or an Austin map pick.
                 </h1>
                 <p className="mt-3 max-w-2xl text-body-lg text-[var(--cl-text-secondary)]">
-                  Use plain English when you know the business, or switch to the Google Map branch and choose a real public Austin business from the demo list.
+                  Use plain English when you know the business, or click a public Austin establishment on the map and let the AI turn that place data into the intake request.
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center">
                 {[
                   ['2', 'intake modes'],
                   ['Austin', 'map scope'],
-                  ['1', 'shared dashboard'],
+                  ['AI', 'place to profile'],
                 ].map(([value, label]) => (
                   <div key={label} className="rounded-2xl border border-[var(--cl-border)] bg-white/75 px-3 py-3 shadow-1">
                     <p className="font-mono text-h2 text-[var(--cl-text)]">{value}</p>
@@ -244,7 +264,7 @@ export default function IntakePage() {
             <div className="mb-6 inline-flex rounded-full border border-[var(--cl-border)] bg-white/80 p-1 shadow-1">
               <button
                 type="button"
-                onClick={() => setMode('describe')}
+                onClick={() => switchMode('describe')}
                 className={cn(
                   'rounded-full px-4 py-2 text-caption font-semibold transition-colors',
                   mode === 'describe'
@@ -256,7 +276,7 @@ export default function IntakePage() {
               </button>
               <button
                 type="button"
-                onClick={() => setMode('map')}
+                onClick={() => switchMode('map')}
                 className={cn(
                   'rounded-full px-4 py-2 text-caption font-semibold transition-colors',
                   mode === 'map'
@@ -268,7 +288,7 @@ export default function IntakePage() {
               </button>
             </div>
 
-            {mode === 'describe' && (stage === 'intake' || stage === 'error') && (
+            {(stage === 'intake' || stage === 'error') && mode === 'describe' && (
               <div className="space-y-5">
                 <IntakeTextarea
                   placeholder={'I own a food truck in Dallas with 3 employees. I want to open a\nbrick-and-mortar restaurant in Austin and add alcohol service.'}
@@ -323,14 +343,26 @@ export default function IntakePage() {
               </div>
             )}
 
-            {mode === 'describe' && stage === 'classifying' && (
+            {(stage === 'intake' || stage === 'error') && mode === 'map' && (
+              <AustinMapPicker
+                selectedBusiness={selectedBusiness}
+                onSelectBusiness={businessId => setSelectedBusinessId(businessId)}
+                onUseSelectedBusiness={handleUseMapBusiness}
+              />
+            )}
+
+            {stage === 'classifying' && (
               <div className="cl-glow-card rounded-[28px] border border-[var(--cl-border)] bg-surface p-6 shadow-1">
                 <div className="inline-flex items-center gap-3 rounded-full border border-[var(--cl-border)] bg-white/80 px-4 py-2 font-mono text-caption text-[var(--cl-text-secondary)]">
                   <Radar size={14} strokeWidth={1.5} className="text-navy-600" />
                   Reading regulations and building the profile...
                 </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  {['Detecting jurisdictions', 'Extracting activities', 'Selecting follow-up logic'].map(item => (
+                  {[
+                    mode === 'map' ? 'Reading selected place details' : 'Detecting jurisdictions',
+                    'Extracting activities',
+                    'Selecting follow-up logic',
+                  ].map(item => (
                     <div key={item} className="rounded-2xl border border-[var(--cl-border-subtle)] bg-[var(--cl-sunken)] px-4 py-4 text-caption text-[var(--cl-text-secondary)]">
                       {item}
                     </div>
@@ -339,7 +371,7 @@ export default function IntakePage() {
               </div>
             )}
 
-            {mode === 'describe' && stage === 'followup' && activeFollowup && (
+            {stage === 'followup' && activeFollowup && (
               <div className="rounded-[28px] border border-[var(--cl-border)] bg-surface p-6 shadow-1">
                 <div className="mb-4 flex items-center gap-2 text-caption text-[var(--cl-text-muted)]">
                   <HelpCircle size={13} strokeWidth={1.5} />
@@ -380,15 +412,17 @@ export default function IntakePage() {
               </div>
             )}
 
-            {mode === 'describe' && stage === 'review' && profile && (
+            {stage === 'review' && profile && (
               <div className="rounded-[28px] border border-[var(--cl-border)] bg-surface p-6 shadow-1">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-label text-[var(--cl-text-muted)]">Structured profile</p>
+                    <p className="text-label text-[var(--cl-text-muted)]">
+                      {mode === 'map' ? 'Profile built from selected place' : 'Structured profile'}
+                    </p>
                     <h2 className="mt-1 text-h2 text-[var(--cl-text)]">We read the business this way</h2>
                   </div>
                   <button
-                    onClick={resetDescribeFlow}
+                    onClick={resetAnalysisState}
                     className="inline-flex items-center gap-1.5 text-caption text-navy-700 transition-colors hover:text-navy-600"
                   >
                     <Edit2 size={13} strokeWidth={1.5} />
@@ -409,19 +443,11 @@ export default function IntakePage() {
                     <CheckCircle size={15} strokeWidth={1.5} />
                     Looks right: analyze
                   </Button>
-                  <Button variant="ghost" onClick={resetDescribeFlow} size="lg">
-                    Edit input
+                  <Button variant="ghost" onClick={resetAnalysisState} size="lg">
+                    {mode === 'map' ? 'Back to map' : 'Edit input'}
                   </Button>
                 </div>
               </div>
-            )}
-
-            {mode === 'map' && (
-              <AustinMapPicker
-                selectedBusiness={selectedBusiness}
-                onSelectBusiness={businessId => setSelectedBusinessId(businessId)}
-                onUseSelectedBusiness={handleUseMapBusiness}
-              />
             )}
           </div>
         </section>
@@ -433,7 +459,7 @@ export default function IntakePage() {
             </div>
             <h2 className="mt-4 text-h2 text-white">Demo runway</h2>
             <p className="mt-2 text-body text-white/72">
-              The intake now supports two demo branches: a text profile and an Austin-only public business picker backed by an embedded Google Map.
+              The intake now supports a real map-first branch. The selected Austin establishment is translated into AI-readable input before the app produces the final compliance profile.
             </p>
             <div className="mt-5 space-y-3">
               {RAIL_STEPS.map((step, index) => (
@@ -476,24 +502,19 @@ function AustinMapPicker({
   onSelectBusiness: (businessId: string) => void
   onUseSelectedBusiness: () => void
 }) {
-  const mapQuery = selectedBusiness?.googleMapsQuery ?? 'Austin TX restaurants'
-  const mapLabel = selectedBusiness
-    ? `${selectedBusiness.name}, ${selectedBusiness.address}`
-    : 'Austin, TX restaurant and hospitality businesses'
-
   return (
     <div className="space-y-5">
       <div className="rounded-[28px] border border-[var(--cl-border)] bg-surface p-5 shadow-1">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-label text-[var(--cl-text-muted)]">Austin public business map</p>
-            <h2 className="mt-1 text-h2 text-[var(--cl-text)]">Pick a demo business from Google Maps</h2>
+            <h2 className="mt-1 text-h2 text-[var(--cl-text)]">Pick a demo business from the map</h2>
             <p className="mt-2 max-w-2xl text-body text-[var(--cl-text-secondary)]">
-              Demo scope is Austin only. Select one of the established public businesses below, preview its location on the map, and analyze that business directly.
+              Click a marker to select an established Austin business. The AI will use the picked place details as the intake input for the compliance run.
             </p>
           </div>
           <a
-            href={getGoogleMapsSearchUrl(mapQuery)}
+            href={getGoogleMapsSearchUrl(selectedBusiness?.googleMapsQuery ?? 'Austin TX restaurants')}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-caption font-semibold text-navy-700 transition-colors hover:text-navy-600"
@@ -504,12 +525,10 @@ function AustinMapPicker({
         </div>
 
         <div className="overflow-hidden rounded-[24px] border border-[var(--cl-border)] bg-[var(--cl-sunken)] shadow-1">
-          <iframe
-            title={`Google Map for ${mapLabel}`}
-            src={getGoogleMapsEmbedUrl(mapQuery)}
-            className="h-[360px] w-full border-0"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+          <AustinBusinessPickerMap
+            businesses={AUSTIN_DEMO_BUSINESSES}
+            selectedBusinessId={selectedBusiness?.id ?? null}
+            onSelectBusiness={onSelectBusiness}
           />
         </div>
       </div>
@@ -554,31 +573,29 @@ function AustinMapPicker({
       <div className="rounded-[28px] border border-[var(--cl-border)] bg-surface p-5 shadow-1">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-label text-[var(--cl-text-muted)]">Selected business profile</p>
+            <p className="text-label text-[var(--cl-text-muted)]">Selected business</p>
             {selectedBusiness ? (
               <>
                 <h3 className="mt-1 text-h3 text-[var(--cl-text)]">{selectedBusiness.name}</h3>
                 <p className="mt-2 max-w-2xl text-body text-[var(--cl-text-secondary)]">{selectedBusiness.scanSummary}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <ProfilePill label={selectedBusiness.profile.location} />
-                  <ProfilePill label={selectedBusiness.profile.industry.replace(/_/g, ' ')} />
-                  {selectedBusiness.profile.activities.map(activity => (
-                    <ProfilePill key={activity} label={activity.replace(/_/g, ' ')} />
-                  ))}
+                  <ProfilePill label="Austin, TX" />
+                  <ProfilePill label={selectedBusiness.category} />
+                  <ProfilePill label={selectedBusiness.neighborhood} />
                 </div>
               </>
             ) : (
               <>
                 <h3 className="mt-1 text-h3 text-[var(--cl-text)]">Nothing selected yet</h3>
                 <p className="mt-2 max-w-2xl text-body text-[var(--cl-text-secondary)]">
-                  Choose one of the Austin businesses above to route that public business into the demo dashboard.
+                  Pick an Austin establishment from the map or the cards above, then run AI intake on that place.
                 </p>
               </>
             )}
           </div>
           <Button size="lg" onClick={onUseSelectedBusiness} disabled={!selectedBusiness}>
             <CheckCircle size={15} strokeWidth={1.5} />
-            Analyze selected business
+            Use picked place as AI input
           </Button>
         </div>
       </div>
@@ -592,10 +609,6 @@ function ProfilePill({ label }: { label: string }) {
       {label}
     </span>
   )
-}
-
-function getGoogleMapsEmbedUrl(query: string) {
-  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=14&output=embed`
 }
 
 function getGoogleMapsSearchUrl(query: string) {
