@@ -1,299 +1,210 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
-  Bell,
+  BellRing,
+  Bot,
   Building2,
-  CheckCircle,
-  FileCheck2,
-  FileText,
-  Gavel,
-  Map,
-  Route,
-  Search,
+  CheckCircle2,
+  FileSearch,
+  MapPinned,
+  Scale,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
-import { Nav } from '@/components/nav'
-import { Button } from '@/components/ui/button'
-import { heroEntrance, initGsap, scrollReveal } from '@/lib/gsap'
+import { InteractiveTexasMap } from '@/components/landing/interactive-texas-map'
+import { LandingDashboard } from '@/components/landing/landing-dashboard'
 
-const SOURCES = [
-  'Texas.gov',
-  'TABC',
-  'City of Austin',
-  'City of Dallas',
-  'TX Comptroller',
-  'TX Legislature',
-]
-
-const WORKFLOW = [
+const FEATURES = [
   {
-    icon: <FileText size={20} strokeWidth={1.5} />,
-    title: 'Profile the business',
-    body: 'Location, industry, lease posture, staffing, and expansion plans become one civic operating context.',
+    icon: FileSearch,
+    title: 'Regulatory risk scanning',
+    body: 'Scan state, county, and city sources against a specific Texas business profile.',
   },
   {
-    icon: <Search size={20} strokeWidth={1.5} />,
-    title: 'Map the rule stack',
-    body: 'CivicLens reads city, county, state, and agency sources and ties them to the activities that matter.',
+    icon: Building2,
+    title: 'Cross-city compliance diff',
+    body: 'Compare requirements across Austin, Dallas, Houston, San Antonio, and Richardson.',
   },
   {
-    icon: <CheckCircle size={20} strokeWidth={1.5} />,
-    title: 'Move with confidence',
-    body: 'Findings become an action plan with deadlines, documents, contacts, and policy monitoring.',
-  },
-]
-
-const FEATURE_STRIPS = [
-  {
-    icon: <Building2 size={18} strokeWidth={1.5} />,
-    title: 'Jurisdiction mapping',
-    body: 'Local, county, state, and agency layers in one view.',
+    icon: Bot,
+    title: 'AI-powered classification',
+    body: 'Classify rule changes by activity, location, risk level, and operating impact.',
   },
   {
-    icon: <Gavel size={18} strokeWidth={1.5} />,
-    title: 'Change radar',
-    body: 'Recent rule shifts matched to the business profile.',
+    icon: ShieldCheck,
+    title: 'Citation-verified findings',
+    body: 'Keep the source attached to every compliance claim and next-step recommendation.',
   },
   {
-    icon: <FileCheck2 size={18} strokeWidth={1.5} />,
-    title: 'Cited findings',
-    body: 'The source stays attached to every material point.',
+    icon: BellRing,
+    title: 'Compliance Pulse monitoring',
+    body: 'Track saved profiles as agency pages, city codes, and effective dates change.',
   },
   {
-    icon: <Route size={18} strokeWidth={1.5} />,
-    title: 'Action sequencing',
-    body: 'Blocking requirements organized in opening order.',
-  },
-  {
-    icon: <Map size={18} strokeWidth={1.5} />,
-    title: 'Location sensitivity',
-    body: 'Rules flex by city and operating context, not just keywords.',
-  },
-  {
-    icon: <Bell size={18} strokeWidth={1.5} />,
-    title: 'Watchlists',
-    body: 'Saved profiles can be monitored as source pages change.',
+    icon: MapPinned,
+    title: 'Expansion planning intelligence',
+    body: 'Surface local risk before a lease, launch, or new Texas market decision.',
   },
 ]
 
-const HERO_FINDINGS = [
-  { source: 'TABC', title: 'Mixed beverage permit dependency', level: 'High', note: 'Confirm local approval path and seller-server timing.' },
-  { source: 'Austin Code', title: 'Outdoor service condition', level: 'Medium', note: 'Verify patio hours and occupancy before lease signoff.' },
-  { source: 'TX Comptroller', title: 'Tax registration follow-through', level: 'Low', note: 'Prepare sales tax and franchise account setup.' },
+const navLinks = [
+  { label: 'Product', href: '#product' },
+  { label: 'Map', href: '#map' },
+  { label: 'Features', href: '#features' },
+  { label: 'Pricing', href: '/pricing' },
 ]
 
 export default function LandingPage() {
-  const heroRef = useRef<HTMLDivElement>(null)
-  const workflowRef = useRef<HTMLDivElement>(null)
-  const featureRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    initGsap()
-    if (heroRef.current) heroEntrance(heroRef.current)
-    if (workflowRef.current) scrollReveal(workflowRef.current)
-    if (featureRef.current) scrollReveal(featureRef.current)
-  }, [])
+  const reducedMotion = useReducedMotion()
+  const heroInitial = reducedMotion ? false : { opacity: 0, y: 30 }
+  const featureContainer = {
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: reducedMotion ? 0 : 0.1,
+      },
+    },
+  }
+  const featureItem = {
+    hidden: reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 },
+    show: { opacity: 1, y: 0 },
+  }
 
   return (
-    <div className="min-h-full bg-canvas text-[var(--cl-text)]">
-      <Nav variant="marketing" />
+    <main className="min-h-screen bg-white text-[#101820]">
+      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-white/90 backdrop-blur-md">
+        <nav className="mx-auto flex h-16 max-w-[1180px] items-center justify-between px-5 sm:px-8" aria-label="Primary navigation">
+          <Link href="/home" className="flex items-center gap-3 text-[#101820]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#101820] text-sm font-bold text-white">
+              CL
+            </span>
+            <span className="text-base font-bold">CivicLens</span>
+          </Link>
 
-      <section className="cl-shell-grid relative overflow-hidden border-b border-[var(--cl-border-subtle)]">
-        <div className="relative mx-auto max-w-marketing px-6 pb-14 pt-14 sm:px-8 lg:pb-20 lg:pt-20">
-          <div ref={heroRef} className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14">
-            <div>
-              <div data-hero className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--cl-border)] bg-white/70 px-3 py-1 text-[12px] uppercase tracking-[0.18em] text-navy-700 shadow-1">
-                <Sparkles size={12} strokeWidth={1.5} />
-                Civic intelligence for local operators
-              </div>
-              <h1 data-hero className="max-w-[11ch] text-[3.25rem] font-bold leading-[0.96] tracking-[-0.05em] text-[var(--cl-text)] sm:text-[4.4rem]">
-                Know the civic moves before they become expensive.
-              </h1>
-              <p data-hero className="mt-6 max-w-xl text-body-lg text-[var(--cl-text-secondary)]">
-                CivicLens turns fragmented city, state, and agency requirements into a sharp operating picture with cited findings, deadlines, action paths, and policy watchlists.
-              </p>
-              <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/intake">
-                  <Button size="lg">
-                    Run a free risk scan
-                    <ArrowRight size={16} />
-                  </Button>
-                </Link>
-                <Link href="/demo">
-                  <Button variant="secondary" size="lg">
-                    Open the demo route
-                  </Button>
-                </Link>
-              </div>
-              <div data-hero className="mt-9 grid max-w-xl grid-cols-3 gap-3">
-                {[
-                  ['4', 'jurisdiction layers'],
-                  ['30d', 'radar window'],
-                  ['100%', 'cited findings'],
-                ].map(([value, label]) => (
-                  <div key={label} className="rounded-2xl border border-[var(--cl-border)] bg-white/70 px-4 py-4 shadow-1">
-                    <p className="font-mono text-[2rem] leading-none text-[var(--cl-text)]">{value}</p>
-                    <p className="mt-2 text-caption uppercase tracking-[0.1em] text-[var(--cl-text-muted)]">{label}</p>
-                  </div>
-                ))}
-              </div>
+          <div className="hidden items-center gap-7 md:flex">
+            {navLinks.map(link => (
+              <Link key={link.label} href={link.href} className="text-sm font-medium text-[#4b5563] transition-colors hover:text-[#101820]">
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          <Link
+            href="/intake"
+            className="inline-flex items-center gap-2 rounded-[8px] bg-[#315f5c] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(49,95,92,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(49,95,92,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315f5c]"
+          >
+            Start scan
+            <ArrowRight size={15} strokeWidth={1.8} />
+          </Link>
+        </nav>
+      </header>
+
+      <section className="border-b border-[#edf0f3] bg-[#fbfcfd]">
+        <div className="mx-auto max-w-[1180px] px-5 pb-16 pt-16 sm:px-8 lg:pb-24 lg:pt-24">
+          <motion.div
+            initial={heroInitial}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="mx-auto max-w-4xl text-center"
+          >
+            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#d9dde3] bg-white px-3 py-1 text-sm font-semibold text-[#315f5c] shadow-[0_6px_16px_rgba(15,23,42,0.05)]">
+              <Scale size={14} strokeWidth={1.8} aria-hidden="true" />
+              AI-Powered Compliance Intelligence
             </div>
-
-            <div data-hero className="cl-hero-panel rounded-[28px] p-4 sm:p-5">
-              <div className="grid gap-4 lg:grid-cols-[0.88fr_1.12fr]">
-                <div className="rounded-[24px] bg-navy-900 px-5 py-5 text-white shadow-2">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-mono text-citation uppercase tracking-[0.18em] text-white/55">Austin launch profile</p>
-                      <p className="mt-2 text-h3 text-white">Restaurant with patio and alcohol service</p>
-                    </div>
-                    <ShieldCheck size={20} strokeWidth={1.5} className="text-white/75" />
-                  </div>
-                  <div className="mt-8 rounded-[20px] border border-white/10 bg-white/5 p-4">
-                    <p className="text-label text-white/55">Risk score</p>
-                    <div className="mt-3 flex items-end gap-2">
-                      <span className="font-mono text-[3rem] leading-none text-[#f2c46b]">68</span>
-                      <span className="pb-1 text-caption text-white/55">/ 100</span>
-                    </div>
-                    <p className="mt-4 text-caption text-white/70">
-                      Lease timing, TABC dependency, and outdoor-service conditions cluster at the top of the opening plan.
-                    </p>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    {['Lease issue before signing', 'Agency approval dependency', 'Outdoor seating condition'].map((item, index) => (
-                      <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-caption text-white/78">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10 font-mono text-citation text-white/60">
-                          0{index + 1}
-                        </span>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-[24px] border border-[var(--cl-border-subtle)] bg-white/80 p-4 shadow-1">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-label text-[var(--cl-text-muted)]">Live intelligence view</p>
-                      <p className="mt-1 text-body font-semibold text-[var(--cl-text)]">Priority findings and next moves</p>
-                    </div>
-                    <span className="rounded-full border border-[var(--cl-border)] bg-[var(--cl-sunken)] px-3 py-1 font-mono text-citation text-[var(--cl-text-secondary)]">
-                      3 active checks
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {HERO_FINDINGS.map(item => (
-                      <div key={item.title} className="rounded-[20px] border border-[var(--cl-border-subtle)] bg-surface px-4 py-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-mono text-citation uppercase tracking-[0.12em] text-[var(--cl-text-muted)]">{item.source}</p>
-                            <p className="mt-1 text-body font-semibold text-[var(--cl-text)]">{item.title}</p>
-                          </div>
-                          <span
-                            className={`rounded-full border px-2.5 py-1 font-mono text-citation ${
-                              item.level === 'High'
-                                ? 'border-risk-high-border bg-risk-high-bg text-risk-high-fg'
-                                : item.level === 'Medium'
-                                  ? 'border-risk-med-border bg-risk-med-bg text-risk-med-fg'
-                                  : 'border-risk-low-border bg-risk-low-bg text-risk-low-fg'
-                            }`}
-                          >
-                            {item.level}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-caption text-[var(--cl-text-secondary)]">{item.note}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            <h1 className="mt-6 text-5xl font-bold leading-[0.98] text-[#101820] sm:text-6xl lg:text-7xl">
+              Regulatory intelligence for Texas small businesses.
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#4b5563]">
+              CivicLens turns fragmented Texas rules into cited, location-aware guidance before compliance risk slows a launch or expansion.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/intake"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#315f5c] px-5 text-base font-semibold text-white shadow-[0_10px_22px_rgba(49,95,92,0.24)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(49,95,92,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315f5c]"
+              >
+                Run a free risk scan
+                <ArrowRight size={17} strokeWidth={1.8} />
+              </Link>
+              <Link
+                href="/demo"
+                className="inline-flex h-12 items-center justify-center rounded-[8px] border border-[#cfd6dc] bg-white px-5 text-base font-semibold text-[#17202b] shadow-[0_8px_18px_rgba(15,23,42,0.05)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.09)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315f5c]"
+              >
+                View demo
+              </Link>
             </div>
-          </div>
+          </motion.div>
+
+          <motion.div
+            id="map"
+            initial={reducedMotion ? false : { opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: reducedMotion ? 0 : 0.1 }}
+            className="mx-auto mt-14 max-w-5xl"
+          >
+            <InteractiveTexasMap className="min-h-[500px] shadow-[0_24px_70px_rgba(15,23,42,0.12)]" />
+          </motion.div>
         </div>
       </section>
 
-      <section id="sources" className="border-b border-[var(--cl-border-subtle)] bg-white/45 px-6 py-4 sm:px-8">
-        <div className="mx-auto flex max-w-marketing flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-          <span className="shrink-0 text-label text-[var(--cl-text-muted)]">Sources in the loop</span>
-          <div className="flex flex-wrap gap-2">
-            {SOURCES.map(source => (
-              <span key={source} className="rounded-full border border-[var(--cl-border)] bg-white/70 px-3 py-1 font-mono text-citation text-[var(--cl-text-secondary)] shadow-1">
-                {source}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      <LandingDashboard />
 
-      <section id="how-it-works" className="mx-auto max-w-marketing px-6 py-16 sm:px-8 lg:py-20">
-        <div ref={workflowRef} className="grid items-start gap-10 lg:grid-cols-[0.84fr_1.16fr] lg:gap-14">
-          <div>
-            <p className="text-label text-navy-600">From rule search to operating plan</p>
-            <h2 className="mt-3 max-w-[12ch] text-[2.6rem] font-bold leading-[1.02] tracking-[-0.04em] text-[var(--cl-text)]">
-              A cleaner workflow for local compliance.
+      <section id="features" className="border-y border-[#edf0f3] bg-[#fbfcfd]">
+        <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8 lg:py-24">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold text-[#4f7d7a]">Built for Texas operators</p>
+            <h2 className="mt-3 text-3xl font-bold leading-[1.05] text-[#101820] sm:text-5xl">
+              Compliance work that stays tied to place, source, and action.
             </h2>
-            <p className="mt-4 max-w-lg text-body-lg text-[var(--cl-text-secondary)]">
-              The product is shaped around the way civic rules actually stack: overlapping jurisdictions, agency guidance, permit dependencies, effective dates, and business impact.
-            </p>
           </div>
-          <div className="space-y-4">
-            {WORKFLOW.map((step, index) => (
-              <div key={step.title} className="cl-glow-card rounded-[24px] border border-[var(--cl-border)] bg-white/75 p-5 shadow-1">
-                <div className="flex items-start gap-4">
-                  <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-navy-900 text-white shadow-1">
-                    {step.icon}
+
+          <motion.div
+            variants={featureContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.18 }}
+            className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {FEATURES.map(feature => {
+              const Icon = feature.icon
+
+              return (
+                <motion.article
+                  key={feature.title}
+                  variants={featureItem}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="rounded-[8px] border border-[#d9dde3] bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.06)]"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#edf5f3] text-[#315f5c]">
+                    <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
                   </div>
-                  <div>
-                    <p className="font-mono text-citation uppercase tracking-[0.14em] text-[var(--cl-text-muted)]">0{index + 1}</p>
-                    <h3 className="mt-1 text-h3 text-[var(--cl-text)]">{step.title}</h3>
-                    <p className="mt-2 text-body text-[var(--cl-text-secondary)]">{step.body}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  <h3 className="mt-5 text-lg font-bold text-[#111827]">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#5b6573]">{feature.body}</p>
+                </motion.article>
+              )
+            })}
+          </motion.div>
         </div>
       </section>
 
-      <section className="border-y border-[var(--cl-border-subtle)] bg-white/55 px-6 py-16 sm:px-8 lg:py-20">
-        <div ref={featureRef} className="mx-auto grid max-w-marketing gap-10 lg:grid-cols-[0.82fr_1.18fr]">
-          <div>
-            <p className="text-label text-navy-600">Built for real civic risk</p>
-            <h2 className="mt-3 max-w-[11ch] text-[2.6rem] font-bold leading-[1.02] tracking-[-0.04em] text-[var(--cl-text)]">
-              Not another generic checklist.
+      <section className="bg-[#101820] px-5 py-16 text-white sm:px-8 lg:py-20">
+        <div className="mx-auto flex max-w-[1180px] flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-white/60">CivicLens for Texas small business</p>
+            <h2 className="mt-3 text-3xl font-bold leading-[1.05] sm:text-5xl">
+              See the compliance picture before you commit.
             </h2>
-            <p className="mt-4 max-w-lg text-body-lg text-[var(--cl-text-secondary)]">
-              CivicLens connects the source, the jurisdiction, the business activity, and the next action so owners can verify what matters before it affects timing or cost.
-            </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {FEATURE_STRIPS.map(feature => (
-              <div key={feature.title} className="rounded-[22px] border border-[var(--cl-border)] bg-surface p-4 shadow-1">
-                <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-navy-50 text-navy-700">
-                  {feature.icon}
-                </div>
-                <h3 className="mt-4 text-h3 text-[var(--cl-text)]">{feature.title}</h3>
-                <p className="mt-2 text-caption text-[var(--cl-text-secondary)]">{feature.body}</p>
-              </div>
-            ))}
-          </div>
+          <Link
+            href="/contact"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-[8px] bg-white px-5 text-base font-semibold text-[#101820] shadow-[0_12px_28px_rgba(255,255,255,0.16)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(255,255,255,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Request access
+            <CheckCircle2 size={17} strokeWidth={1.8} />
+          </Link>
         </div>
       </section>
-
-      <footer className="bg-navy-900 px-8 py-6 text-caption text-white/55">
-        <div className="mx-auto flex max-w-marketing flex-col items-center justify-between gap-2 sm:flex-row">
-          <span className="font-semibold text-white">CivicLens</span>
-          <span>Informational guidance, not legal advice.</span>
-          <div className="flex gap-4">
-            <Link href="#sources" className="transition-colors hover:text-white">Sources</Link>
-            <Link href="/intake" className="transition-colors hover:text-white">Free scan</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </main>
   )
 }
