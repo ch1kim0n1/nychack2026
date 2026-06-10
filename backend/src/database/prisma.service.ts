@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client';
 
 /** How often the background retry attempts to (re)connect to the database. */
 const RETRY_INTERVAL_MS = 5000;
+const CONNECT_TIMEOUT_MS = 2500;
 
 @Injectable()
 export class PrismaService
@@ -49,12 +50,25 @@ export class PrismaService
 
   /** Attempt a single connection. Returns true on success; never throws. */
   private async tryConnect(): Promise<boolean> {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
     try {
-      await this.$connect();
+      await Promise.race([
+        this.$connect(),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error('Database connection timed out')),
+            CONNECT_TIMEOUT_MS,
+          );
+          timeout.unref?.();
+        }),
+      ]);
       this.dbAvailable = true;
       return true;
     } catch {
       return false;
+    } finally {
+      if (timeout) clearTimeout(timeout);
     }
   }
 
