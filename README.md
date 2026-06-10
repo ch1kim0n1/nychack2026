@@ -1,6 +1,27 @@
-# nychack2026
+# CivicLens
 
-CivicLens — frontend on Vercel, backend + Postgres (pgvector) on Railway.
+**Know which local rules apply to your business — before they cost you.**
+
+CivicLens turns fragmented Texas city, county, state, and agency regulations into
+a single risk picture for small-business owners. Describe your business in plain
+English (or pick a real Austin establishment on the map) and CivicLens returns a
+scored compliance report: cited findings, permit dependencies, deadlines, an
+action sequence, and policy watchlists.
+
+**Who it's for:** restaurant and food-truck owners, salons, retail, and other
+operators planning to open, expand, or change operations across Texas jurisdictions.
+
+**The flow:** open the app → *Run a free risk scan* → describe the business →
+answer a couple of follow-up questions → review the generated dashboard (risk
+score, findings, checklist, lease check, and a shareable report).
+
+> Informational guidance, not legal advice.
+
+Stack: Next.js frontend (Vercel), Node API + Postgres/pgvector (Railway), optional
+Python ingestion for live retrieval. Repo name is `nychack2026`.
+
+> Screenshots: run locally (below) and open http://localhost:3000 — the landing
+> page and dashboard are the fastest way to see what the product does.
 
 ## Local development
 
