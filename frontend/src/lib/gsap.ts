@@ -35,6 +35,17 @@ export { gsap, ScrollTrigger }
 export function heroEntrance(container: HTMLElement) {
   initGsap()
   const items = container.querySelectorAll('[data-hero]')
+
+  const reduce =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+  // Reduced motion: show hero instantly, no rise/stagger.
+  if (reduce) {
+    gsap.set(items, { opacity: 1, y: 0 })
+    return
+  }
+
   gsap.set(items, { opacity: 0, y: 16 })
   gsap.to(items, {
     opacity: 1,
@@ -44,6 +55,16 @@ export function heroEntrance(container: HTMLElement) {
     ease: 'power3.out',
     delay: 0.05,
   })
+
+  // Safety net: never leave hero content stuck hidden if the tween is
+  // interrupted (layout race, tab backgrounded mid-entrance).
+  setTimeout(() => {
+    items.forEach(el => {
+      if (Number(gsap.getProperty(el, 'opacity')) < 1) {
+        gsap.set(el, { opacity: 1, y: 0 })
+      }
+    })
+  }, 1500)
 }
 
 /** Staggered reveal for a list of rows (findings, table rows).

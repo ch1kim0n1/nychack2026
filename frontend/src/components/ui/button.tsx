@@ -14,8 +14,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<ButtonVariant, string> = {
-  primary:     'bg-navy-600 text-white hover:bg-navy-700 active:bg-navy-800',
-  secondary:   'bg-navy-100 text-navy-700 border border-[var(--cl-border)] hover:bg-navy-50 hover:border-[var(--cl-border-strong)]',
+  primary:     'bg-navy-600 text-white shadow-1 hover:bg-navy-700 active:bg-navy-800',
+  secondary:   'bg-white/85 text-navy-700 border border-[var(--cl-border)] shadow-1 hover:bg-navy-50 hover:border-[var(--cl-border-strong)]',
   ghost:       'bg-transparent text-navy-700 hover:bg-navy-50',
   destructive: 'bg-risk-high-bg text-risk-high-fg border border-risk-high-border hover:opacity-90',
 }
@@ -23,7 +23,7 @@ const variants: Record<ButtonVariant, string> = {
 const sizes: Record<ButtonSize, string> = {
   sm: 'h-7 px-3 text-caption',
   md: 'h-9 px-4 text-body',
-  lg: 'h-11 px-5 text-body-lg',
+  lg: 'h-12 px-5 text-body-lg',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -33,7 +33,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled={disabled || loading}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded font-sans font-semibold',
-        'transition-colors duration-[80ms] select-none',
+        'transition-[background-color,border-color,color,box-shadow,transform] duration-[140ms] select-none',
         'focus-visible:outline-2 focus-visible:outline-offset-2',
         'disabled:opacity-40 disabled:pointer-events-none',
         'active:translate-y-px',

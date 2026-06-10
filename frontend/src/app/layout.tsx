@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter, IBM_Plex_Mono } from 'next/font/google'
+import { Space_Grotesk, IBM_Plex_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/lib/theme'
 import './globals.css'
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-sans',
   display: 'swap',
 })
 
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${ibmPlexMono.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full`} suppressHydrationWarning>
       <body className="h-full">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
