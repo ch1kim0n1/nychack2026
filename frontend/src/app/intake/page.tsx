@@ -163,6 +163,7 @@ export default function IntakePage() {
     const inputText = typeof overrideText === 'string' ? overrideText : text
     if (!inputText || inputText.length < 15) {
       setError('Please describe your business in plain English with at least 15 characters.')
+      setStage('error')
       return
     }
 
@@ -296,6 +297,7 @@ export default function IntakePage() {
                   onChange={event => setText(event.target.value)}
                   onAnalyze={() => void handleAnalyze()}
                   analyzing={analyzing}
+                  invalid={stage === 'error'}
                 />
 
                 {stage === 'error' && (
