@@ -1,31 +1,36 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { api, type AdminFinding, type ReviewStats } from '@/lib/api'
 
 export default function AdminPage() {
+  const [adminKey, setAdminKey] = useState('')
+  const [authorized, setAuthorized] = useState(false)
   const [findings, setFindings] = useState<AdminFinding[]>([])
   const [stats, setStats] = useState<ReviewStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [reviewing, setReviewing] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    void loadData()
-  }, [])
-
-  async function loadData() {
+  async function loadData(key = adminKey) {
+    const trimmedKey = key.trim()
+    if (!trimmedKey) {
+      setError('Enter the admin API key to load the review queue.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
       const [pending, statsData] = await Promise.all([
-        api.getAdminPendingFindings(),
-        api.getAdminStats(),
+        api.getAdminPendingFindings(trimmedKey),
+        api.getAdminStats(trimmedKey),
       ])
       setFindings(pending)
       setStats(statsData)
+      setAuthorized(true)
     } catch (err) {
+      setAuthorized(false)
       setError(err instanceof Error ? err.message : 'Failed to load admin data')
     } finally {
       setLoading(false)
@@ -35,10 +40,10 @@ export default function AdminPage() {
   async function handleReview(id: string, state: 'approved' | 'rejected') {
     setReviewing(prev => ({ ...prev, [id]: true }))
     try {
-      await api.reviewFinding(id, state, notes[id] || undefined)
+      await api.reviewFinding(id, state, notes[id] || undefined, adminKey.trim())
       setFindings(prev => prev.filter(f => f.id !== id))
       // Refresh stats
-      const updated = await api.getAdminStats()
+      const updated = await api.getAdminStats(adminKey.trim())
       setStats(updated)
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Review action failed')
@@ -55,11 +60,41 @@ export default function AdminPage() {
         </h1>
         <p className="text-sm text-gray-500 mb-6">
           High-risk category findings requiring approval before public display.
-          Internal use only. Not linked from the main nav.
+          Internal use only. Admin API key required.
         </p>
 
+        <form
+          className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          onSubmit={event => {
+            event.preventDefault()
+            void loadData()
+          }}
+        >
+          <label htmlFor="admin-key" className="block text-sm font-medium text-gray-700 mb-2">
+            Admin API key
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              id="admin-key"
+              type="password"
+              value={adminKey}
+              onChange={event => setAdminKey(event.target.value)}
+              autoComplete="off"
+              className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              placeholder="Paste internal review key"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            >
+              {loading ? 'Checking...' : 'Unlock review queue'}
+            </button>
+          </div>
+        </form>
+
         {/* Stats Banner */}
-        {stats && (
+        {authorized && stats && (
           <div className="flex gap-4 mb-6 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
             <StatPill label="Pending" value={stats.pending} color="amber" />
             <StatPill label="Approved" value={stats.approved} color="green" />
@@ -82,7 +117,7 @@ export default function AdminPage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && findings.length === 0 && (
+        {authorized && !loading && !error && findings.length === 0 && (
           <div className="text-center py-16">
             <p className="text-2xl mb-2">&#10003;</p>
             <p className="text-gray-600 font-medium">
@@ -95,7 +130,7 @@ export default function AdminPage() {
         )}
 
         {/* Findings List */}
-        {!loading && findings.length > 0 && (
+        {authorized && !loading && findings.length > 0 && (
           <div className="space-y-4">
             {findings.map(finding => (
               <FindingCard

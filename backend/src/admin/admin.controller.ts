@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { AdminApiKeyGuard } from './admin-api-key.guard';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
+@UseGuards(AdminApiKeyGuard)
 export class AdminController {
   constructor(private adminService: AdminService) {}
 

@@ -23,15 +23,24 @@ Input.displayName = 'Input'
 interface IntakeTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   onAnalyze?: () => void
   analyzing?: boolean
+  invalid?: boolean
 }
 
 export const IntakeTextarea = forwardRef<HTMLTextAreaElement, IntakeTextareaProps>(
-  ({ className, onAnalyze, analyzing, value, ...props }, ref) => (
-    <div className="cl-glow-card relative rounded-lg border border-[var(--cl-border)] bg-surface shadow-1 focus-within:border-[var(--cl-border-strong)] focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--cl-navy-600)_40%,transparent)] transition-[border-color,box-shadow] duration-[140ms]">
+  ({ className, onAnalyze, analyzing, invalid = false, value, ...props }, ref) => (
+    <div
+      className={cn(
+        'cl-glow-card relative rounded-lg border bg-surface shadow-1 transition-[border-color,box-shadow] duration-[140ms]',
+        invalid
+          ? 'border-risk-high-border ring-2 ring-[color-mix(in_srgb,var(--cl-risk-high-fg)_18%,transparent)]'
+          : 'border-[var(--cl-border)] focus-within:border-[var(--cl-border-strong)] focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--cl-navy-600)_40%,transparent)]',
+      )}
+    >
       <textarea
         ref={ref}
         value={value}
         rows={5}
+        aria-invalid={invalid}
         className={cn(
           'w-full bg-transparent resize-none px-5 pt-5 pb-16 text-body-lg font-sans',
           'text-[var(--cl-text)] placeholder:text-[var(--cl-text-muted)] placeholder:font-mono placeholder:text-body',
@@ -43,13 +52,13 @@ export const IntakeTextarea = forwardRef<HTMLTextAreaElement, IntakeTextareaProp
       <div className="absolute bottom-3 right-3">
         <button
           type="button"
-          disabled={!value || String(value).length < 15 || analyzing}
+          disabled={analyzing}
           onClick={onAnalyze}
           className={cn(
             'inline-flex items-center gap-1.5 h-10 px-4 rounded-md text-body font-semibold shadow-1',
             'bg-navy-600 text-white transition-colors duration-[80ms]',
             'hover:bg-navy-700 active:translate-y-px active:bg-navy-800',
-            'disabled:opacity-40 disabled:pointer-events-none',
+            'disabled:opacity-40 disabled:cursor-wait',
           )}
         >
           {analyzing ? 'Analyzing...' : 'Analyze ->'}

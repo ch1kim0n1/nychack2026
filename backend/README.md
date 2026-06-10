@@ -1,98 +1,107 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# CivicLens Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS API server for the CivicLens regulatory intelligence platform.  
+Deployed to Railway. Pairs with the Next.js frontend in `../frontend`.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Prerequisites
 
-## Description
+- Node 20+ (see `.nvmrc`)
+- Docker (for local Postgres with pgvector)
+- An OpenAI API key (for `/api/profile/classify`, `/api/risk/analyze`, `/api/draft`)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Local setup
 
 ```bash
-$ npm install
+# 1. Install dependencies
+npm install
+
+# 2. Copy env file and fill in your OpenAI key
+cp .env.example .env
+
+# 3. Start Postgres + pgvector in Docker
+npm run db:up           # docker-compose up -d
+
+# 4. Apply migrations and generate Prisma client
+npx prisma migrate deploy
+npx prisma generate
+
+# 5. Seed demo data (Scenario A business + risk findings)
+npx prisma db seed
+
+# 6. Start dev server (port 3001, hot-reload)
+npm run start:dev
 ```
 
-## Compile and run the project
+The app boots without a database — demo and diff endpoints fall back to bundled
+static data. Only `/api/profile/classify`, `/api/risk/analyze`, and `/api/draft`
+require a live DB and OpenAI key.
+
+## Environment variables
+
+See `.env.example` for all variables. Key ones:
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `DATABASE_URL` | For live routes | PostgreSQL connection string |
+| `OPENAI_API_KEY` | For live routes | GPT-4o / embeddings |
+| `OPENAI_MODEL` | Optional | Default `gpt-4o-mini` |
+| `PORT` | Optional | Default `3001` |
+| `FRONTEND_URL` | For CORS | Vercel URL in prod, `http://localhost:3000` locally |
+| `ADMIN_API_KEY` | For admin routes | Long random secret — required for `/api/admin/*` |
+
+## Useful commands
 
 ```bash
-# development
-$ npm run start
+npm run start:dev        # dev server with hot-reload
+npm run start:prod       # production start (requires build first)
+npm run build:prod       # tsc production build → dist/
+npm run lint             # ESLint
+npm test                 # Jest unit tests (mocked Prisma, no DB needed)
+npm run test:cov         # coverage report
+npm run e2e:smoke        # dependency-free smoke test (set BASE_URL)
 
-# watch mode
-$ npm run start:dev
+npx prisma generate      # regenerate Prisma client after schema changes
+npx prisma migrate dev   # create + apply a new migration locally
+npx prisma migrate deploy # apply pending migrations (CI / production)
+npx prisma db seed       # seed demo data
+npx prisma studio        # GUI for browsing the DB
 
-# production mode
-$ npm run start:prod
+npm run validate:citations  # check all source URLs in risk findings return 200
 ```
 
-## Run tests
+## API overview
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| `GET` | `/api/health` | — | Liveness check |
+| `POST` | `/api/profile/classify` | — | Classify business description → structured profile |
+| `POST` | `/api/risk/analyze` | — | RAG-based risk findings for a profile |
+| `GET` | `/api/risk/demo` | — | Pre-seeded Scenario A findings (no DB/OpenAI needed) |
+| `GET` | `/api/diff/:scenario` | — | OLD vs NEW rule diff for a scenario |
+| `POST` | `/api/draft` | — | Generate email / call script / landlord inquiry |
+| `POST` | `/api/contact` | — | Persist contact / waitlist leads |
+| `GET` | `/api/metrics/citation-coverage` | — | Citation URL coverage stats |
+| `GET` | `/api/admin/queue` | `x-admin-api-key` | Pending finding review queue |
+| `PATCH` | `/api/admin/findings/:id/review` | `x-admin-api-key` | Approve / reject a finding |
+
+Admin routes require the `x-admin-api-key` header to match `ADMIN_API_KEY` in env.
+
+## Data ingestion
+
+The Python ingestion pipeline lives in `backend/ingestion/`:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd backend/ingestion
+pip install -r requirements.txt
+DATABASE_URL=... OPENAI_API_KEY=... python ingest.py
 ```
 
-## Deployment
+This fetches the 9 Texas/Austin/Dallas regulatory sources in `sources.json`,
+chunks them, embeds each chunk with OpenAI, and stores them in pgvector.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Deployment (Railway)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+See the root [`DEPLOYMENT.md`](../DEPLOYMENT.md) for full Railway + Vercel deployment instructions including all required environment variables.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+The backend ships a `Dockerfile` and `railway.json`; Railway builds from the
+Dockerfile and uses `/api/health` as the healthcheck.

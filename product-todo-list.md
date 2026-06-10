@@ -33,9 +33,9 @@
 | Backend API & RAG pipeline | ✅ Largely complete |
 | Database & schema | ✅ Complete |
 | Data ingestion (code) | ✅ Complete · 🟡 live ingestion run unverified |
-| Frontend (all screens) | ⬜ Not started (placeholder only) |
-| Diff engine (Scenario A) | ✅ Backend done · ⛔ UI blocked on frontend |
-| Compliance Pulse email mock | ⬜ Not started |
+| Frontend (all screens) | ✅ Implemented — all 13 routes live |
+| Diff engine (Scenario A) | ✅ Backend + UI both done |
+| Compliance Pulse email mock | ✅ Done — `/pulse` renders the email mock |
 | Human story / market validation | ⬜ Not started |
 | Demo prep, QA & deployment | ⬜ Not started |
 | **Phase 1 Actionability layer** (info tool → execution tool) | ⬜ Planned — the priority upgrade after MVP, see the Phase 1 section |
@@ -81,7 +81,7 @@
 
 ## 3. Frontend — Foundations & Design System
 
-> **Status:** Frontend is a `placeholder.md` only — the Next.js app has not been scaffolded. Everything below is **Not done**, and screen work (Section 4) is **Blocked** until 3.1–3.2 land.
+> **Status:** Next.js 14 app fully scaffolded and running. Design system, component library, and all API client wiring are in place.
 
 | # | Status | Item | One-liner |
 |---|--------|------|-----------|
@@ -98,7 +98,7 @@
 
 ## 4. Frontend — Screens
 
-> All screens are **Blocked** until the frontend foundation (3.1–3.2) exists; marked ⛔ to reflect the dependency.
+> All screens are implemented. Routes are live under `frontend/src/app`.
 
 | # | Status | Item | One-liner |
 |---|--------|------|-----------|

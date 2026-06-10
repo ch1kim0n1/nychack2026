@@ -170,13 +170,18 @@ export default function ChecklistPage() {
                   <button
                     onClick={() => cycleStatus(key, state.status)}
                     title={`Status: ${cfg.label}, click to advance`}
+                    aria-label={`Status: ${cfg.label}. Click to advance task status.`}
                     className={cn(
-                      'inline-flex items-center gap-1 px-2 py-1 rounded-sm border text-caption font-mono shrink-0 transition-colors duration-[80ms] hover:opacity-80',
+                      'inline-flex items-center gap-1 px-2 py-1 rounded-sm border text-caption font-mono shrink-0 transition-colors duration-[80ms] hover:opacity-80 cursor-pointer',
                       cfg.classes,
                     )}
                   >
                     {cfg.icon}
                     <span className="hidden sm:inline">{cfg.label}</span>
+                    <span className="hidden md:inline text-[10px] uppercase tracking-[0.06em] opacity-70">
+                      Change
+                    </span>
+                    <ChevronDown size={12} strokeWidth={1.5} className="opacity-70" />
                   </button>
 
                   {/* Content */}

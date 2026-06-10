@@ -15,7 +15,9 @@ describe('SourceDiffService', () => {
     prisma = {
       dbAvailable: true,
       sourceChangeLog: { findMany: jest.fn().mockResolvedValue([]) },
-      regulatorySource: { findUnique: jest.fn().mockResolvedValue({ id: 'src1' }) },
+      regulatorySource: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'src1' }),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({

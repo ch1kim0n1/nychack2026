@@ -15,6 +15,7 @@ interface Tier {
   cta: string
   ctaHref: string
   featured?: boolean
+  badge?: string
 }
 
 const TIERS: Tier[] = [
@@ -34,25 +35,25 @@ const TIERS: Tier[] = [
   },
   {
     name: 'Pro / Monitoring',
-    price: '$15',
-    period: '/mo',
-    tagline: 'Ongoing monitoring is the reason to come back.',
+    price: 'Coming soon',
+    tagline: 'Monitoring features are in pilot, not available for purchase yet.',
     features: [
       'Everything in Free',
-      'Saved business profiles',
-      'Weekly Compliance Pulse digest',
-      'Deadline & renewal reminders',
-      'Rule-change alerts for your profile',
+      'Planned saved business profiles',
+      'Weekly Compliance Pulse preview',
+      'Planned deadline & renewal reminders',
+      'Planned rule-change alerts for your profile',
       'Unlimited scans',
     ],
-    cta: 'Start monitoring',
-    ctaHref: '/intake',
+    cta: 'Join waitlist',
+    ctaHref: '/contact',
     featured: true,
+    badge: 'Pilot roadmap',
   },
   {
     name: 'Multi-Location',
-    price: 'Custom',
-    tagline: 'Franchises, chains, multi-city operators.',
+    price: 'Waitlist',
+    tagline: 'For franchises, chains, and multi-city operators once team plans launch.',
     features: [
       'Everything in Pro',
       'Unlimited locations & profiles',
@@ -61,14 +62,14 @@ const TIERS: Tier[] = [
       'Priority support',
     ],
     cta: 'Contact sales',
-    ctaHref: 'mailto:sales@civiclens.app',
+    ctaHref: '/contact',
   },
 ]
 
 const ONE_TIME = {
   name: 'Expansion Report',
-  price: '$49',
-  tagline: 'One-time city-to-city or new-service expansion report. Pay once before you commit.',
+  price: 'Preview',
+  tagline: 'City-to-city or new-service expansion report preview. Payment is not connected yet.',
 }
 
 const CHANNELS = [
@@ -88,11 +89,14 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <p className="text-label uppercase tracking-[0.06em] text-[var(--cl-text-muted)] mb-3">Pricing</p>
-          <h1 className="text-h1 text-[var(--cl-text)] mb-2">Free to scan. Pay to stay ahead.</h1>
+          <h1 className="text-h1 text-[var(--cl-text)] mb-2">Free scan now. Paid monitoring is coming soon.</h1>
           <p className="text-body-lg text-[var(--cl-text-secondary)] max-w-lg mx-auto">
-            Run your first risk scan for free. Upgrade when you want ongoing monitoring,
-            deadline tracking, and alerts as rules change.
+            Run your first risk scan for free. Monitoring, reminders, and paid reports are roadmap previews while payment and account flows are being built.
           </p>
+        </div>
+
+        <div className="mb-6 rounded border border-risk-med-border bg-risk-med-bg px-4 py-3 text-body text-risk-med-fg">
+          Paid tiers are not purchasable yet. Use the free scan today or join the waitlist for monitoring pilots.
         </div>
 
         {/* Tiers */}
@@ -109,7 +113,7 @@ export default function PricingPage() {
             >
               {tier.featured && (
                 <span className="self-start mb-3 px-2 py-0.5 rounded-sm bg-navy-600 text-white font-mono text-citation uppercase tracking-wide">
-                  Most popular
+                  {tier.badge ?? 'Featured'}
                 </span>
               )}
               <h2 className="text-h3 text-[var(--cl-text)]">{tier.name}</h2>
@@ -163,7 +167,7 @@ export default function PricingPage() {
         </div>
 
         <p className="text-caption text-[var(--cl-text-muted)] mt-10 text-center">
-          Informational guidance, not legal advice. Prices shown are illustrative for this demo.
+          Informational guidance, not legal advice. Paid plans are roadmap previews and are not available for purchase in this demo.
         </p>
       </main>
     </div>

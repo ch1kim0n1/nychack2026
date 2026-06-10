@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Nav } from '@/components/nav'
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner'
 import { type RiskAnalysisResult, type RiskFinding, type PulseDigest, api } from '@/lib/api'
@@ -116,8 +117,8 @@ export default function PulsePage() {
             {apiPersonalized
               ? 'LIVE: Personalized from your scan.'
               : personalized
-                ? 'PREVIEW: Personalized from your scan. This is what lands in your inbox every Monday.'
-                : 'PREVIEW: This is what lands in your inbox every Monday.'}
+                ? "PREVIEW: Personalized from your scan. This shows what a weekly digest would look like."
+                : 'PREVIEW: This shows what a weekly digest would look like.'}
           </p>
         </div>
 
@@ -128,7 +129,7 @@ export default function PulsePage() {
           </div>
 
           <div className="px-6 py-3 bg-sunken border-b border-[var(--cl-border-subtle)] text-caption text-[var(--cl-text-muted)] font-mono">
-            <span>from: pulse@civiclens.app</span>
+            <span>email delivery: not connected yet</span>
             <span className="mx-3">·</span>
             <span>subj: {digest.length} update{digest.length === 1 ? '' : 's'} for your business</span>
           </div>
@@ -167,7 +168,9 @@ export default function PulsePage() {
 
             <div className="mt-6 pt-4 border-t border-[var(--cl-border-subtle)] text-caption text-[var(--cl-text-muted)] flex items-center justify-between flex-wrap gap-2">
               <span>Informational guidance, not legal advice.</span>
-              <a href="#" className="hover:underline">Unsubscribe</a>
+              <Link href="/contact" className="text-navy-600 hover:underline">
+                Get notified when weekly digest launches
+              </Link>
             </div>
           </div>
         </div>
